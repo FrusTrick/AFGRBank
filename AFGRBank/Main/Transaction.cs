@@ -12,15 +12,11 @@ namespace AFGRBank.Main
         public int SenderID { get; set; }
         public int RecieverID { get; set; }
         public decimal Funds { get; set; }
+        public DateTime TransDate { get; set; }
 
         public Transaction()
         {
             
-        }
-
-        public void SendFunds()
-        {
-
         }
     }
 }

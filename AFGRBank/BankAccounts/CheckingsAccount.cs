@@ -9,5 +9,7 @@ namespace AFGRBank.BankAccounts
     public class CheckingsAccount : Account
     {
         public bool isCheckings { get; set; } = true;
+
     }
+
 }

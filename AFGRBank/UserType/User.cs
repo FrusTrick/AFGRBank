@@ -17,8 +17,8 @@ namespace AFGRBank.UserType
         public string Name { get; set; }
         public string Surname { get; set; }
         public string Email { get; set; }
-        public string Adress { get; set; }
-        public string PhoneNumber { get; set; }
+        public string Address { get; set; }
+        public int PhoneNumber { get; set; }
         public List<Account> AccountList { get; set; }
         public List<Transaction> TransactionList { get; set; }
         public List<Loan> LoanList { get; set; }
@@ -27,29 +27,68 @@ namespace AFGRBank.UserType
         {
         }
 
-        public void ChooseCurrency()
+        // Set the currency of an account (can't be done yet, need to have the conversion rates)
+        public void SetCurrency(Account account, string currency)
         {
-
-        }
-        public void ViewAccounts()
-        {
+            account.Currency = currency;
         }
 
-        public void TransferFunds()
+        // Returns a list of all the users accounts
+        public List<Account> ViewAccounts(List<Account> accountList)
         {
+            return accountList;
         }
 
-        public void AccountInterestRates()
+        // Calculates the interest rate for the specified account
+        public decimal AccountInterestRates(SavingsAccount account, decimal interestRate)
         {
+            decimal funds = account.Funds;
+            string currency = account.Currency;
+            decimal expectedInterest = (funds * interestRate);
+            return expectedInterest;
         }
 
-        public void GetLoanEstimate()
+        //Method loans out x amount of funds from the bank, to x account, at an x rate
+        //Also checks if the user is eligible for a loan
+        public void Loan(decimal borrowedAmount, Account account, decimal loanRate)
         {
+            decimal funds = account.Funds;
+            decimal maxLoan = (funds * 5);
+            if (borrowedAmount > maxLoan)
+            {
+                Console.WriteLine("Loan exceeds limit.");
+            }
+            else if (LoanList != null)
+            {
+                foreach (Loan loan in LoanList)
+                {
+                    maxLoan = maxLoan - loan.LoanAmount;
+                }
+                if (maxLoan > 0)
+                {
+                    funds = funds + borrowedAmount;
+                    Console.WriteLine($"{borrowedAmount} has now been sent to your account with an interest rate of {loanRate}.");
+                }
+                else
+                {
+                    Console.WriteLine("You are not eligible for a loan.");
+                }
+            }
+            else if (borrowedAmount <= maxLoan && borrowedAmount > 0)
+            {
+                funds = funds + borrowedAmount;
+                Console.WriteLine($"{borrowedAmount} has now been sent to your account with an interest rate of {loanRate}.");
+            }
+            else
+            {
+                Console.WriteLine("You are not eligible for a loan.");
+            }
         }
 
-        //This method shows all transactions related to the user across all their accounts.
-        public void ViewAllTransactions()
+        //This method returns a list of transactions that have occurred in the user's bank accounts.
+        public List<Transaction> ViewAllTransactions()
         {
+            return TransactionList;
         }
 
 
