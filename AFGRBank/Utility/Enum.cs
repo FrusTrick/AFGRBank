@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace AFGRBank.Utility
 {
-        // File to store all enums used in the project
+    // File to store all enums used in the project
     public enum MainMenuOptions
     {
-        NewGame,
-        LoadGame,
-        Options,
-        Credits,
-        Exit,
+        Login,
+        Exit
     }
     public enum LoginMenuOptions
     {
