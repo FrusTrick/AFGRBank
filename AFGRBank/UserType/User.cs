@@ -39,14 +39,13 @@ namespace AFGRBank.UserType
         {
         }
 
-        public void AccountIntrestRates()
+        public void AccountInterestRates()
         {
         }
 
         public void GetLoanEstimate()
         {
         }
-
 
         //This method shows all transactions related to the user across all their accounts.
         public void ViewAllTransactions()
