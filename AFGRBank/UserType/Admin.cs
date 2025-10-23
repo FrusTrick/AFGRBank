@@ -11,19 +11,13 @@ namespace AFGRBank.UserType
 {
     public class Admin : User
     {
-        public bool IsAdmin { get; set; }
+        public bool IsAdmin { get; private set; } = true;
 
         // Calls to create a new user
         // Loops through to make sure there are no duplicate UserNames
         // If there aren't, returns a new userlist with the created user
-        public List<User> CreateUser(List<User> userList, string username, string password, string name, string surName, int phoneNumber, string address)
+        public User CreateUser(string username, string password, string name, string surName, int phoneNumber, string address)
         {
-            if (userList.Any(u => UserName == username))
-            {
-                Console.WriteLine("The username is already taken.");
-                return userList;
-            }
-
             User newUser = new User
             {
                 UserName = username,
@@ -34,22 +28,23 @@ namespace AFGRBank.UserType
                 Address = address
             };
 
-            userList.Add(newUser);
             Console.WriteLine($"{username} successfully created.");
-            return userList;
+            return newUser;
         }
 
-        public void UpdateCurrencyRates()
+        // TODO: Implement real currency update logic
+        public string UpdateCurrencyRates(string currency)
         {
-            
+            return currency;
         }
 
-        public void Loan(User user, Account account, decimal loanAmount, string currency, decimal interestRate, DateOnly startDate, DateOnly endDate)
+        public void CreateLoan(User user, Account account, decimal loanAmount, string currency, decimal interestRate, DateOnly startDate, DateOnly endDate)
         {
-            decimal maxLoan = (account.Funds * 5);
+            // GetTotalFunds returns a decimal variable of all the funds between every account
+            decimal maxLoan = (GetTotalFunds() * 5);
             if (user.LoanList != null)
             {
-                maxLoan -= user.LoanList.Sum(l => l.LoanAmount);
+                maxLoan -= user.LoanList.Sum(l => l.LoanAmount); // Adds the sum of all LoanList LoanAmounts and subtracts it from the maxLoan
             }
             if (loanAmount <= 0 || loanAmount > maxLoan)
             {

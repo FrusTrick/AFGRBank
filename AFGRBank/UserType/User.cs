@@ -19,10 +19,9 @@ namespace AFGRBank.UserType
         public string Email { get; set; }
         public string Address { get; set; }
         public int PhoneNumber { get; set; }
-        public List<SavingsAccount> savingsAccounts { get; set; }
-        public List<CheckingsAccount> checkingAccounts { get; set; }
-        public List<Transaction> TransactionList { get; set; }
-        public List<Loan> LoanList { get; set; }
+        public List<Account> Accounts { get; set; } = new List<Account>();
+        public List<Transaction> TransactionList { get; set; } = new List<Transaction>();
+        public List<Loan> LoanList { get; set; } = new List<Loan>();
 
         public User()
         {
@@ -35,18 +34,26 @@ namespace AFGRBank.UserType
         }
 
         // Returns a list of all the users accounts
-        public List<Account> ViewAccounts(List<Account> accountList)
+        public List<Account> ViewAccounts()
         {
-            return accountList;
+            List<Account> allAccounts = new();
+            allAccounts.AddRange(Accounts);
+            return allAccounts;
         }
 
         // Calculates the interest rate for the specified account
-        public decimal AccountInterestRates(SavingsAccount account, decimal interestRate)
+        public decimal CalculateAccountInterest(SavingsAccount account, decimal interestRate)
         {
             decimal funds = account.Funds;
             string currency = account.Currency;
             decimal expectedInterest = (funds * interestRate);
             return expectedInterest;
+        }
+
+        // Returns interest rate
+        public decimal CalculateLoanInterestRate(Loan loan)
+        {
+            return loan.InterestRate;
         }
 
         //Method loans out x amount of funds from the bank, to x account, at an x rate
@@ -62,6 +69,16 @@ namespace AFGRBank.UserType
             return TransactionList;
         }
 
+        // Calculates the total funds across all bank account types
+        public decimal GetTotalFunds()
+        {
+            decimal totalFunds = 0;
+            foreach (Account account in Accounts)
+            {
+                totalFunds += account.Funds;
+            }
+            return totalFunds;
+        }
 
     }
 }
