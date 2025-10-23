@@ -3,18 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using AFGRBank.Main;
+{
+    
+}
 
 namespace AFGRBank.BankAccounts
 {
     public class SavingsAccount : Account
     {
-        public bool isSavings { get; set; } = true;
+        public bool IsSavings { get; set; } = true;
         public decimal InterestRate { get; set; }
 
         public SavingsAccount()
         {
             
+        }
+
+        public override List<Account> CreateAccount(List<Account> accountList, string currency)
+        {
+            
+            SavingsAccount newSavingsAcc = new SavingsAccount
+            {
+                AccountID = Guid.NewGuid(),
+                Currency = currency,
+                Funds = 0,
+                IsSavings = true,
+                InterestRate = 2,
+                AccTransList = new List<Transaction>()
+            };
+            accountList.Add(newSavingsAcc);
+            Console.WriteLine($"Savings account with account number {newSavingsAcc.AccountID} has been created");
+            return accountList;
         }
 
         public void SavingsForecast(SavingsAccount savingsAcc, int years)

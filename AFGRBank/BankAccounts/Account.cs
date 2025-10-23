@@ -29,10 +29,9 @@ namespace AFGRBank.BankAccounts
 
 
 
-        public void CreateAccount(Account account, string currency)
+        public virtual List<Account> CreateAccount(List<Account> accountList, string currency)
         {
-            account.AccountID = Guid.NewGuid();
-            account.Currency = currency;
+            return accountList;
         }
 
         //Removes an account from the user account list. Checks if account 
