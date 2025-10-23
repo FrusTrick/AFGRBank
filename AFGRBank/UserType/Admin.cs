@@ -1,9 +1,11 @@
-﻿using System;
+﻿using AFGRBank.BankAccounts;
+using AFGRBank.Loans;
+using AFGRBank.Main;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AFGRBank.Main;
 
 namespace AFGRBank.UserType
 {
@@ -14,35 +16,58 @@ namespace AFGRBank.UserType
         // Calls to create a new user
         // Loops through to make sure there are no duplicate UserNames
         // If there aren't, returns a new userlist with the created user
-        public List<User> CreateUser(string username, string password, string name, string surName, int phoneNumber, string address, List<User> userList)
+        public List<User> CreateUser(List<User> userList, string username, string password, string name, string surName, int phoneNumber, string address)
         {
-            List<User> newUserList = userList;
-
-            foreach (User user in userList)
+            if (userList.Any(u => UserName == username))
             {
-                if (username != user.UserName)
-                {
-                    User newUser = new User();
-                    newUser.UserName = username;
-                    newUser.Password = password;
-                    newUser.Name = name;
-                    newUser.PhoneNumber = phoneNumber;
-                    newUser.Address = address;
-                    newUserList.Add(newUser);
-                    Console.WriteLine($"{UserName} successfully created.");
-                }
-                else
-                {
-                    Console.WriteLine("The username is already taken.");
-                }
+                Console.WriteLine("The username is already taken.");
+                return userList;
             }
-            
-            return newUserList;
+
+            User newUser = new User
+            {
+                UserName = username,
+                Password = password,
+                Name = name,
+                Surname = surName,
+                PhoneNumber = phoneNumber,
+                Address = address
+            };
+
+            userList.Add(newUser);
+            Console.WriteLine($"{username} successfully created.");
+            return userList;
         }
 
         public void UpdateCurrencyRates()
         {
             
+        }
+
+        public void Loan(User user, Account account, decimal loanAmount, string currency, decimal interestRate, DateOnly startDate, DateOnly endDate)
+        {
+            decimal maxLoan = (account.Funds * 5);
+            if (user.LoanList != null)
+            {
+                maxLoan -= user.LoanList.Sum(l => l.LoanAmount);
+            }
+            if (loanAmount <= 0 || loanAmount > maxLoan)
+            {
+                Console.WriteLine("You are not eligible for a loan");
+                return;
+            }
+
+            Loan newLoan = new Loan
+            {
+                Currency = currency,
+                InterestRate = interestRate,
+                StartDate = startDate,
+                EndDate = endDate,
+                LoanAmount = loanAmount
+            };
+
+            user.AddLoan(newLoan);
+            Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
         }
     }
 }
