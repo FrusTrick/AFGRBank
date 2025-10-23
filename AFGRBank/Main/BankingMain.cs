@@ -1,4 +1,7 @@
 ﻿using AFGRBank.Utility;
+using AFGRBank.UserType;
+using AFGRBank.BankAccounts;
+using AFGRBank.Loans;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +9,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using OOPGenericList.Helper;
 
 namespace AFGRBank.Main
 {
@@ -38,6 +42,9 @@ namespace AFGRBank.Main
         {
             Console.Clear();
 
+            int attempts = 3;
+
+
             Console.WriteLine($"Username:");
             string username = Console.ReadLine()
                 .Trim();
@@ -55,6 +62,7 @@ namespace AFGRBank.Main
                 Console.WriteLine($"Password cannot be empty.");
                 return;
             }
+            // login.LoginUser(username, password);
         }
 
         public void UserMenu(string name, string surname)
@@ -86,6 +94,7 @@ namespace AFGRBank.Main
                     case UserMenuOptions.ViewTransactions:
                         break;
                     case UserMenuOptions.Logout:
+                        // login.LogoutUser();
                         return;
                 }
             }
@@ -113,6 +122,7 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case AdminMenuOptions.CreateUser:
+                        CreateUserMenu();
                         break;
                     case AdminMenuOptions.UpdateCurrencyRate:
                         break;
@@ -127,6 +137,91 @@ namespace AFGRBank.Main
                     case AdminMenuOptions.ViewTransactions:
                         break;
                     case AdminMenuOptions.Logout:
+                        return;
+                }
+            }
+        }
+
+        public void CreateUserMenu()
+        {
+            string username = string.Empty;
+            string password = string.Empty;
+            string name = string.Empty;
+            string surname = string.Empty;
+            string email = string.Empty;
+            int phoneNumber = 0;
+            string address = string.Empty;
+
+            bool isContinue = true;
+            while (isContinue)
+            {
+                string text = $"User account creation:";
+                string[] createUserMenuOptions = {
+                    $"Edit username              Current: {username}",
+                    $"Edit password              Current: {password}",
+                    $"Edit name                  Current: {name}",
+                    $"Edit surname               Current: {surname}",
+                    $"Edit email address         Current: {email}",
+                    $"Edit phone number          Current: {phoneNumber}",
+                    $"Edit address               Current: {address}",
+                    $"Create new user",
+                    $"Exit"
+                };
+
+                CreateUserMenuOptions selectedOption = Menu.ReadOption<string, CreateUserMenuOptions>(text, createUserMenuOptions);
+                switch (selectedOption)
+                {
+                    case CreateUserMenuOptions.EditUsername:
+                        Console.Clear();
+                        username = Validate.GetInput("Input new username:", "Input cannot be empty. Try again.");
+                        break;
+                    case CreateUserMenuOptions.EditPassword:
+                        Console.Clear();
+                        password = Validate.GetInput("Input new password:", "Input cannot be empty. Try again.");
+                        break;
+                    case CreateUserMenuOptions.EditName:
+                        Console.Clear();
+                        name = Validate.GetInput("Input new name:", "Input cannot be empty. Try again.");
+                        break;
+                    case CreateUserMenuOptions.EditSurname:
+                        Console.Clear();
+                        surname = Validate.GetInput("Input new surname:", "Input cannot be empty. Try again.");
+                        break;
+                    case CreateUserMenuOptions.EditEmail:
+                        Console.Clear();
+                        email = Validate.GetInput("Input new email address:", "Input cannot be empty. Try again.");
+                        break;
+                    case CreateUserMenuOptions.EditPhoneNumber:
+                        Console.Clear();
+                        phoneNumber = Validate.StringToInt("Input new phone number (numbers only):", 
+                            "Input cannot be empty. Try again.", "Input was not a number. Try again.", 
+                            "Input was either too big or too small. Try again."
+                            );
+                        break;
+                    case CreateUserMenuOptions.EditAddress:
+                        Console.Clear();
+                        address = Validate.GetInput("Input new phone number (numbers only):", "Input cannot be empty. Try again.");
+                        break;
+                    case CreateUserMenuOptions.CreateUser:
+                        if (username == string.Empty || 
+                            password == string.Empty || 
+                            name == string.Empty || 
+                            surname == string.Empty ||
+                            email == string.Empty ||
+                            phoneNumber <= 0 ||
+                            address == string.Empty)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine($"Error. One or more fields are empty." +
+                                $"\nPress any key to continue...");
+                            Console.ReadKey();
+                            break;
+                        }
+                        Login login = new Login();
+                        Admin admin = new Admin();
+                        login.UserList = admin.CreateUser(username, password, name, surname, email, phoneNumber, address, login.UserList);
+                        break;
+                    case CreateUserMenuOptions.Exit:
                         return;
                 }
             }
@@ -165,6 +260,43 @@ namespace AFGRBank.Main
                 }
             }
         }
+        public void SavingsAccountMenu()
+        {
+            string text = $"Your bank account menu.";
+            string[] savingAccountMenuOptions = {
+                "View your account info",
+                "View your account transactions",
+                "View savings forecast" +
+                "Transfer funds",
+                "Create account",
+                "Delete account",
+                "Exit"
+            };
+
+            bool isContinue = true;
+            while (isContinue)
+            {
+                SavingsAccountMenuOptions selectedOption = Menu.ReadOption<string, SavingsAccountMenuOptions>(text, savingAccountMenuOptions);
+                switch (selectedOption)
+                {
+                    case SavingsAccountMenuOptions.ViewAccountInfo:
+                        break;
+                    case SavingsAccountMenuOptions.ViewAccountTransactions:
+                        break;
+                    case SavingsAccountMenuOptions.ViewSavingsForecast:
+                        break;
+                    case SavingsAccountMenuOptions.TransferFunds:
+                        break;
+                    case SavingsAccountMenuOptions.CreateAccount:
+                        break;
+                    case SavingsAccountMenuOptions.DeleteAccount:
+                        break;
+                    case SavingsAccountMenuOptions.Exit:
+                        return;
+                }
+            }
+        }
+
 
         public void TransferMenu()
         {
@@ -172,21 +304,21 @@ namespace AFGRBank.Main
             string receiverID = "None";
             decimal amount = 0;
 
-            string text = $"Transfer funds:" +
-                $"\nFrom:   {senderID}" +
-                $"\nTo:     {receiverID}" +
-                $"\nAmount: {amount}";
-            
-            string[] transferMenuOptions = {
-                "Choose bank account to send from",
-                "Choose bank account to send to",
-                "Choose amount",
-                "Exit"
-            };
-
             bool isContinue = true;
             while (isContinue)
             {
+                string text = $"Transfer funds:" +
+                    $"\nFrom:   {senderID}" +
+                    $"\nTo:     {receiverID}" +
+                    $"\nAmount: {amount}";
+            
+                string[] transferMenuOptions = {
+                    "Choose bank account to send from",
+                    "Choose bank account to send to",
+                    "Choose amount",
+                    "Exit"
+                };
+
                 TransferMenuOptions selectedOption = Menu.ReadOption<string, TransferMenuOptions>(text, transferMenuOptions);
                 switch (selectedOption)
                 {
@@ -245,9 +377,11 @@ namespace AFGRBank.Main
                     $"\n[2] LoginMenu()" +
                     $"\n[3] UserMenu()" +
                     $"\n[4] AdminMenu()" +
-                    $"\n[5] AccountMenu()" +
-                    $"\n[6] TransferMenu()" +
-                    $"\n[7] LoanMenu()");
+                    $"\n[5] CreateUserMenu()" +
+                    $"\n[6] AccountMenu()" +
+                    $"\n[7] SavingsAccountMenu()" +
+                    $"\n[8] TransferMenu()" +
+                    $"\n[9] LoanMenu()");
             
                 string input = Console.ReadLine().Trim();
                 if (string.IsNullOrEmpty(input))
@@ -272,13 +406,21 @@ namespace AFGRBank.Main
                         AdminMenu("Förnamn", "Efternamn");
                         break;
                     case "5":
-                        AccountMenu();
+                        CreateUserMenu();
                         break;
                     case "6":
-                        TransferMenu();
+                        AccountMenu();
                         break;
                     case "7":
+                        break;
+                    case "8":
+                        TransferMenu();
+                        break;
+                    case "9":
                         LoanMenu();
+                        break;
+                    default:
+                        Console.WriteLine($"Error. Incorrect input. Try again.");
                         break;
                 }
             }
