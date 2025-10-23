@@ -200,7 +200,7 @@ namespace AFGRBank.Main
                         break;
                     case CreateUserMenuOptions.EditAddress:
                         Console.Clear();
-                        address = Validate.GetInput("Input new phone number (numbers only):", "Input cannot be empty. Try again.");
+                        address = Validate.GetInput("Input new physical address:", "Input cannot be empty. Try again.");
                         break;
                     case CreateUserMenuOptions.CreateUser:
                         if (username == string.Empty || 

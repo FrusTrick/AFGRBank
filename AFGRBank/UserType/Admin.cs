@@ -1,49 +1,87 @@
-﻿using System;
+﻿using AFGRBank.BankAccounts;
+using AFGRBank.Loans;
+using AFGRBank.Main;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AFGRBank.Main;
 
 namespace AFGRBank.UserType
 {
     public class Admin : User
     {
-        public bool IsAdmin { get; set; }
+        public bool IsAdmin { get; private set; } = true;
 
         // Calls to create a new user
         // Loops through to make sure there are no duplicate UserNames
         // If there aren't, returns a new userlist with the created user
         public List<User> CreateUser(string username, string password, string name, string surName, string email, int phoneNumber, string address, List<User> userList)
         {
-            List<User> newUserList = userList;
-
-            foreach (User user in userList)
+            try
             {
-                if (username != user.UserName)
+                User newUser = new User
                 {
-                    User newUser = new User();
-                    newUser.UserName = username;
-                    newUser.Password = password;
-                    newUser.Name = name;
-                    newUser.Email = email;
-                    newUser.PhoneNumber = phoneNumber;
-                    newUser.Address = address;
-                    newUserList.Add(newUser);
-                    Console.WriteLine($"{UserName} successfully created.");
-                }
-                else
-                {
-                    Console.WriteLine("The username is already taken.");
-                }
+                    UserName = username,
+                    Password = password,
+                    Name = name,
+                    Surname = surName,
+                    PhoneNumber = phoneNumber,
+                    Address = address,
+                    Email = email,
+                };
+
+                userList.Add(newUser);
+                Console.WriteLine($"{username} successfully created.");
+            }
+            catch
+            {
+                Console.WriteLine("CreateUser failed to process information");
             }
             
-            return newUserList;
+
+            
+            return userList;
         }
 
-        public void UpdateCurrencyRates()
+        // TODO: Implement real currency update logic
+        public string UpdateCurrencyRates(string currency)
         {
-            
+            return currency;
+        }
+
+        public void CreateLoan(User user, Account account, decimal loanAmount, string currency, decimal interestRate, DateOnly startDate, DateOnly endDate)
+        {
+            try
+            {
+                // GetTotalFunds returns a decimal variable of all the funds between every account
+                decimal maxLoan = (user.GetTotalFunds() * 5);
+                if (user.LoanList != null)
+                {
+                    maxLoan -= user.LoanList.Sum(l => l.LoanAmount); // Adds the sum of all LoanList LoanAmounts and subtracts it from the maxLoan
+                }
+                if (loanAmount <= 0 || loanAmount > maxLoan)
+                {
+                    Console.WriteLine("You are not eligible for a loan");
+                    return;
+                }
+
+                Loan newLoan = new Loan
+                {
+                    Currency = currency,
+                    InterestRate = interestRate,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    LoanAmount = loanAmount
+                };
+
+                user.AddLoan(newLoan);
+                Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
+            }
+            catch
+            {
+                Console.WriteLine("CreateLoan failed to process information");
+            }
         }
     }
 }
