@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AFGRBank.Main;
+using AFGRBank.UserType;
 
 namespace AFGRBank.BankAccounts
 {
@@ -61,42 +62,58 @@ namespace AFGRBank.BankAccounts
 
         //Transfers funds between two accounts.
         //ADD CURRENCY CHECK AND CONVERSION!!!!!!
-        public List<Account> TransferFunds(List<Account> accountList, Guid senderAccID, Guid recipientAccID, decimal funds)
+        public List<User> TransferFunds(List<User> userList, Guid senderAccID, Guid recipientAccID, decimal funds)
         {
-            //Fetches both accounts from account list.
-            Account sender = accountList.FirstOrDefault(x => x.AccountID == senderAccID);
-            Account reciever = new Account();
+            //Fetches both accounts from user list.
+            var currentUser = userList.FirstOrDefault(x => x.Accounts.Any(a => a.AccountID == senderAccID));
+            Account sender = currentUser.Accounts.FirstOrDefault(x => x.AccountID == senderAccID);
 
             try
             {
-                reciever = accountList.FirstOrDefault(x => x.AccountID == recipientAccID);
+                var recipientUser = userList.FirstOrDefault(x => x.Accounts.Any(a => a.AccountID == recipientAccID));
+                Account reciever = currentUser.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID);
+
+                Transaction currentTransaction = new Transaction
+                {
+                    SenderID = senderAccID,
+                    RecieverID = recipientAccID,
+                    Funds = funds,
+                    TransDate = DateTime.Now
+                };
+
+                if (sender != null && reciever != null && sender.Funds > funds)
+                {
+                    currentUser.Accounts.Where(x => x.AccountID == senderAccID);
+                    {
+                        //ADD CURRENCY CHECK AND CONVERSION HERE
+                        Funds = Funds - funds;
+                        currentUser.TransactionList
+                    }
+                    recipientUser.Accounts.Where(x => x.AccountID == recipientAccID);
+                    {
+                        //ADD CURRENCY CHECK AND CONVERSION HERE
+                        Funds = Funds + funds;
+                    }
+                    Console.WriteLine($"You have transfered {funds} to {recipientAccID}");
+
+                    //Returns updated values.
+                    return accountList;
+                }
+                else
+                {
+                    //Returns unchanged values.
+                    return accountList;
+                }
+
             }
-            catch{Console.WriteLine($"Could not find a recipient acount with account number: {recipientAccID}");}
+            catch
+            {
+                Console.WriteLine($"Could not find a recipient acount with account number: {recipientAccID}");
+            }
 
             //Checks that both accounts have been found and that sender has balance to cover trasnfer.
             //Transfers and confirms if possible. 
-            if (sender != null && reciever != null && sender.Funds > funds) 
-            {
-                accountList.Where(x => x.AccountID == senderAccID);
-                {
-                    //ADD CURRENCY CHECK AND CONVERSION HERE
-                    Funds = Funds - funds;
-                }
-                accountList.Where(x => x.AccountID == recipientAccID);
-                {
-                    //ADD CURRENCY CHECK AND CONVERSION HERE
-                    Funds = Funds + funds;
-                }
-                Console.WriteLine($"You have transfered {funds} to {recipientAccID}");
-
-                //Returns updated values.
-                return accountList;
-            }
-            else
-            {
-                //Returns unchanged values.
-                return accountList;
-            }
+            
             
         }
 
