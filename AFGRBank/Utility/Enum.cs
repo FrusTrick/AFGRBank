@@ -12,52 +12,48 @@ namespace AFGRBank.Utility
         Login,
         Exit
     }
-    public enum LoginMenuOptions
-    {
-        NewGame,
-        LoadGame,
-        Options,
-        Credits,
-        Exit,
-    }
+
     public enum UserMenuOptions
     {
-        NewGame,
-        LoadGame,
-        Options,
-        Credits,
-        Exit,
+        Borrow,
+        SetCurrency,
+        ViewAccounts,
+        ViewInterests,
+        ViewTransactions,
+        Logout
     }
     public enum AdminMenuOptions
     {
-        NewGame,
-        LoadGame,
-        Options,
-        Credits,
+        CreateUser,
+        UpdateCurrencyRate,
+        Borrow,
+        SetCurrency,
+        ViewAccounts,
+        ViewInterests,
+        ViewTransactions,
+        Logout
+    }
+    public enum AccountMenuOptions
+    {
+        ViewAccountInfo,
+        ViewAccountTransactions,
+        TransferFunds,
+        CreateAccount,
+        DeleteAccount,
         Exit,
     }
     public enum TransferMenuOptions
     {
-        NewGame,
-        LoadGame,
-        Options,
-        Credits,
+        SetSenderID,
+        SetReceiverID,
+        SetAmount,
         Exit,
     }
     public enum LoanMenuOptions
     {
-        NewGame,
-        LoadGame,
-        Options,
-        Credits,
-        Exit,
-    }
-    public enum AccountMenuOptions
-    {
-        NewGame,
-        LoadGame,
-        Options,
-        Credits,
+        CreateLoan,
+        GetLoan,
+        EditLoan,
         Exit,
     }
 }

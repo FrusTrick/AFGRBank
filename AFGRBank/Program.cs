@@ -8,8 +8,19 @@ namespace AFGRBank
         static void Main(string[] args)
         {
             BankingMain menus = new BankingMain();
+            Login login = new Login();
 
-            menus.MainMenu();
+            menus.Testing();
+            // If LoggedInUser is null, this means user hasn't logged in yet.
+            // I'm assuming LoggedInUser will be used for this.
+            while (login.LoggedInUser == null)
+            {
+                menus.MainMenu();
+            }
+
+
+
+
             Console.WriteLine("Hello, World!");
         }
     }
