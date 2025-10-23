@@ -14,18 +14,10 @@ namespace AFGRBank.Loans
         public decimal InterestRate  { get; set; }
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
-        public int LoanAmount { get; set; }
+        public decimal LoanAmount { get; set; }
 
         
-        // Konstruktor som skapar ett nytt lån med alla värden direkt
-        public Loan(string currency, decimal interestRate, DateOnly startDate, DateOnly endDate, int amount)
-        {
-            Currency = currency;
-            InterestRate = interestRate;
-            StartDate = startDate;
-            EndDate = endDate;
-            LoanAmount = amount;
-        }
+       
 
         // Skapar ett lån genom att sätta värden för objektet
         public void CreateLoan(string currency, decimal interestRate, DateOnly startDate, DateOnly endDate, int amount)
@@ -44,8 +36,9 @@ namespace AFGRBank.Loans
             Console.WriteLine($"Currency: {Currency}");
             Console.WriteLine($"Interest Rate: {InterestRate}");
             Console.WriteLine($"Start Date: {StartDate}");
-            Console.WriteLine($"End Date: {StartDate}");
+            Console.WriteLine($"End Date: {EndDate}");
             Console.WriteLine($"Loan Amount: {LoanAmount}");
+            
         }
 
         // Redigerar ett lån genom att uppdatera objektets värden
@@ -62,7 +55,7 @@ namespace AFGRBank.Loans
         // Beräknar maxlån baserat på inkomst och en multiplikator
         public void CalcMaxLoan(decimal income, decimal multiplier)
         {
-            LoanAmount = (int)(income * multiplier); // Maxlån = inkomst * multiplikator
+            LoanAmount = (income * multiplier); // Maxlån = inkomst * multiplikator
             Console.WriteLine($"Maximum loan calculated: {LoanAmount}");
         }
 

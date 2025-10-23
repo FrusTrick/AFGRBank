@@ -26,6 +26,7 @@ namespace AFGRBank.UserType
                     newUser.UserName = username;
                     newUser.Password = password;
                     newUser.Name = name;
+                    newUser.Email = email;
                     newUser.PhoneNumber = phoneNumber;
                     newUser.Address = address;
                     newUserList.Add(newUser);
