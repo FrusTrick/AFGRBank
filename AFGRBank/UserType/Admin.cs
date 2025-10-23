@@ -16,20 +16,31 @@ namespace AFGRBank.UserType
         // Calls to create a new user
         // Loops through to make sure there are no duplicate UserNames
         // If there aren't, returns a new userlist with the created user
-        public User CreateUser(string username, string password, string name, string surName, int phoneNumber, string address)
+        public List<User> CreateUser(List<User> userList, string username, string password, string name, string surName, int phoneNumber, string address)
         {
-            User newUser = new User
+            try
             {
-                UserName = username,
-                Password = password,
-                Name = name,
-                Surname = surName,
-                PhoneNumber = phoneNumber,
-                Address = address
-            };
+                User newUser = new User
+                {
+                    UserName = username,
+                    Password = password,
+                    Name = name,
+                    Surname = surName,
+                    PhoneNumber = phoneNumber,
+                    Address = address
+                };
 
-            Console.WriteLine($"{username} successfully created.");
-            return newUser;
+                userList.Add(newUser);
+                Console.WriteLine($"{username} successfully created.");
+            }
+            catch
+            {
+                Console.WriteLine("CreateUser failed to process information");
+            }
+            
+
+            
+            return userList;
         }
 
         // TODO: Implement real currency update logic
@@ -40,29 +51,36 @@ namespace AFGRBank.UserType
 
         public void CreateLoan(User user, Account account, decimal loanAmount, string currency, decimal interestRate, DateOnly startDate, DateOnly endDate)
         {
-            // GetTotalFunds returns a decimal variable of all the funds between every account
-            decimal maxLoan = (GetTotalFunds() * 5);
-            if (user.LoanList != null)
+            try
             {
-                maxLoan -= user.LoanList.Sum(l => l.LoanAmount); // Adds the sum of all LoanList LoanAmounts and subtracts it from the maxLoan
-            }
-            if (loanAmount <= 0 || loanAmount > maxLoan)
-            {
-                Console.WriteLine("You are not eligible for a loan");
-                return;
-            }
+                // GetTotalFunds returns a decimal variable of all the funds between every account
+                decimal maxLoan = (user.GetTotalFunds() * 5);
+                if (user.LoanList != null)
+                {
+                    maxLoan -= user.LoanList.Sum(l => l.LoanAmount); // Adds the sum of all LoanList LoanAmounts and subtracts it from the maxLoan
+                }
+                if (loanAmount <= 0 || loanAmount > maxLoan)
+                {
+                    Console.WriteLine("You are not eligible for a loan");
+                    return;
+                }
 
-            Loan newLoan = new Loan
-            {
-                Currency = currency,
-                InterestRate = interestRate,
-                StartDate = startDate,
-                EndDate = endDate,
-                LoanAmount = loanAmount
-            };
+                Loan newLoan = new Loan
+                {
+                    Currency = currency,
+                    InterestRate = interestRate,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    LoanAmount = loanAmount
+                };
 
-            user.AddLoan(newLoan);
-            Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
+                user.AddLoan(newLoan);
+                Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
+            }
+            catch
+            {
+                Console.WriteLine("CreateLoan failed to process information");
+            }
         }
     }
 }
