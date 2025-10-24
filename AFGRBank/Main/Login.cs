@@ -15,21 +15,18 @@ namespace AFGRBank.Main
         public string Password { get; set; }
         public bool IsAdmin { get; set; }
 
-        public void LoginUser()
-        {
-            Console.WriteLine("Ange användernamn: ");
-            string username = Console.ReadLine();
 
-            Console.WriteLine("Ange Lösenord: ");
-            string password = Console.ReadLine();
+
+        public void LoginUser(string username, string password)
+        {
 
             var user = UserList.FirstOrDefault(u => u.UserName == username && u.Password == password);
-
             if (user != null)
             {
                 LoggedInUser = user;
                 Console.WriteLine($"\nInloggad som: {user.UserName}");
             }
+
             else
             {
                 Console.WriteLine("\nFel användarnamn eller lösenord.");
@@ -38,15 +35,17 @@ namespace AFGRBank.Main
 
         public void LogoutUser()
         {
-            if (LoggedInUser != null)
-            {
-                Console.WriteLine($"\n{LoggedInUser.UserName} har loggats ut.");
-                LoggedInUser = null;
-            }
+            Console.WriteLine($"\n{LoggedInUser.UserName} har loggats ut.");
+            LoggedInUser = null;
+
+        }
+
+        private bool ChaeckIsAdmin()
+        {
+            if (IsAdmin == true)
+                return true;
             else
-            {
-                Console.WriteLine($"\ningen användare är inloggad");
-            }
+                return false;
         }
     }
 }
