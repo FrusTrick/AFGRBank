@@ -43,7 +43,7 @@ namespace AFGRBank.UserType
         }
 
         // TODO: Implement real currency update logic
-        public void UpdateCurrencyRates(CurrencyExchange currencyExchange, string chosenCurrency, decimal updatedAmount)
+        public void UpdateCurrencyRates(string chosenCurrency, decimal updatedAmount)
         {
             try
             {
@@ -70,22 +70,28 @@ namespace AFGRBank.UserType
                                     ?? new Dictionary<CurrencyName, decimal>(); // Creates a dictionary to ensure that the program doesn't crash in case the file is empty
 
                 // Tries to convert string into enum, and if it's true initialize currency and change the key pair that matches currency to the updated amount
-                if (Enum.TryParse<CurrencyName>(chosenCurrency, true, out var currency))
+                while (true)
                 {
-                    currencyRates[currency] = updatedAmount;
-                    Console.WriteLine("Updated to: " + updatedAmount + currency);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid currency given...");
+                    if (Enum.TryParse<CurrencyName>(chosenCurrency, true, out var currency) && currency == CurrencyExchange.CurrencyName.SEK)
+                    {
+                        Console.WriteLine($"Exchange rate of SEK can not be updated.");
+                        break;
+                    }
+                    else if (Enum.TryParse<CurrencyName>(chosenCurrency, true, out currency))
+                    {
+                        currencyRates[currency] = updatedAmount;
+                        Console.WriteLine($"Updated exchange rate of {currency} to {updatedAmount} ");
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid currency given... (SEK, EUR, USD, DKK, YEN)\n");
+                        chosenCurrency = Console.ReadLine();
+                    }
                 }
 
                 // Update the files
                 File.WriteAllText(jsonPath, JsonSerializer.Serialize(currencyRates, options));
-                Console.WriteLine("JSON updated.");
-                Console.WriteLine(File.Exists(jsonPath));  // Should print True
-                Console.WriteLine(File.ReadAllText(jsonPath));  // Should show updated JSON
-
             }
             catch (Exception ex)
             {
