@@ -12,6 +12,12 @@ namespace AFGRBank.Utility
         Login,
         Exit
     }
+    public enum LoginMenuOptions
+    {
+        Username,
+        Password,
+        Exit
+    }
 
     public enum UserMenuOptions
     {
@@ -33,10 +39,32 @@ namespace AFGRBank.Utility
         ViewTransactions,
         Logout
     }
+    public enum CreateUserMenuOptions
+    {
+        EditUsername,
+        EditPassword,
+        EditName,
+        EditSurname,
+        EditEmail,
+        EditPhoneNumber,
+        EditAddress,
+        CreateUser,
+        Exit
+    }
     public enum AccountMenuOptions
     {
         ViewAccountInfo,
         ViewAccountTransactions,
+        TransferFunds,
+        CreateAccount,
+        DeleteAccount,
+        Exit,
+    }
+    public enum SavingsAccountMenuOptions
+    {
+        ViewAccountInfo,
+        ViewAccountTransactions,
+        ViewSavingsForecast,
         TransferFunds,
         CreateAccount,
         DeleteAccount,

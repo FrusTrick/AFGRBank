@@ -7,4 +7,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Exchange\CurrencyRates.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Exchange\CurrencyRates.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

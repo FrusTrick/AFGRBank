@@ -19,6 +19,7 @@ namespace AFGRBank.UserType
         public string Email { get; set; }
         public string Address { get; set; }
         public int PhoneNumber { get; set; }
+        private decimal TotalFunds { get; set; } = 0;
         public List<Account> Accounts { get; set; } = new List<Account>();
         public List<Transaction> TransactionList { get; set; } = new List<Transaction>();
         public List<Loan> LoanList { get; set; } = new List<Loan>();
@@ -36,18 +37,24 @@ namespace AFGRBank.UserType
         // Returns a list of all the users accounts
         public List<Account> ViewAccounts()
         {
-            List<Account> allAccounts = new();
-            allAccounts.AddRange(Accounts);
-            return allAccounts;
+            return Accounts;
         }
 
         // Calculates the interest rate for the specified account
         public decimal CalculateAccountInterest(SavingsAccount account, decimal interestRate)
         {
-            decimal funds = account.Funds;
-            string currency = account.Currency;
-            decimal expectedInterest = (funds * interestRate);
-            return expectedInterest;
+            try
+            {
+                decimal funds = account.Funds;
+                string currency = account.Currency;
+                interestRate = (funds * interestRate);
+            }
+            catch
+            {
+                Console.WriteLine("CalculateAccountInterest failed to process information");
+            }
+            
+            return interestRate;
         }
 
         // Returns interest rate
@@ -72,12 +79,19 @@ namespace AFGRBank.UserType
         // Calculates the total funds across all bank account types
         public decimal GetTotalFunds()
         {
-            decimal totalFunds = 0;
-            foreach (Account account in Accounts)
+            try
             {
-                totalFunds += account.Funds;
+                foreach (Account account in Accounts)
+                {
+                    TotalFunds += account.Funds;
+                }
             }
-            return totalFunds;
+            catch
+            {
+                Console.WriteLine("GetTotalFunds failed to calculate funds");
+            }
+            
+            return TotalFunds;
         }
 
     }
