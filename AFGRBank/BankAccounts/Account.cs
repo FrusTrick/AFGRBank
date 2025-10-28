@@ -85,8 +85,7 @@ namespace AFGRBank.BankAccounts
                         sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Funds -= funds;
                         sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).AccTransList.Add(currenttransaction);
 
-
-
+                        
                         //Insert method for currency conversion here
 
                         recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Funds += funds;
