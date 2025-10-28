@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace AFGRBank.CurrencyHandler
+namespace AFGRBank.Exchange
 {
     public class CurrencyExchange
     {
         public enum CurrencyName { SEK, DKK, EUR, USD, YEN }
-        public string Currency { get; set; }
-        public decimal Rate { get; set; }
 
         public CurrencyExchange()
         {   
@@ -18,7 +17,12 @@ namespace AFGRBank.CurrencyHandler
 
         public decimal GetExchangeRate(CurrencyName currency)
         {
-            return 1;
+            string jsonString = File.ReadAllText("./Exchange/CurrencyRates.json");
+
+            Dictionary<CurrencyName, decimal> currencyExchange =
+                JsonSerializer.Deserialize<Dictionary<CurrencyName, decimal>>(jsonString);
+
+            return currencyExchange[currency];
         }
     }
 }
