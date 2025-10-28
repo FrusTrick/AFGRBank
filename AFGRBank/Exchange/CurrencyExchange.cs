@@ -27,17 +27,6 @@ namespace AFGRBank.Exchange
             return currencyRates[currency];
         }
 
-        public List<string> FetchCurrencyNameList()
-        {
-            var list = Enum.GetValues<CurrencyName>();
-            List<string> list2 = new();
-            foreach (var item in list)
-            {
-                list2.Add(item.ToString());
-            }
-            return list2;
-        }
-
 
         public decimal CalculateExchangeRate(string senderCurrencyName, string recipientCurrencyName, decimal transactionAmount)
         {
@@ -48,27 +37,33 @@ namespace AFGRBank.Exchange
 
             else
             {
-                string jsonString = File.ReadAllText("./Exchange/CurrencyRates.json");
+                string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+                string jsonString = File.ReadAllText(jsonPath);
 
-                Dictionary<string, decimal> listExchangeRate =
-                    JsonSerializer.Deserialize<Dictionary<string, decimal>>(jsonString);
+                // Deserializes the json file and turns it into a dictionary
+                var currencyRates = JsonSerializer.Deserialize<Dictionary<string, decimal>>(jsonString);
 
-                decimal senderExchangeRate = listExchangeRate[senderCurrencyName];
-                decimal recipientExchangeRate = listExchangeRate[recipientCurrencyName];
 
+                // Gets exchange rate from JSON.
+                // Example:
+                // if ( senderCurrencyName == "USD" ) then ( senderXCR == 9.39 )
+                //
+                decimal senderXCR = currencyRates[senderCurrencyName];
+                decimal recipientXCR = currencyRates[recipientCurrencyName];
+
+
+                // Convert transactionAmount to SEK first (newTransactionAmount)
+                // Then converts newTransactionAmount to recipient, using recipient exchange rate.
+                // Example:
+                // if ( transactionAmount == 100USD ) then ( 100 / 0.11 = 909 SEK)
+
+                // if ( transactionAmount == 100USD ) then ( 100 * 0.11 = 11 SEK)
+
+                decimal newTransactionAmount = transactionAmount / senderXCR;
+                decimal newNewTransactionAmount = newTransactionAmount * recipientXCR;
                 
-                // Convert transactionAmount to SEK first
-                decimal newTransactionAmount = transactionAmount / senderExchangeRate;
-
-                // Converts transactionAmount in SEK to exchange rate of the recipient's bank currency.
-                decimal newNewTransactionAmount = transactionAmount * recipientExchangeRate;
-
-                switch (senderCurrencyName)
-                {
-
-                }
+                return newNewTransactionAmount;
             }
-            return ;
         }
 
 
