@@ -24,5 +24,52 @@ namespace AFGRBank.Exchange
 
             return currencyExchange[currency];
         }
+
+        public List<string> FetchCurrencyNameList()
+        {
+            var list = Enum.GetValues<CurrencyName>();
+            List<string> list2 = new();
+            foreach (var item in list)
+            {
+                list2.Add(item.ToString());
+            }
+            return list2;
+        }
+
+
+        public decimal CalculateExchangeRate(string senderCurrencyName, string recipientCurrencyName, decimal transactionAmount)
+        {
+            if (senderCurrencyName == recipientCurrencyName)
+            {
+                return transactionAmount;
+            }
+
+            else
+            {
+                string jsonString = File.ReadAllText("./Exchange/CurrencyRates.json");
+
+                Dictionary<string, decimal> listExchangeRate =
+                    JsonSerializer.Deserialize<Dictionary<string, decimal>>(jsonString);
+
+                decimal senderExchangeRate = listExchangeRate[senderCurrencyName];
+                decimal recipientExchangeRate = listExchangeRate[recipientCurrencyName];
+
+                
+                // Convert transactionAmount to SEK first
+                decimal newTransactionAmount = transactionAmount / senderExchangeRate;
+
+                // Converts transactionAmount in SEK to exchange rate of the recipient's bank currency.
+                decimal newNewTransactionAmount = transactionAmount * recipientExchangeRate;
+
+                switch (senderCurrencyName)
+                {
+
+                }
+            }
+            return ;
+        }
+
+
+
     }
 }
