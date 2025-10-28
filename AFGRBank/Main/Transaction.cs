@@ -19,11 +19,5 @@ namespace AFGRBank.Main
         {
         }
 
-        public List<Transaction> NewTransaction(User user)
-        {
-            List<Transaction> transList = user.TransactionList;
-
-        }
-
     }
 }
