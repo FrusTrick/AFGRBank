@@ -1,0 +1,14 @@
+[
+  {
+    "Currency": "SEK",
+    "Rate": 1
+  },
+  {
+    "Currency": "EUR",
+    "Rate": 1.094
+  },
+  {
+    "Currency": "USD",
+    "Rate": 0.938
+  }
+]
