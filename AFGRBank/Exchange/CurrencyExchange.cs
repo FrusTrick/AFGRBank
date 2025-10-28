@@ -17,12 +17,14 @@ namespace AFGRBank.Exchange
 
         public decimal GetExchangeRate(CurrencyName currency)
         {
-            string jsonString = File.ReadAllText("./Exchange/CurrencyRates.json");
+            // Ensures the file that is being edited is the one in the currenct project directory
+            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+            string jsonString = File.ReadAllText(jsonPath);
 
-            Dictionary<CurrencyName, decimal> currencyExchange =
-                JsonSerializer.Deserialize<Dictionary<CurrencyName, decimal>>(jsonString);
+            // Deserializes the json file and turns it into a dictionary
+            var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyName, decimal>>(jsonString);
 
-            return currencyExchange[currency];
+            return currencyRates[currency];
         }
     }
 }
