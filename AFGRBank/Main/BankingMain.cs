@@ -23,8 +23,7 @@ namespace AFGRBank.Main
                 "ASCII Placeholder\n";
 
             string[] mainMenuOptions = { "Login", "Exit" };
-            bool isContinue = true;
-            while (isContinue)
+            while (true)
             {
                 MainMenuOptions selectedOption = Menu.ReadOption<string, MainMenuOptions>(asciiArt, mainMenuOptions);
                 switch (selectedOption)
@@ -40,16 +39,33 @@ namespace AFGRBank.Main
 
         public void LoginMenu()
         {
-            Console.Clear();
-
             int attempts = 3;
+            string text = "Sign in to account:";
+            string username = string.Empty;
+            string password = string.Empty;
 
+            string[] loginOptions = { "Username:", "Password:", "Login", "Exit" };
+            while (true)
+            {
+                LoginMenuOptions selectedOptions = Menu.ReadOption<string, LoginMenuOptions>(text, loginOptions);
+                switch (selectedOptions)
+                {
+                    case LoginMenuOptions.Username:
+                        break;
+                    case LoginMenuOptions.Password:
+                        break;
+                    case LoginMenuOptions.Login:
+                        break;
+                    case LoginMenuOptions.Exit:
+                        return;
+                }
+            }
 
             Console.WriteLine($"Username:");
-            string username = Console.ReadLine()
+            username = Console.ReadLine()
                 .Trim();
             Console.WriteLine($"Password:");
-            string password = Console.ReadLine()
+            password = Console.ReadLine()
                 .Trim();
 
             if (string.IsNullOrEmpty(username))
@@ -144,13 +160,21 @@ namespace AFGRBank.Main
 
         public void CreateUserMenu()
         {
-            string username = string.Empty;
-            string password = string.Empty;
-            string name = string.Empty;
-            string surname = string.Empty;
-            string email = string.Empty;
-            int phoneNumber = 0;
-            string address = string.Empty;
+            //string username = string.Empty;
+            //string password = string.Empty;
+            //string name = string.Empty;
+            //string surname = string.Empty;
+            //string email = string.Empty;
+            //int phoneNumber = 0;
+            //string address = string.Empty;
+
+            string username = "test";
+            string password = "test";
+            string name = "test";
+            string surname = "test";
+            string email = "test@test.se";
+            int phoneNumber = 070;
+            string address = "testHome";
 
             bool isContinue = true;
             while (isContinue)

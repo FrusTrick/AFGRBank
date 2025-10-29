@@ -9,7 +9,7 @@ namespace AFGRBank.Main
 {
     public class Login
     {
-        public List<User> UserList { get; set; }
+        public List<User> UserList { get; set; } = new List<User>();
         public User? LoggedInUser { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
