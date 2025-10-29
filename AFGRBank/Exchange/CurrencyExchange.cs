@@ -18,6 +18,7 @@ namespace AFGRBank.Exchange
         {   
         }
 
+        // Sends in an enum currency specified and returns the value of it in the CurrencyRates.json file
         public decimal GetExchangeRate(CurrencyNames currency)
         {
             // Ensures the file that is being edited is the one in the currenct project directory
