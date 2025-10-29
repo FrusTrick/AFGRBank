@@ -3,6 +3,7 @@ using AFGRBank.Exchange;
 using AFGRBank.Loans;
 using AFGRBank.Utility;
 using AFGRBank.UserType;
+using static AFGRBank.Exchange.CurrencyExchange;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,6 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using OOPGenericList.Helper;
 
 namespace AFGRBank.Main
 {
@@ -41,23 +41,24 @@ namespace AFGRBank.Main
         public void LoginMenu()
         {
             int attempts = 3;
-            string text = "Sign in to account:";
             string username = string.Empty;
             string password = string.Empty;
 
-            string[] loginOptions = { "Username:", "Password:", "Login", "Exit" };
+            string promptText = "Sign in to account:";
+            string[] menuOptions = { "Username:", "Password:", "Login", "Exit" };
             while (true)
             {
-                LoginMenuOptions selectedOptions = Menu.ReadOption<string, LoginMenuOptions>(text, loginOptions);
+                var selectedOptions = Menu.ReadOptionIndex(promptText, menuOptions);
+                // LoginMenuOptions selectedOptions = Menu.ReadOption<string, LoginMenuOptions>(text, loginOptions);
                 switch (selectedOptions)
                 {
-                    case LoginMenuOptions.Username:
+                    case 0:
                         break;
-                    case LoginMenuOptions.Password:
+                    case 1:
                         break;
-                    case LoginMenuOptions.Login:
+                    case 2:
                         break;
-                    case LoginMenuOptions.Exit:
+                    case 3:
                         return;
                 }
             }
@@ -119,6 +120,8 @@ namespace AFGRBank.Main
 
         public void AdminMenu(string name, string surname)
         {
+            Admin admin = new Admin();
+
             string text = $"Welcome {name} {surname}." +
                 $"\nYou're logged in as Admin.";
             string[] adminMenuOptions = {
@@ -139,33 +142,77 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case AdminMenuOptions.CreateUser:
-                        CreateUserMenu();
+                        CreateUserMenu(admin);
                         break;
                     case AdminMenuOptions.UpdateCurrencyRate:
                         
-                        while (true)
-                        {
-                            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
-                            string jsonString = File.ReadAllText(jsonPath);
-                            
-                            Console.WriteLine(jsonString);
-                            string inputCurrencyName = Validate.GetInput(
-                                "Input the currency which needs to update its exchange rate:",
-                                "Input cannot be empty, please try again.")
-                                .ToUpper();
+                        string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+                        string jsonString = File.ReadAllText(jsonPath);
 
-                            CurrencyExchange.CurrencyName currencyName;
-                            try
+                        CurrencyNames selectedCurrency = CurrencyNames.SEK;
+                        decimal newRates = 1;
+
+                        string displaySelectedCurrency = string.Empty;
+                        string displayNewRates = string.Empty;
+                        
+                        bool isContinue2 = true;
+                        while (isContinue2 == true)
+                        {
+
+                            string promptText = $"Select which currency's exchange rate to update:" +
+                                $"\n{jsonString}"
+                                .Replace('{', '\u200e')
+                                .Replace('}', '\u200e') + 
+                                $"\nSelect which currency's exchange rate to update:";
+
+                            int selectUpdateRateOptions = Menu.ReadOptionIndex(
+                                $"Select which currency's exchange rate to update:" +
+                                $"\n{jsonString}"
+                                .Replace('{', '\n')
+                                .Replace('}', '\n'),
+                                [ 
+                                $"Select currency:        {displaySelectedCurrency}",
+                                $"Set new exchange rate:  {displayNewRates}",
+                                $"Update",
+                                $"Exit",
+                                ]);
+
+                            switch (selectUpdateRateOptions)
                             {
-                                currencyName = (CurrencyExchange.CurrencyName)Enum.Parse(typeof(CurrencyExchange.CurrencyName), inputCurrencyName);
+                                case 0:
+                                    Console.Clear();
+                                    string inputSelectedCurrency = Validate.GetInput(
+                                        $"\n{jsonString
+                                        .Replace('{', '\n')
+                                        .Replace('}', '\n')}" +
+                                        $"Input the currency which needs to update its exchange rate:",
+                                        $"Input cannot be empty, please try again.");
+                                    if (!Enum.TryParse(inputSelectedCurrency, true, out selectedCurrency))
+                                    {
+                                        Console.WriteLine($"Currency does not exists, please try again.");
+                                        break;
+                                    }
+                                    displaySelectedCurrency = selectedCurrency.ToString();
+                                    break;
+                                case 1:
+                                    newRates = Validate.StringToDecimal(
+                                        $"\n{jsonString
+                                        .Replace('{', '\n')
+                                        .Replace('}', '\n')}" +
+                                        $"Input the updated exchange rate:",
+                                        $"Input cannot be empty, please try again.",
+                                        $"Input failed to parse. Make sure the input doesn't contain invalid characters and try again.");
+                                    displayNewRates = newRates.ToString();
+                                    break;
+                                case 2:
+                                    admin.UpdateCurrencyRates(selectedCurrency, newRates);
+                                    jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+                                    jsonString = File.ReadAllText(jsonPath);
+                                    break;
+                                case 4:
+                                    isContinue2 = false;
+                                    break;
                             }
-                            catch(Exception e)
-                            {
-                                Console.WriteLine($"");
-                                continue;
-                            }
-                            Console.WriteLine(currencyName);
-                            Console.ReadKey();
                         }
 
                         break;
@@ -185,23 +232,23 @@ namespace AFGRBank.Main
             }
         }
 
-        public void CreateUserMenu()
+        private void CreateUserMenu(Admin admin)
         {
-            //string username = string.Empty;
-            //string password = string.Empty;
-            //string name = string.Empty;
-            //string surname = string.Empty;
-            //string email = string.Empty;
-            //int phoneNumber = 0;
-            //string address = string.Empty;
+            string username = string.Empty;
+            string password = string.Empty;
+            string name = string.Empty;
+            string surname = string.Empty;
+            string email = string.Empty;
+            int phoneNumber = 0;
+            string address = string.Empty;
 
-            string username = "test";
-            string password = "test";
-            string name = "test";
-            string surname = "test";
-            string email = "test@test.se";
-            int phoneNumber = 070;
-            string address = "testHome";
+            //string username = "test";
+            //string password = "test";
+            //string name = "test";
+            //string surname = "test";
+            //string email = "test@test.se";
+            //int phoneNumber = 070;
+            //string address = "testHome";
 
             bool isContinue = true;
             while (isContinue)
@@ -269,7 +316,6 @@ namespace AFGRBank.Main
                             break;
                         }
                         Login login = new Login();
-                        Admin admin = new Admin();
                         login.UserList = admin.CreateUser(username, password, name, surname, email, phoneNumber, address, login.UserList);
                         break;
                     case CreateUserMenuOptions.Exit:
