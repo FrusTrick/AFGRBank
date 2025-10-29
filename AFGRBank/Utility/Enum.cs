@@ -85,4 +85,14 @@ namespace AFGRBank.Utility
         EditLoan,
         Exit,
     }
+
+    public enum CurrencyOptions
+    { 
+        SEK, 
+        DKK, 
+        EUR, 
+        USD, 
+        YEN,
+        Exit
+    }
 }
