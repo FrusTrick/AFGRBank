@@ -4,6 +4,7 @@ using AFGRBank.Loans;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static AFGRBank.Exchange.CurrencyExchange;
+using AFGRBank.Utility;
 
 namespace AFGRBank.UserType
 {
@@ -47,6 +48,8 @@ namespace AFGRBank.UserType
         {
             try
             {
+
+                
                 // Set the options to handle CurrencyName enum keys
                 var options = new JsonSerializerOptions
                 {
@@ -54,6 +57,7 @@ namespace AFGRBank.UserType
                     WriteIndented = true // Essentially reformats the spaces for the json file for machine reading 
                 };
 
+                
                 // Ensures the file path that is being updated is the currenct directory we're using and not the debugger files that vss generates
                 string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
                 string jsonString = File.ReadAllText(jsonPath);
@@ -66,8 +70,37 @@ namespace AFGRBank.UserType
                 */
 
                 // Decodes the json file into dictionary format CurrencyName: decimal
-                var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyName, decimal>>(jsonString, options)
-                                    ?? new Dictionary<CurrencyName, decimal>(); // Creates a dictionary to ensure that the program doesn't crash in case the file is empty
+                var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyExchange.CurrencyNames, decimal>>(jsonString, options)
+                                    ?? new Dictionary<CurrencyNames, decimal>(); // Creates a dictionary to ensure that the program doesn't crash in case the file is empty
+                string[] currencyOptions = Enum.GetNames(typeof(CurrencyNames));
+                // Read all of the json files
+                while (true)
+                {
+                    CurrencyOptions selectedOptions = Menu.ReadOption<string, CurrencyOptions>(
+                        "Select the currency you want to exchange to",
+                        currencyOptions
+                    );
+                    string msgEmpty = "Input was empty, please input a decimal";
+                    string msgFailed = "Couldn't convert to decimal, make sure it doesn't contain special characters or alphabet"
+                    switch (selectedOptions)
+                    {
+                        case CurrencyOptions.EUR:
+                            Console.ReadLine();
+                            StringToDecimal("Input the exchange rate: ", msgEmpty, msgFailed);
+                            break;
+                        case CurrencyOptions.USD:
+                            StringToDecimal("Input the exchange rate: ", msgEmpty, msgFailed);
+                            break;
+                        case CurrencyOptions.DKK:
+                            StringToDecimal("Input the exchange rate: ", msgEmpty, msgFailed);
+                            break;
+                        case CurrencyOptions.YEN:
+                            StringToDecimal("Input the exchange rate: ", msgEmpty, msgFailed);
+                            break;
+                        case CurrencyOptions.Exit:
+                            return;
+                    }
+                }
 
                 // Tries to convert string into enum, and if it's true initialize currency and change the key pair that matches currency to the updated amount
                 while (true)
@@ -131,6 +164,26 @@ namespace AFGRBank.UserType
             catch
             {
                 Console.WriteLine("CreateLoan failed to process information");
+            }
+        }
+        private static decimal StringToDecimal(string msgPrompt, string msgErrorEmpty, string msgErrorParse)
+        {
+            while (true)
+            {
+                Console.WriteLine(msgPrompt);
+                string stringToParse = Console.ReadLine()
+                    .Trim();
+                if (string.IsNullOrWhiteSpace(stringToParse))
+                {
+                    Console.WriteLine(msgErrorEmpty);
+                    continue;
+                }
+                if (!decimal.TryParse(stringToParse, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal parsedValue))
+                {
+                    Console.WriteLine(msgErrorParse);
+                    continue;
+                }
+                return parsedValue;
             }
         }
     }
