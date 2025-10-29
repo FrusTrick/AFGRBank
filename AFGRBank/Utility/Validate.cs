@@ -140,7 +140,7 @@ namespace AFGRBank.Utility
                     Console.WriteLine(msgErrorEmpty);
                     continue;
                 }
-                if (!int.TryParse(stringToParse, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out int parsedValue))
+                if (!int.TryParse(stringToParse, out int parsedValue))
                 {
                     Console.WriteLine(msgErrorParse);
                     continue;
@@ -194,7 +194,7 @@ namespace AFGRBank.Utility
                     Console.WriteLine(msgErrorEmpty);
                     continue;
                 }
-                if (!decimal.TryParse(stringToParse, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal parsedValue))
+                if (!decimal.TryParse(stringToParse, System.Globalization.CultureInfo.InvariantCulture, out decimal parsedValue))
                 {
                     Console.WriteLine(msgErrorParse);
                     continue;

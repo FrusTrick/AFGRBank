@@ -145,26 +145,35 @@ namespace AFGRBank.Main
                         CreateUserMenu(admin);
                         break;
                     case AdminMenuOptions.UpdateCurrencyRate:
-                        
+                        // Update exchange rate for a specified currency.
+
                         string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
                         string jsonString = File.ReadAllText(jsonPath);
 
+                        // The default selected currency and values (TryParse doesn't allow null CurrencyNames)
+                        // These two will be used as parameter in UpdateExchangeRates method
                         CurrencyNames selectedCurrency = CurrencyNames.SEK;
-                        decimal newRates = 1;
+                        decimal newRates = 1m;
 
+                        // These variables will be used to display the selected currency and the new exchange rates admin inputted
                         string displaySelectedCurrency = string.Empty;
                         string displayNewRates = string.Empty;
                         
                         bool isContinue2 = true;
                         while (isContinue2 == true)
                         {
-
+                            // Display .JSON content to string, replacing the curly brackets with whitespaces
                             string promptText = $"Select which currency's exchange rate to update:" +
                                 $"\n{jsonString}"
-                                .Replace('{', '\u200e')
-                                .Replace('}', '\u200e') + 
-                                $"\nSelect which currency's exchange rate to update:";
+                                .Replace('{', ' ')
+                                .Replace('}', ' ');
 
+                            // Call ReadOptionIndex with parameters declared inside instead of declaring them outside the method first
+                            // This is used to update {displaySelectedCurrency} and {displayNewRates} in real time.
+                            // If you hover over ReadOptionIndex, you can see it takes in two parameters:
+                            //      questionTetxt is the text displayed above the menu buttons
+                            //      menuOptions contain the buttons, separated with the comma character ','
+                            // ReadOptionIndex returns an integer value which is used to compare the switch case below.
                             int selectUpdateRateOptions = Menu.ReadOptionIndex(
                                 $"Select which currency's exchange rate to update:" +
                                 $"\n{jsonString}"
@@ -180,6 +189,7 @@ namespace AFGRBank.Main
                             switch (selectUpdateRateOptions)
                             {
                                 case 0:
+                                    // Admin inputs which currency to update. There's validation to ensure input matches the correct enum.
                                     Console.Clear();
                                     string inputSelectedCurrency = Validate.GetInput(
                                         $"\n{jsonString
@@ -192,9 +202,11 @@ namespace AFGRBank.Main
                                         Console.WriteLine($"Currency does not exists, please try again.");
                                         break;
                                     }
+                                    // displaySelectedCurrency is used to display which currency admin picked, in case they forget
                                     displaySelectedCurrency = selectedCurrency.ToString();
                                     break;
                                 case 1:
+                                    // Admin inputs the updated exchange rate. There's validation to ensure input is decimal.
                                     newRates = Validate.StringToDecimal(
                                         $"\n{jsonString
                                         .Replace('{', '\n')
@@ -202,14 +214,18 @@ namespace AFGRBank.Main
                                         $"Input the updated exchange rate:",
                                         $"Input cannot be empty, please try again.",
                                         $"Input failed to parse. Make sure the input doesn't contain invalid characters and try again.");
+                                    // displaySelectedCurrency is used to display the updated exchange rates the admin picked, in case they forget
                                     displayNewRates = newRates.ToString();
                                     break;
                                 case 2:
+                                    // Calls UpdateCurrencyRates which updates the selected currency with the new rates.
+                                    // Then read .JSON file and update displayText.
                                     admin.UpdateCurrencyRates(selectedCurrency, newRates);
                                     jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
                                     jsonString = File.ReadAllText(jsonPath);
                                     break;
                                 case 4:
+                                    // Exits AdminMenuOptions.UpdateCurrencyRate 
                                     isContinue2 = false;
                                     break;
                             }
@@ -464,7 +480,7 @@ namespace AFGRBank.Main
 
         public void Testing()
         {
-            
+            Admin admin = new Admin();
             while (true)
             {
                 Console.Clear();
@@ -503,7 +519,7 @@ namespace AFGRBank.Main
                         AdminMenu("Förnamn", "Efternamn");
                         break;
                     case "5":
-                        CreateUserMenu();
+                        CreateUserMenu(admin);
                         break;
                     case "6":
                         AccountMenu();
