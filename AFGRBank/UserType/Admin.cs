@@ -1,9 +1,19 @@
-﻿using AFGRBank.BankAccounts;
+﻿// To get the total funds of a user when creating a loan
+using AFGRBank.BankAccounts;
+
+// For accessing the .json file that contains all exchange rates
 using AFGRBank.Exchange;
+
+// To be able to use the Loan class to initialize a loan
 using AFGRBank.Loans;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+
+// To be able to access the enum list without writing CurrencyExchange.CurrencyNames
 using static AFGRBank.Exchange.CurrencyExchange;
+
+using System.Text.Json;
+
+using System.Text.Json.Serialization;
+
 using AFGRBank.Utility;
 
 namespace AFGRBank.UserType
@@ -33,33 +43,35 @@ namespace AFGRBank.UserType
                 userList.Add(newUser);
                 Console.WriteLine($"{username} successfully created.");
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("CreateUser failed to process information");
+                Console.WriteLine($"CreateUser failed to process: {ex.Message}");
             }
-            
-
-            
             return userList;
         }
 
         // TODO: Implement real currency update logic
-        public void UpdateCurrencyRates(string chosenCurrency, decimal updatedAmount)
+        public void UpdateCurrencyRates(CurrencyNames currencyName, decimal updatedAmount)
         {
             try
             {
-
-                
                 // Set the options to handle CurrencyName enum keys
                 var options = new JsonSerializerOptions
                 {
                     Converters = { new JsonStringEnumConverter() }, // Converts json string to Enum
                     WriteIndented = true // Essentially reformats the spaces for the json file for machine reading 
                 };
-
                 
                 // Ensures the file path that is being updated is the currenct directory we're using and not the debugger files that vss generates
                 string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+
+                // Ensure file exists
+                if (!File.Exists(jsonPath))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(jsonPath)!); // If it doesn't exist, create it
+                    File.WriteAllText(jsonPath, "{}");
+                }
+
                 string jsonString = File.ReadAllText(jsonPath);
 
                 // Debugging, feel free to remove
@@ -72,63 +84,16 @@ namespace AFGRBank.UserType
                 // Decodes the json file into dictionary format CurrencyName: decimal
                 var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyExchange.CurrencyNames, decimal>>(jsonString, options)
                                     ?? new Dictionary<CurrencyNames, decimal>(); // Creates a dictionary to ensure that the program doesn't crash in case the file is empty
-                string[] currencyOptions = Enum.GetNames(typeof(CurrencyNames));
-                // Read all of the json files
-                while (true)
-                {
-                    CurrencyOptions selectedOptions = Menu.ReadOption<string, CurrencyOptions>(
-                        "Select the currency you want to exchange to",
-                        currencyOptions
-                    );
-                    string msgEmpty = "Input was empty, please input a decimal";
-                    string msgFailed = "Couldn't convert to decimal, make sure it doesn't contain special characters or alphabet"
-                    switch (selectedOptions)
-                    {
-                        case CurrencyOptions.EUR:
-                            Console.ReadLine();
-                            StringToDecimal("Input the exchange rate: ", msgEmpty, msgFailed);
-                            break;
-                        case CurrencyOptions.USD:
-                            StringToDecimal("Input the exchange rate: ", msgEmpty, msgFailed);
-                            break;
-                        case CurrencyOptions.DKK:
-                            StringToDecimal("Input the exchange rate: ", msgEmpty, msgFailed);
-                            break;
-                        case CurrencyOptions.YEN:
-                            StringToDecimal("Input the exchange rate: ", msgEmpty, msgFailed);
-                            break;
-                        case CurrencyOptions.Exit:
-                            return;
-                    }
-                }
-
-                // Tries to convert string into enum, and if it's true initialize currency and change the key pair that matches currency to the updated amount
-                while (true)
-                {
-                    if (Enum.TryParse<CurrencyName>(chosenCurrency, true, out var currency) && currency == CurrencyExchange.CurrencyName.SEK)
-                    {
-                        Console.WriteLine($"Exchange rate of SEK can not be updated.");
-                        break;
-                    }
-                    else if (Enum.TryParse<CurrencyName>(chosenCurrency, true, out currency))
-                    {
-                        currencyRates[currency] = updatedAmount;
-                        Console.WriteLine($"Updated exchange rate of {currency} to {updatedAmount} ");
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid currency given... (SEK, EUR, USD, DKK, YEN)\n");
-                        chosenCurrency = Console.ReadLine();
-                    }
-                }
+                
+                // Updates the dictionary
+                currencyRates[currencyName] = updatedAmount;
 
                 // Update the files
                 File.WriteAllText(jsonPath, JsonSerializer.Serialize(currencyRates, options));
             }
             catch (Exception ex)
             {
-                Console.WriteLine("UpdateCurrencyRates Failed to process: " + ex.Message);
+                Console.WriteLine($"UpdateCurrencyRates failed to process: {ex.Message}");
             }
         }
 
@@ -161,29 +126,9 @@ namespace AFGRBank.UserType
                 user.AddLoan(newLoan);
                 Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("CreateLoan failed to process information");
-            }
-        }
-        private static decimal StringToDecimal(string msgPrompt, string msgErrorEmpty, string msgErrorParse)
-        {
-            while (true)
-            {
-                Console.WriteLine(msgPrompt);
-                string stringToParse = Console.ReadLine()
-                    .Trim();
-                if (string.IsNullOrWhiteSpace(stringToParse))
-                {
-                    Console.WriteLine(msgErrorEmpty);
-                    continue;
-                }
-                if (!decimal.TryParse(stringToParse, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal parsedValue))
-                {
-                    Console.WriteLine(msgErrorParse);
-                    continue;
-                }
-                return parsedValue;
+                Console.WriteLine($"CreateLoan failed to process: {ex.Message}");
             }
         }
     }
