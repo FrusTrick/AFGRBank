@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,14 +10,16 @@ namespace AFGRBank.Main
 {
     public class Login
     {
-        public List<User> UserList { get; set; }
+        //Initialize the list so it i never null
+        public List<User> UserList { get; set; } = new List<User>();
         public User? LoggedInUser { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
         public bool IsAdmin { get; set; }
 
 
-
+        //Attemots to log in a user with the provided credentials.
+        //If successful, LoggedInUser is set and IsAdmin is uppdated.
         public void LoginUser(string username, string password)
         {
 
@@ -24,6 +27,9 @@ namespace AFGRBank.Main
             if (user != null)
             {
                 LoggedInUser = user;
+                //If User has IsAdmin propertym copy it
+                //assumes User class contains bool IsAdmin
+
                 Console.WriteLine($"\nInloggad som: {user.UserName}");
             }
 
@@ -33,19 +39,28 @@ namespace AFGRBank.Main
             }
         }
 
+
+        //Logs out the current user if any is loggd in.
         public void LogoutUser()
         {
-            Console.WriteLine($"\n{LoggedInUser.UserName} har loggats ut.");
-            LoggedInUser = null;
+            
+            if(LoggedInUser != null)
+            {
+                Console.WriteLine($"\n{LoggedInUser.UserName} har loggats ut.");
+                LoggedInUser = null;
+                IsAdmin = false;
+            }
+            else
+            {
+                Console.WriteLine("\nIngen användare är inloggad.");
+            }
 
         }
 
-        private bool ChaeckIsAdmin()
+        //Returns true if the current session belongs to an admin user.
+        public bool ChaeckIsAdmin()
         {
-            if (IsAdmin == true)
-                return true;
-            else
-                return false;
+            return IsAdmin;
         }
     }
 }

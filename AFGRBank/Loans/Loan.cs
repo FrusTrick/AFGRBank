@@ -9,7 +9,7 @@ namespace AFGRBank.Loans
 {
     public class Loan
     {
-        // characteristics of the loan
+        // properties of the loan
         public string Currency { get; set; }
         public decimal InterestRate  { get; set; }
         public DateOnly StartDate { get; set; }
