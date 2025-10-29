@@ -1,7 +1,8 @@
-﻿using AFGRBank.Utility;
-using AFGRBank.UserType;
-using AFGRBank.BankAccounts;
+﻿using AFGRBank.BankAccounts;
+using AFGRBank.Exchange;
 using AFGRBank.Loans;
+using AFGRBank.Utility;
+using AFGRBank.UserType;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -141,6 +142,32 @@ namespace AFGRBank.Main
                         CreateUserMenu();
                         break;
                     case AdminMenuOptions.UpdateCurrencyRate:
+                        
+                        while (true)
+                        {
+                            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+                            string jsonString = File.ReadAllText(jsonPath);
+                            
+                            Console.WriteLine(jsonString);
+                            string inputCurrencyName = Validate.GetInput(
+                                "Input the currency which needs to update its exchange rate:",
+                                "Input cannot be empty, please try again.")
+                                .ToUpper();
+
+                            CurrencyExchange.CurrencyName currencyName;
+                            try
+                            {
+                                currencyName = (CurrencyExchange.CurrencyName)Enum.Parse(typeof(CurrencyExchange.CurrencyName), inputCurrencyName);
+                            }
+                            catch(Exception e)
+                            {
+                                Console.WriteLine($"");
+                                continue;
+                            }
+                            Console.WriteLine(currencyName);
+                            Console.ReadKey();
+                        }
+
                         break;
                     case AdminMenuOptions.Borrow:
                         break;
