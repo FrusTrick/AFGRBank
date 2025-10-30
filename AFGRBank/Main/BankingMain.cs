@@ -16,7 +16,43 @@ namespace AFGRBank.Main
 {
     public class BankingMain
     {
-        public void MainMenu()
+        // Every class should be instanced here (except the classes inside the Utility folder??)
+        //
+        // "user" is the blueprint for creating user accounts.
+        // "admin" is the blueprint for creating admin accounts.
+        // "login" contains a list of every user, as well as the information of the current signed in user.
+        // "cx" contains every currency and their exchange rates.
+        // "cAccount" is the blueprint for a checkings bank account.
+        // "sAccount" is the blueprint for a checkings bank account.
+        // "transaction" is used create a new transaction between users, and save it to their history
+        // "loan" is used to create a new bank loan, and save it to user history
+
+        User user = new User();
+        Admin admin = new Admin();
+        Login login = new Login();
+        CurrencyExchange cx = new CurrencyExchange();
+        CheckingsAccount cAccount = new CheckingsAccount();
+        SavingsAccount sAccount = new SavingsAccount();
+        Transaction transaction = new Transaction();
+        Loan loan = new Loan();
+
+        // Test method for populating UserList
+        public void PopulateList()
+        {
+            string username = "1";
+            string password = "1";
+            string name = "Ax";
+            string surname = "Be";
+            string email = "admin@se.se";
+            int phonenumer = 777777;
+            string address = "Address";
+            login.UserList = admin.CreateUser(username, password, name, surname, email, phonenumer, address, login.UserList);
+        }
+
+
+        // The first screen, contains the options to login or exit program.
+        // "loginAttempts"
+        public void MainMenu(short loginAttempts)
         {
             string asciiArt =
                 "ASCII Placeholder\n" +
@@ -30,7 +66,7 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case MainMenuOptions.Login:
-                        LoginMenu();
+                        LoginMenu(loginAttempts);
                         break;
                     case MainMenuOptions.Exit:
                         return;
@@ -38,54 +74,91 @@ namespace AFGRBank.Main
             }
         }
 
-        public void LoginMenu()
+        // Login screen, here user can input their username and password, as well as try to sign in or exit back to MainMenu()
+        public void LoginMenu(short loginAttempts)
         {
-            int attempts = 3;
             string username = string.Empty;
             string password = string.Empty;
 
-            string promptText = "Sign in to account:";
-            string[] menuOptions = { "Username:", "Password:", "Login", "Exit" };
             while (true)
             {
+                string promptText = "Sign in to bank";
+                string[] menuOptions = { 
+                    $"Username: {username}", 
+                    $"Password: {password}", 
+                    "Login", 
+                    "Exit" 
+                };
                 var selectedOptions = Menu.ReadOptionIndex(promptText, menuOptions);
-                // LoginMenuOptions selectedOptions = Menu.ReadOption<string, LoginMenuOptions>(text, loginOptions);
                 switch (selectedOptions)
                 {
                     case 0:
+                        Console.Clear();
+                        username = Validate.GetInput($"Username:",
+                                        $"Username cannot be empty. Try again.");
                         break;
                     case 1:
+                        Console.Clear();
+                        password = Validate.GetInput($"Password:",
+                                        $"Password cannot be empty. Try again.");
                         break;
                     case 2:
-                        break;
+                        Console.Clear();
+                        // Log in button, if user attempts to login without filling in username or password,
+                        // they lose 1 attempt, and an error message is displayed.
+                        // If attempts reaches 0, they're automatically exited out of program.
+                        if (username == string.Empty || password == string.Empty)
+                        {
+                            loginAttempts--;
+                            if (loginAttempts <= 0)
+                            {
+                                Console.WriteLine($"{loginAttempts} left. You cannot login.");
+                                Console.ReadKey();
+                                Environment.FailFast("Shit!");
+                            }
+                            if (username == string.Empty)
+                            {
+                                Console.WriteLine($"Invalid login. Username is empty. Press any key to retry.");
+                                Console.WriteLine($"{loginAttempts} tries left. Press any key to retry...");
+                            }
+                            else if (password == string.Empty)
+                            {
+                                Console.WriteLine($"Invalid login. Password is empty. Press any key to retry.");
+                                Console.WriteLine($"{loginAttempts} tries left. Press any key to retry...");
+                            }
+                            Console.ReadKey();
+                            break;
+                        }
+
+                        // If filled, calls this method which will try to locate user with matching username and password in Login.UserList
+                        login.LoginUser(username, password);
+                        if (login.LoggedInUser == null)
+                        {
+                            loginAttempts--;
+                            if (loginAttempts <= 0)
+                            {
+                                Console.WriteLine($"{loginAttempts} left. You cannot login.");
+                                Console.ReadKey();
+                                Environment.FailFast("Shit!");
+                            }
+                            // If no matching user could be found, this error message will be displayed, and then resets this loop
+                            Console.WriteLine("Failed to login. Username or password was wrong.");
+                            Console.WriteLine($"{loginAttempts} tries left. Press any key to retry...");
+                            Console.ReadKey();
+                            continue;
+                        }
+                        Console.WriteLine($"{login.LoggedInUser.UserName} + {login.LoggedInUser.Password}");
+                        Console.ReadKey();
+                        return;
                     case 3:
                         return;
                 }
             }
-
-            Console.WriteLine($"Username:");
-            username = Console.ReadLine()
-                .Trim();
-            Console.WriteLine($"Password:");
-            password = Console.ReadLine()
-                .Trim();
-
-            if (string.IsNullOrEmpty(username))
-            {
-                Console.WriteLine($"Username cannot be empty.");
-                return;
-            }
-            if (string.IsNullOrEmpty(password))
-            {
-                Console.WriteLine($"Password cannot be empty.");
-                return;
-            }
-            // login.LoginUser(username, password);
         }
 
-        public void UserMenu(string name, string surname)
+        public void UserMenu()
         {
-            string text = $"Welcome {name} {surname}.";
+            string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}.";
             string[] userMenuOptions = { 
                 "Borrow money", 
                 "Change currency", 
@@ -118,11 +191,9 @@ namespace AFGRBank.Main
             }
         }
 
-        public void AdminMenu(string name, string surname)
+        public void AdminMenu()
         {
-            Admin admin = new Admin();
-
-            string text = $"Welcome {name} {surname}." +
+            string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}." +
                 $"\nYou're logged in as Admin.";
             string[] adminMenuOptions = {
                 "Create new user",
@@ -142,7 +213,7 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case AdminMenuOptions.CreateUser:
-                        CreateUserMenu(admin);
+                        CreateUserMenu();
                         break;
                     case AdminMenuOptions.UpdateCurrencyRate:
                         // Update exchange rate for a specified currency.
@@ -248,7 +319,7 @@ namespace AFGRBank.Main
             }
         }
 
-        private void CreateUserMenu(Admin admin)
+        private void CreateUserMenu()
         {
             string username = string.Empty;
             string password = string.Empty;
@@ -331,7 +402,6 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                             break;
                         }
-                        Login login = new Login();
                         login.UserList = admin.CreateUser(username, password, name, surname, email, phoneNumber, address, login.UserList);
                         break;
                     case CreateUserMenuOptions.Exit:
@@ -478,9 +548,9 @@ namespace AFGRBank.Main
             }
         }
 
-        public void Testing()
+        public void Testing(short loginAttempt)
         {
-            Admin admin = new Admin();
+            PopulateList();
             while (true)
             {
                 Console.Clear();
@@ -507,19 +577,19 @@ namespace AFGRBank.Main
                     case "0":
                         return;
                     case "1":
-                        MainMenu();
+                        MainMenu(loginAttempt);
                         break;
                     case "2":
-                        LoginMenu();
+                        LoginMenu(loginAttempt);
                         break;
                     case "3":
-                        UserMenu("Förnamn", "Efternamn");
+                        UserMenu();
                         break;
                     case "4":
-                        AdminMenu("Förnamn", "Efternamn");
+                        AdminMenu();
                         break;
                     case "5":
-                        CreateUserMenu(admin);
+                        CreateUserMenu();
                         break;
                     case "6":
                         AccountMenu();
