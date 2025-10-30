@@ -147,8 +147,8 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                             continue;
                         }
-                        //Console.WriteLine($"{login.LoggedInUser.UserName} + {login.LoggedInUser.Password}");
-                        //Console.ReadKey();
+                        Console.WriteLine($"{login.LoggedInUser.UserName} + {login.LoggedInUser.Password}");
+                        Console.ReadKey();
                         return;
                     case 3:
                         return;
@@ -193,8 +193,6 @@ namespace AFGRBank.Main
 
         public void AdminMenu(string name, string surname)
         {
-            Admin admin = new Admin();
-
             string text = $"Welcome {name} {surname}." +
                 $"\nYou're logged in as Admin.";
             string[] adminMenuOptions = {
