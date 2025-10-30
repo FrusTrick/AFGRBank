@@ -22,7 +22,6 @@ namespace AFGRBank.UserType
         public int PhoneNumber { get; set; }
         public bool IsAdmin { get; private set; } = false;
         private decimal TotalFunds { get; set; } = 0;
-
         public List<Account> Accounts { get; set; } = new List<Account>();
         public List<Transaction> TransactionList { get; set; } = new List<Transaction>();
         public List<Loan> LoanList { get; set; } = new List<Loan>();
