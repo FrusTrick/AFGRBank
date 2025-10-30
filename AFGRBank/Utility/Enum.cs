@@ -16,6 +16,7 @@ namespace AFGRBank.Utility
     {
         Username,
         Password,
+        Login,
         Exit
     }
 

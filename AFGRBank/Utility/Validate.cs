@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace OOPGenericList.Helper
+namespace AFGRBank.Utility
 {
     /// <summary>
     /// Class contains custom-made methods for error handling.
@@ -134,7 +134,6 @@ namespace OOPGenericList.Helper
             {
                 Console.WriteLine(msgPrompt);
                 string stringToParse = Console.ReadLine()
-                    .Replace(",", string.Empty)
                     .Trim();
                 if (string.IsNullOrWhiteSpace(stringToParse))
                 {
@@ -176,6 +175,28 @@ namespace OOPGenericList.Helper
                 catch (OverflowException)
                 {
                     Console.WriteLine(msgErrorOutOfRange);
+                    continue;
+                }
+                return parsedValue;
+            }
+        }
+
+
+        public static decimal StringToDecimal(string msgPrompt, string msgErrorEmpty, string msgErrorParse)
+        {
+            while (true)
+            {
+                Console.WriteLine(msgPrompt);
+                string stringToParse = Console.ReadLine()
+                    .Trim();
+                if (string.IsNullOrWhiteSpace(stringToParse))
+                {
+                    Console.WriteLine(msgErrorEmpty);
+                    continue;
+                }
+                if (!decimal.TryParse(stringToParse, System.Globalization.CultureInfo.InvariantCulture, out decimal parsedValue))
+                {
+                    Console.WriteLine(msgErrorParse);
                     continue;
                 }
                 return parsedValue;
