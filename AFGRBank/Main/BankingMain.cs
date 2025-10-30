@@ -156,9 +156,9 @@ namespace AFGRBank.Main
             }
         }
 
-        public void UserMenu(string name, string surname)
+        public void UserMenu()
         {
-            string text = $"Welcome {name} {surname}.";
+            string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}.";
             string[] userMenuOptions = { 
                 "Borrow money", 
                 "Change currency", 
@@ -191,9 +191,9 @@ namespace AFGRBank.Main
             }
         }
 
-        public void AdminMenu(string name, string surname)
+        public void AdminMenu()
         {
-            string text = $"Welcome {name} {surname}." +
+            string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}." +
                 $"\nYou're logged in as Admin.";
             string[] adminMenuOptions = {
                 "Create new user",
@@ -583,10 +583,10 @@ namespace AFGRBank.Main
                         LoginMenu(loginAttempt);
                         break;
                     case "3":
-                        UserMenu("Förnamn", "Efternamn");
+                        UserMenu();
                         break;
                     case "4":
-                        AdminMenu("Förnamn", "Efternamn");
+                        AdminMenu();
                         break;
                     case "5":
                         CreateUserMenu();
