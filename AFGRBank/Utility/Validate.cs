@@ -65,6 +65,16 @@ namespace AFGRBank.Utility
             }
         }
 
+
+        /// <summary>
+        /// Prompts user, and continuously loops until user inputs a valid email address syntax.
+        /// </summary>
+        /// <remarks>
+        /// Uses RegEx. Not case-sensitive.
+        /// </remarks>
+        /// <param name="msgPrompt">Custom defined text that instructs the user to type an email address.</param>
+        /// <param name="msgErrorEmail">Custom defined error text that is displayed when user input is not a valid email address.</param>
+        /// <returns>A valid email address as string.</returns>
         public static string GetInputEmail(string msgPrompt, string msgErrorEmail)
         {
             while (true)
@@ -89,6 +99,16 @@ namespace AFGRBank.Utility
             }
         }
 
+
+        /// <summary>
+        /// Prompts user, and continuously loops until user inputs a valid phone number syntax.
+        /// </summary>
+        /// <remarks>
+        /// Uses RegEx. Numbers only.
+        /// </remarks>
+        /// <param name="msgPrompt">Custom defined text that instructs the user to type an email address.</param>
+        /// <param name="msgErrorPhone">Custom defined error text that is displayed when user input is not a valid phone number.</param>
+        /// <returns>A valid phone number as string.</returns>
         // Class Regex Represents an immutable regular expression.
         // Phone Format         Regex Pattern
         // xxxxxxxxxx           ^[0 - 9]{ 10}$
