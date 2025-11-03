@@ -111,6 +111,8 @@ namespace AFGRBank.BankAccounts
                             userList[indexSender] = sender;
                             userList[indexRecipient] = recipient;
                         }
+
+                        return userList;
                     }
                 }
                 catch
