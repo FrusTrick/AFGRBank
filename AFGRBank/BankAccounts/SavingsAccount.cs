@@ -22,7 +22,6 @@ namespace AFGRBank.BankAccounts
 
         public override List<Account> CreateAccount(List<Account> accountList, string currency)
         {
-            
             SavingsAccount newSavingsAcc = new SavingsAccount
             {
                 AccountID = Guid.NewGuid(),

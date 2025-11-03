@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AFGRBank.Exchange;
 using AFGRBank.Main;
 using AFGRBank.UserType;
 
@@ -66,10 +67,12 @@ namespace AFGRBank.BankAccounts
         {
             try
             {
+                //Find both sender account and recipient account.
                 var sender = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderAccID));
                 var recipient = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderAccID));
 
-                Transaction currenttransaction = new Transaction
+                //Create new transaction instance to save to accounts later.
+                Transaction currentTransaction = new Transaction
                 {
                     SenderID = senderAccID,
                     RecieverID = recipientAccID,
@@ -77,18 +80,37 @@ namespace AFGRBank.BankAccounts
                     TransDate = DateTime.Now
                 };
 
-
                 try
                 {
+                    //If account retriaval isn't null and the funds sent do not exceed account balance
+                    //the funds will be deducted from the sender, converted and aded to the reciever. 
+                    //transaction will be saved to each accounts transaction history.
                     if (sender != null && recipient != null && sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Funds > funds)
                     {
+                        //Fetch currencies and convert. Converted currency saved in variable converted rate and
+                        //added instead of funds to the recipient account.
+                        CurrencyExchange exhange = new CurrencyExchange();
+                        string senderCurrency = sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Currency;
+                        string recipientCurrency = recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Currency;
+                        decimal convertedRate = exhange.CalculateExchangeRate(senderCurrency, recipientCurrency, funds);
+
                         sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Funds -= funds;
-                        sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).AccTransList.Add(currenttransaction);
+                        sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).AccTransList.Add(currentTransaction);
 
-                        
-                        //Insert method for currency conversion here
+                        //currentTransaction updated with recipient currency value to reflect the recieved funds correctly in accordance with the recipient currency.
+                        currentTransaction.Funds = convertedRate;
+                        recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Funds += convertedRate;
+                        recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).AccTransList.Add(currentTransaction);
 
-                        recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Funds += funds;
+                        //Replaces values of acounts in the userlist with updated values, using index to identify
+                        //their locations and overwriting the old data with the updated sender and recipient data.
+                        var indexSender = userList.IndexOf(sender);
+                        var indexRecipient = userList.IndexOf(recipient);
+                        if (indexSender > -1 && indexRecipient > -1)
+                        {
+                            userList[indexSender] = sender;
+                            userList[indexRecipient] = recipient;
+                        }
                     }
                 }
                 catch
@@ -105,57 +127,6 @@ namespace AFGRBank.BankAccounts
             }
 
             return userList;
-            ////Fetches both accounts from user list.
-            //var currentUser = userList.FirstOrDefault(x => x.Accounts.Any(a => a.AccountID == senderAccID));
-            //Account sender = currentUser.Accounts.FirstOrDefault(x => x.AccountID == senderAccID);
-
-            //try
-            //{
-            //    var recipientUser = userList.FirstOrDefault(x => x.Accounts.Any(a => a.AccountID == recipientAccID));
-            //    Account reciever = currentUser.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID);
-
-            //    Transaction currentTransaction = new Transaction
-            //    {
-            //        SenderID = senderAccID,
-            //        RecieverID = recipientAccID,
-            //        Funds = funds,
-            //        TransDate = DateTime.Now
-            //    };
-
-            //    if (sender != null && reciever != null && sender.Funds > funds)
-            //    {
-            //        currentUser.Accounts.Where(x => x.AccountID == senderAccID);
-            //        {
-            //            //ADD CURRENCY CHECK AND CONVERSION HERE
-            //            Funds = Funds - funds;
-            //            currentUser.TransactionList
-            //        }
-            //        recipientUser.Accounts.Where(x => x.AccountID == recipientAccID);
-            //        {
-            //            //ADD CURRENCY CHECK AND CONVERSION HERE
-            //            Funds = Funds + funds;
-            //        }
-            //        Console.WriteLine($"You have transfered {funds} to {recipientAccID}");
-
-            //        //Returns updated values.
-            //        return accountList;
-            //    }
-            //    else
-            //    {
-            //        //Returns unchanged values.
-            //        return accountList;
-            //    }
-
-            //}
-            //catch
-            //{
-            //    Console.WriteLine($"Could not find a recipient acount with account number: {recipientAccID}");
-            //}
-
-            //Checks that both accounts have been found and that sender has balance to cover trasnfer.
-            //Transfers and confirms if possible. 
-            
-            
         }
 
         //Method shows all transactions related to the specific account.
