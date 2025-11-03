@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace OOPGenericList.Helper
+namespace AFGRBank.Utility
 {
     /// <summary>
     /// Class contains custom-made methods for error handling.
@@ -65,6 +65,16 @@ namespace OOPGenericList.Helper
             }
         }
 
+
+        /// <summary>
+        /// Prompts user, and continuously loops until user inputs a valid email address syntax.
+        /// </summary>
+        /// <remarks>
+        /// Uses RegEx. Not case-sensitive.
+        /// </remarks>
+        /// <param name="msgPrompt">Custom defined text that instructs the user to type an email address.</param>
+        /// <param name="msgErrorEmail">Custom defined error text that is displayed when user input is not a valid email address.</param>
+        /// <returns>A valid email address as string.</returns>
         public static string GetInputEmail(string msgPrompt, string msgErrorEmail)
         {
             while (true)
@@ -89,6 +99,16 @@ namespace OOPGenericList.Helper
             }
         }
 
+
+        /// <summary>
+        /// Prompts user, and continuously loops until user inputs a valid phone number syntax.
+        /// </summary>
+        /// <remarks>
+        /// Uses RegEx. Numbers only.
+        /// </remarks>
+        /// <param name="msgPrompt">Custom defined text that instructs the user to type an email address.</param>
+        /// <param name="msgErrorPhone">Custom defined error text that is displayed when user input is not a valid phone number.</param>
+        /// <returns>A valid phone number as string.</returns>
         // Class Regex Represents an immutable regular expression.
         // Phone Format         Regex Pattern
         // xxxxxxxxxx           ^[0 - 9]{ 10}$
@@ -134,7 +154,6 @@ namespace OOPGenericList.Helper
             {
                 Console.WriteLine(msgPrompt);
                 string stringToParse = Console.ReadLine()
-                    .Replace(",", string.Empty)
                     .Trim();
                 if (string.IsNullOrWhiteSpace(stringToParse))
                 {
@@ -176,6 +195,28 @@ namespace OOPGenericList.Helper
                 catch (OverflowException)
                 {
                     Console.WriteLine(msgErrorOutOfRange);
+                    continue;
+                }
+                return parsedValue;
+            }
+        }
+
+
+        public static decimal StringToDecimal(string msgPrompt, string msgErrorEmpty, string msgErrorParse)
+        {
+            while (true)
+            {
+                Console.WriteLine(msgPrompt);
+                string stringToParse = Console.ReadLine()
+                    .Trim();
+                if (string.IsNullOrWhiteSpace(stringToParse))
+                {
+                    Console.WriteLine(msgErrorEmpty);
+                    continue;
+                }
+                if (!decimal.TryParse(stringToParse, System.Globalization.CultureInfo.InvariantCulture, out decimal parsedValue))
+                {
+                    Console.WriteLine(msgErrorParse);
                     continue;
                 }
                 return parsedValue;

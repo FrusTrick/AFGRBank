@@ -16,6 +16,7 @@ namespace AFGRBank.Utility
     {
         Username,
         Password,
+        Login,
         Exit
     }
 
@@ -83,5 +84,15 @@ namespace AFGRBank.Utility
         GetLoan,
         EditLoan,
         Exit,
+    }
+
+    public enum CurrencyOptions
+    { 
+        SEK, 
+        DKK, 
+        EUR, 
+        USD, 
+        YEN,
+        Exit
     }
 }

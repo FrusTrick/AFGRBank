@@ -1,9 +1,20 @@
-﻿using AFGRBank.BankAccounts;
+﻿// To get the total funds of a user when creating a loan
+using AFGRBank.BankAccounts;
+
+// For accessing the .json file that contains all exchange rates
 using AFGRBank.Exchange;
+
+// To be able to use the Loan class to initialize a loan
 using AFGRBank.Loans;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+
+// To be able to access the enum list without writing CurrencyExchange.CurrencyNames
 using static AFGRBank.Exchange.CurrencyExchange;
+
+using System.Text.Json;
+
+using System.Text.Json.Serialization;
+
+using AFGRBank.Utility;
 
 namespace AFGRBank.UserType
 {
@@ -32,18 +43,15 @@ namespace AFGRBank.UserType
                 userList.Add(newUser);
                 Console.WriteLine($"{username} successfully created.");
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("CreateUser failed to process information");
+                Console.WriteLine($"CreateUser failed to process: {ex.Message}");
             }
-            
-
-            
             return userList;
         }
 
         // TODO: Implement real currency update logic
-        public void UpdateCurrencyRates(string chosenCurrency, decimal updatedAmount)
+        public void UpdateCurrencyRates(CurrencyNames currencyName, decimal updatedAmount)
         {
             try
             {
@@ -53,9 +61,17 @@ namespace AFGRBank.UserType
                     Converters = { new JsonStringEnumConverter() }, // Converts json string to Enum
                     WriteIndented = true // Essentially reformats the spaces for the json file for machine reading 
                 };
-
+                
                 // Ensures the file path that is being updated is the currenct directory we're using and not the debugger files that vss generates
                 string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+
+                // Ensure file exists
+                if (!File.Exists(jsonPath))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(jsonPath)!); // If it doesn't exist, create it
+                    File.WriteAllText(jsonPath, "{}");
+                }
+
                 string jsonString = File.ReadAllText(jsonPath);
 
                 // Debugging, feel free to remove
@@ -66,36 +82,18 @@ namespace AFGRBank.UserType
                 */
 
                 // Decodes the json file into dictionary format CurrencyName: decimal
-                var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyName, decimal>>(jsonString, options)
-                                    ?? new Dictionary<CurrencyName, decimal>(); // Creates a dictionary to ensure that the program doesn't crash in case the file is empty
-
-                // Tries to convert string into enum, and if it's true initialize currency and change the key pair that matches currency to the updated amount
-                while (true)
-                {
-                    if (Enum.TryParse<CurrencyName>(chosenCurrency, true, out var currency) && currency == CurrencyExchange.CurrencyName.SEK)
-                    {
-                        Console.WriteLine($"Exchange rate of SEK can not be updated.");
-                        break;
-                    }
-                    else if (Enum.TryParse<CurrencyName>(chosenCurrency, true, out currency))
-                    {
-                        currencyRates[currency] = updatedAmount;
-                        Console.WriteLine($"Updated exchange rate of {currency} to {updatedAmount} ");
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid currency given... (SEK, EUR, USD, DKK, YEN)\n");
-                        chosenCurrency = Console.ReadLine();
-                    }
-                }
+                var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyExchange.CurrencyNames, decimal>>(jsonString, options)
+                                    ?? new Dictionary<CurrencyNames, decimal>(); // Creates a dictionary to ensure that the program doesn't crash in case the file is empty
+                
+                // Updates the dictionary
+                currencyRates[currencyName] = updatedAmount;
 
                 // Update the files
                 File.WriteAllText(jsonPath, JsonSerializer.Serialize(currencyRates, options));
             }
             catch (Exception ex)
             {
-                Console.WriteLine("UpdateCurrencyRates Failed to process: " + ex.Message);
+                Console.WriteLine($"UpdateCurrencyRates failed to process: {ex.Message}");
             }
         }
 
@@ -128,9 +126,9 @@ namespace AFGRBank.UserType
                 user.AddLoan(newLoan);
                 Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("CreateLoan failed to process information");
+                Console.WriteLine($"CreateLoan failed to process: {ex.Message}");
             }
         }
     }
