@@ -36,6 +36,11 @@ namespace AFGRBank.BankAccounts
             return accountList;
         }
 
+        /// <summary>
+        /// Recieves a SavingsAccount and a number representing years. Returns projected account value based on the int years entered. 
+        /// </summary>
+        /// <param name="savingsAcc"></param>
+        /// <param name="years"></param>
         public void SavingsForecast(SavingsAccount savingsAcc, int years)
         {
             var interestRate= Convert.ToDouble(savingsAcc.InterestRate);

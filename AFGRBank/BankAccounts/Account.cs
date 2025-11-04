@@ -36,7 +36,8 @@ namespace AFGRBank.BankAccounts
             return accountList;
         }
 
-        //Removes an account from the user account list. Checks if account 
+        //Removes an account from the user account list. Checks if account ID matches the recieved one, then checks the available funds.
+        //If available funds in 0, the account will be closed.
         public List<CheckingsAccount> DeleteAccount(List<CheckingsAccount> accountList, Guid accountId)
         {
             foreach (CheckingsAccount account in accountList) 
@@ -62,7 +63,6 @@ namespace AFGRBank.BankAccounts
         }
 
         //Transfers funds between two accounts.
-        //ADD CURRENCY CHECK AND CONVERSION!!!!!!
         public List<User> TransferFunds(List<User> userList, Guid senderAccID, Guid recipientAccID, decimal funds)
         {
             try
