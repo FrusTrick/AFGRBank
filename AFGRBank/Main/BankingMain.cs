@@ -36,6 +36,29 @@ namespace AFGRBank.Main
         Transaction transaction = new Transaction();
         Loan loan = new Loan();
 
+        public bool GetIsAdmin()
+        {
+            if (login.LoggedInUser.IsAdmin == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public bool GetUserIsLoggedIn()
+        {
+            if (login.LoggedInUser != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         // Test method for populating UserList
         public void PopulateList()
         {
