@@ -120,15 +120,9 @@ namespace AFGRBank.UserType
                     Math.Log((double)(1 + monthlyInterest))
                 );
 
-                Loan newLoan = new Loan
-                {
-                    Currency = currency,
-                    InterestRate = interestRate,
-                    StartDate = startDate,
-                    LoanAmount = loanAmount,
-                    EndDate = startDate.AddMonths(months)
-                };
 
+                Loan newLoan = new Loan();
+                newLoan.CreateLoan(currency, interestRate, startDate, loanAmount, months);
                 user.AddLoan(newLoan);
                 Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
             }
