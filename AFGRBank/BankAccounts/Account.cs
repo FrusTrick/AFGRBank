@@ -75,7 +75,7 @@ namespace AFGRBank.BankAccounts
                 Transaction currentTransaction = new Transaction
                 {
                     SenderID = senderAccID,
-                    RecieverID = recipientAccID,
+                    ReceiverID = recipientAccID,
                     Funds = funds,
                     TransDate = DateTime.Now
                 };
@@ -142,7 +142,7 @@ namespace AFGRBank.BankAccounts
                     Console.WriteLine("________________________________________");
                     Console.WriteLine($"Transaction date: {transaction.TransDate.ToShortTimeString()}");
                     Console.WriteLine($"Transfered funds: {transaction.Funds}{account.Currency}");
-                    Console.WriteLine($"Recipient account: {transaction.RecieverID}");
+                    Console.WriteLine($"Recipient account: {transaction.ReceiverID}");
                     Console.WriteLine("________________________________________");
                 }
             }
