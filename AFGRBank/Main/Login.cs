@@ -10,6 +10,7 @@ namespace AFGRBank.Main
 {
     public class Login
     {
+        // Every user and admin accounts are stored inside the "UserList" property.
         //Initialize the list so it i never null
         public List<User> UserList { get; set; } = new List<User>();
         public User? LoggedInUser { get; set; }
@@ -17,26 +18,37 @@ namespace AFGRBank.Main
         public string Password { get; set; }
         public bool IsAdmin { get; set; }
 
+        // If "LoggedInUser" is null, that means user is not logged in. 
+        // The current signed in user info is stored inside LoggedInUser. Used Login.LoggedInUser.
+        // DO NOT use the Login class to check for current user info.
 
-        //Attemots to log in a user with the provided credentials.
-        //If successful, LoggedInUser is set and IsAdmin is uppdated.
+        public List<User> UserList { get; set; } = new List<User>();
+        public User? LoggedInUser { get; set; }
+
+
         public void LoginUser(string username, string password)
         {
-
+            try
             var user = UserList.FirstOrDefault(u => u.UserName == username && u.Password == password);
             if (user != null)
             {
+                LoggedInUser = UserList.FirstOrDefault(u => u.UserName == username && u.Password == password);
                 LoggedInUser = user;
                 //If User has IsAdmin propertym copy it
                 //assumes User class contains bool IsAdmin
 
                 Console.WriteLine($"\nInloggad som: {user.UserName}");
             }
+            catch (Exception ex)
 
             else
             {
-                Console.WriteLine("\nFel användarnamn eller lösenord.");
+                Console.WriteLine($"Failed outright: {ex.Message}");
+                Console.WriteLine($"Press any key to continue...");
+                Console.ReadKey();
             }
+            return;
+
         }
 
 
@@ -46,12 +58,15 @@ namespace AFGRBank.Main
             
             if(LoggedInUser != null)
             {
-                Console.WriteLine($"\n{LoggedInUser.UserName} har loggats ut.");
+                Console.WriteLine($"{LoggedInUser.UserName} has logged out.");
+                Console.ReadKey();
                 LoggedInUser = null;
                 IsAdmin = false;
             }
             else
             {
+                Console.WriteLine($"No one is logged in.");
+            }
                 Console.WriteLine("\nIngen användare är inloggad.");
             }
 
