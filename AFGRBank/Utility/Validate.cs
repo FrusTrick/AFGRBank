@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace AFGRBank.Utility
+namespace OOPGenericList.Helper
 {
     /// <summary>
     /// Class contains custom-made methods for error handling.
@@ -154,6 +154,7 @@ namespace AFGRBank.Utility
             {
                 Console.WriteLine(msgPrompt);
                 string stringToParse = Console.ReadLine()
+                    .Replace(",", string.Empty)
                     .Trim();
                 if (string.IsNullOrWhiteSpace(stringToParse))
                 {

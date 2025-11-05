@@ -71,8 +71,8 @@ namespace AFGRBank.Utility
         /// </summary>
         /// <typeparam name="T">An array that is going to be displayed as strings</typeparam>
         /// <typeparam name="TEnum">An enum that represents options in menu, where each index is an option</typeparam>
-        /// <param name="questionText">A string displayed above the option buttons</param>
-        /// <param name="menuOptions">The option buttons that is displayed to the user</param>
+        /// <param name="questionText">A string displayed at the top of the menu</param>
+        /// <param name="menuOptions">Options in an array that is displayed to the user</param>
         /// <returns>Returns an Enum with chosen enum index</returns>
         public static TEnum ReadOption<T, TEnum>(string questionText, T[] menuOptions) where TEnum : Enum
         {
@@ -81,8 +81,7 @@ namespace AFGRBank.Utility
             while (true)
             {
                 Console.Clear();
-
-                // Write out question and display options, currently selected index in menuOptions will be highlighted
+                // Write out question and display options, currently selected index gets highlighted
                 Console.WriteLine(questionText + "\n");
                 for (int j = 0; j < menuOptions.Length; j++)
                 {
@@ -117,11 +116,7 @@ namespace AFGRBank.Utility
                         }
                         break;
                     case ConsoleKey.Enter:
-                        // returns the enum value that is indexed at i
-                        // Example:
-                        //      enum MainMenuOptions { Login = 0, Exit = 1 }
-                        //      if (i == 1)
-                        //          return MainMenuOption.Exit
+                        // returns specified enum
                         return (TEnum)Enum.ToObject(typeof(TEnum), i);
 
                 }

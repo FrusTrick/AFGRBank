@@ -1,13 +1,9 @@
 ﻿using AFGRBank.BankAccounts;
 using AFGRBank.Exchange;
 using AFGRBank.Loans;
-using AFGRBank.Utility;
-using AFGRBank.UserType;
-using static AFGRBank.Exchange.CurrencyExchange;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -483,70 +479,12 @@ namespace AFGRBank.Main
 
         public void TransferMenu()
         {
-            string senderID = "None";
-            string receiverID = "None";
-            decimal amount = 0;
 
-            bool isContinue = true;
-            while (isContinue)
-            {
-                string text = $"Transfer funds:" +
-                    $"\nFrom:   {senderID}" +
-                    $"\nTo:     {receiverID}" +
-                    $"\nAmount: {amount}";
-            
-                string[] transferMenuOptions = {
-                    "Choose bank account to send from",
-                    "Choose bank account to send to",
-                    "Choose amount",
-                    "Exit"
-                };
-
-                TransferMenuOptions selectedOption = Menu.ReadOption<string, TransferMenuOptions>(text, transferMenuOptions);
-                switch (selectedOption)
-                {
-                    case TransferMenuOptions.SetSenderID:
-                        senderID = "TestAccount";
-                        break;
-                    case TransferMenuOptions.SetReceiverID:
-                        receiverID = "TestAccount";
-                        break;
-                    case TransferMenuOptions.SetAmount:
-                        amount = 1999.99M;
-                        break;
-                    case TransferMenuOptions.Exit:
-                        return;
-                }
-            }
         }
 
         public void LoanMenu()
         {
-            string text = $"Borrow money from AFGR Bank.";
-            string[] transferMenuOptions = {
-                "Create loan",
-                "Get loan",
-                "Edit loan",
-                "Exit"
-            };
-
-            bool isContinue = true;
-            while (isContinue)
-            {
-                LoanMenuOptions selectedOption = Menu.ReadOption<string, LoanMenuOptions>(text, transferMenuOptions);
-                switch (selectedOption)
-                {
-                    case LoanMenuOptions.CreateLoan:
-                        break;
-                    case LoanMenuOptions.GetLoan:
-                        break;
-                    case LoanMenuOptions.EditLoan:
-                        break;
-                    case LoanMenuOptions.Exit:
-                        return;
-                }
-            }
-        }
+        }   
 
         public void Testing(short loginAttempt)
         {
@@ -608,5 +546,6 @@ namespace AFGRBank.Main
                 }
             }
         }
+
     }
 }
