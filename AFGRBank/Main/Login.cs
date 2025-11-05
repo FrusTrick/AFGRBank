@@ -27,7 +27,7 @@ namespace AFGRBank.Main
             }
             catch (Exception ex)
             {
-                Console.WriteLine("\nFel användarnamn eller lösenord.");
+                Console.WriteLine("\nWrong user or password.");
             }
         }
 
@@ -36,7 +36,7 @@ namespace AFGRBank.Main
         {
             if (LoggedInUser != null)
             {
-                Console.WriteLine($"\n{LoggedInUser.UserName} har loggats ut.");
+                Console.WriteLine($"\n{LoggedInUser.UserName} has been logged out.");
                 LoggedInUser = null;
             }
             else
