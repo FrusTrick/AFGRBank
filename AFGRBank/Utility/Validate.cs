@@ -235,7 +235,7 @@ namespace AFGRBank.Utility
                     Console.WriteLine(msgErrorEmpty);
                     continue;
                 }
-                if (!Enum.TryParse(stringToParse, out CurrencyExchange.CurrencyNames parsedValue))
+                if (!Enum.TryParse(stringToParse, true, out CurrencyExchange.CurrencyNames parsedValue))
                 {
                     Console.WriteLine(msgErrorParse);
                     continue;
@@ -244,7 +244,25 @@ namespace AFGRBank.Utility
             }
         }
 
-
+        public static Guid StringToGuid(string msgPrompt, string msgErrorEmpty, string msgErrorParse)
+        {
+            while (true)
+            {
+                Console.WriteLine(msgPrompt);
+                string? stringToParse = Console.ReadLine().Trim();
+                if (string.IsNullOrWhiteSpace(stringToParse))
+                {
+                    Console.WriteLine(msgErrorEmpty);
+                    continue;
+                }
+                if (!Guid.TryParse(stringToParse, out Guid parsedValue))
+                {
+                    Console.WriteLine(msgErrorParse);
+                    continue;
+                }
+                return parsedValue;
+            }
+        }
 
     }
 }

@@ -11,22 +11,22 @@ namespace AFGRBank.Loans
     public class Loan
     {
         // Egenskaer för lånet
-        public string Currency { get; set; }
+        public CurrencyExchange.CurrencyNames Currency { get; set; }
         public decimal InterestRate  { get; set; }
-        public DateOnly StartDate { get; set; }
-        public DateOnly EndDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public decimal LoanAmount { get; set; }
 
         
        
 
         // Skapar ett lån genom att sätta värden för objektet
-        public void CreateLoan(string currency, decimal interestRate, DateOnly startDate, DateOnly endDate, int amount)
+        public void CreateLoan(CurrencyExchange.CurrencyNames currency, decimal interestRate, decimal amount, int months)
         {
             Currency = currency;
             InterestRate = interestRate;
-            StartDate = startDate;
-            EndDate = endDate;
+            StartDate = DateTime.Now;
+            EndDate = DateTime.Now.AddMonths(months);
             LoanAmount = amount;
             Console.WriteLine("Loan created successfully. ");
         }
@@ -43,14 +43,14 @@ namespace AFGRBank.Loans
         }
 
         // Redigerar ett lån genom att uppdatera objektets värden
-        public void EditLoan(string currency, decimal interestRate, DateOnly startDate, DateOnly endDate, int amount)
+        public void EditLoan(CurrencyExchange.CurrencyNames currency, decimal interestRate, decimal amount, int months)
         {
             Currency = currency;
             InterestRate = interestRate;
-            StartDate = startDate;
-            EndDate = endDate;
+            StartDate = DateTime.Now;
+            EndDate = DateTime.Now.AddMonths(months);
             LoanAmount = amount;
-            Console.WriteLine("Loan edited successfully.");
+            Console.WriteLine("Loan created successfully. ");
         }
 
         // Beräknar maxlån baserat på inkomst och en multiplikator

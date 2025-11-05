@@ -1,26 +1,24 @@
 ﻿// To get the total funds of a user when creating a loan
 using AFGRBank.BankAccounts;
-
 // For accessing the .json file that contains all exchange rates
 using AFGRBank.Exchange;
-
 // To be able to use the Loan class to initialize a loan
 using AFGRBank.Loans;
-
+using AFGRBank.Main;
+using AFGRBank.Utility;
+using System.Net.NetworkInformation;
+using System.Security.Principal;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 // To be able to access the enum list without writing CurrencyExchange.CurrencyNames
 using static AFGRBank.Exchange.CurrencyExchange;
-
-using System.Text.Json;
-
-using System.Text.Json.Serialization;
-
-using AFGRBank.Utility;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AFGRBank.UserType
 {
     public class Admin : User
     {
-        public bool IsAdmin { get; private set; } = true;
+        public bool IsAdmin { get; set; } = true;
 
         // Calls to create a new user
         // Loops through to make sure there are no duplicate UserNames
@@ -98,7 +96,7 @@ namespace AFGRBank.UserType
         }
 
         // Create's a Loan object with given parameters
-        public void CreateLoan(User user, Account account, decimal loanAmount, string currency, decimal interestRate, DateOnly startDate, DateOnly endDate)
+        public void CreateLoan(User user, Account account, decimal loanAmount, CurrencyNames currency, decimal interestRate)
         {
             try
             {
@@ -114,13 +112,21 @@ namespace AFGRBank.UserType
                     return;
                 }
 
+                decimal monthlyPayment = loanAmount * 0.05m;
+                decimal monthlyInterest = interestRate / 12m;
+
+                int months = (int)Math.Ceiling(
+                    Math.Log((double)(monthlyPayment / (monthlyPayment - loanAmount * monthlyInterest))) /
+                    Math.Log((double)(1 + monthlyInterest))
+                );
+
                 Loan newLoan = new Loan
                 {
                     Currency = currency,
                     InterestRate = interestRate,
-                    StartDate = startDate,
-                    EndDate = endDate,
-                    LoanAmount = loanAmount
+                    StartDate = DateTime.Now,
+                    LoanAmount = loanAmount,
+                    EndDate = DateTime.Now.AddMonths(months)
                 };
 
                 user.AddLoan(newLoan);
@@ -129,6 +135,80 @@ namespace AFGRBank.UserType
             catch (Exception ex)
             {
                 Console.WriteLine($"CreateLoan failed to process: {ex.Message}");
+            }
+        }
+
+        // Provides the admin a list of all pending transactions and allows them to view & confirm them
+        public void ViewPendingTransactions()
+        {
+            string promptText = "Choose a transaction to confirm or exit";
+            List<string> menuOptions = new List<string>(); // For saving the menu options
+            List<PendingTransaction> menuTransactions = new List<PendingTransaction>(); // For saving the pending transactions
+
+            // Build the list of pending transactions
+            foreach (var pt in BankingMain.PTransaction.Where(t => !t.Confirmed))
+            {
+                menuOptions.Add(
+                    $"From: {pt.CurrentSender.UserName} -> To: {pt.CurrentReceiver.UserName}," +
+                    $" Amount: {pt.CurrentTransaction.Funds}, Created: {pt.InitializedDate}"
+                );
+                menuTransactions.Add(pt);
+            }
+
+            menuOptions.Add("Exit");
+
+            while (true)
+            {
+                // Promp the ReadOptionIndexList 
+                int selectedIndex = Menu.ReadOptionIndexList(promptText, menuOptions); 
+                var chosenOption = menuOptions[selectedIndex];
+
+                if (chosenOption == "Exit")
+                {
+                    return;
+                }
+                
+                if (selectedIndex < menuTransactions.Count)
+                {
+                    PendingTransaction selectedTransaction = menuTransactions[selectedIndex];
+                    Console.Clear();
+                    Console.WriteLine(
+                        $"You selected transaction: \n" +
+                        $"From: {selectedTransaction.CurrentSender.UserName}" +
+                        $"To: {selectedTransaction.CurrentReceiver.UserName}" +
+                        $"Amount: {selectedTransaction.CurrentTransaction.Funds}" +
+                        $"Created: {selectedTransaction.InitializedDate}"
+                    );
+
+                    Console.WriteLine("\nDo you want to confirm this transaction early? y/n");
+                    string input = Console.ReadLine()?.Trim().ToLower();
+
+                    if (input == "y")
+                    {
+                        selectedTransaction.Confirm();
+                        Console.WriteLine("Transaction has been confirmed.");
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Transaction not confirmed, returning to list...");
+                        continue;
+                    }
+
+                    Console.ReadKey();
+                }
+            }
+            
+        }
+
+        // Confirms a pending transaction through sender and receiver IDs
+        public void ConfirmTransaction(Guid senderID, Guid receiverID)
+        {
+            var pending = BankingMain.PTransaction.FirstOrDefault(t => t.CurrentTransaction.SenderID == senderID && t.CurrentTransaction.ReceiverID == receiverID && !t.Confirmed);
+
+            if (pending != null)
+            {
+                pending.Confirm();
             }
         }
     }

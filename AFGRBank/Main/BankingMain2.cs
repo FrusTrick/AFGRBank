@@ -1,16 +1,18 @@
 ﻿using AFGRBank.BankAccounts;
 using AFGRBank.Exchange;
 using AFGRBank.Loans;
-using AFGRBank.Utility;
 using AFGRBank.UserType;
-using static AFGRBank.Exchange.CurrencyExchange;
+using AFGRBank.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static AFGRBank.Exchange.CurrencyExchange;
 
 namespace AFGRBank.Main
 {
@@ -21,26 +23,31 @@ namespace AFGRBank.Main
         {
             while (true)
             {
-                string test = "Borrow:";
+                string questionText = "Borrow:";
                 string[] borrowMenuOptions = { 
                     $"Create loan request",
-                $"Edit loan request",
-                $"Get loan information"
+                    $"Edit loan request",
+                    $"Get loan information",
+                    $"Exit"
                 };
-                var selectedOptions = Menu.ReadOptionIndex(test, borrowMenuOptions);
+                var selectedOptions = Menu.ReadOptionIndex(questionText, borrowMenuOptions);
                 switch (selectedOptions)
                 {
-                    case 1:
-                        CreateLoan();
+                    case 0:
+                        CreateLoanMenu();
                         break;
+                    case 1:
+                        // EditLoan();
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        return;
                 }
             }
         }
 
-        private void CreateLoan()
-        {
-            login.LoggedInUser.LoanList = loan.CreateLoan();
-        }
+        
 
         private void GetLoanList()
         {
@@ -66,7 +73,7 @@ namespace AFGRBank.Main
             bool isContinue = true;
             while (isContinue)
             {
-                string text = $"User account creation:";
+                string questionText = $"User account creation:";
                 string[] createUserMenuOptions = {
                     $"Edit username              Current: {username}",
                     $"Edit password              Current: {password}",
@@ -79,41 +86,41 @@ namespace AFGRBank.Main
                     $"Exit"
                 };
 
-                CreateUserMenuOptions selectedOption = Menu.ReadOption<string, CreateUserMenuOptions>(text, createUserMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(questionText, createUserMenuOptions);
                 switch (selectedOption)
                 {
-                    case CreateUserMenuOptions.EditUsername:
+                    case 0:
                         Console.Clear();
                         username = Validate.GetInput("Input new username:", "Input cannot be empty. Try again.");
                         break;
-                    case CreateUserMenuOptions.EditPassword:
+                    case 1:
                         Console.Clear();
                         password = Validate.GetInput("Input new password:", "Input cannot be empty. Try again.");
                         break;
-                    case CreateUserMenuOptions.EditName:
+                    case 2:
                         Console.Clear();
                         name = Validate.GetInput("Input new name:", "Input cannot be empty. Try again.");
                         break;
-                    case CreateUserMenuOptions.EditSurname:
+                    case 3:
                         Console.Clear();
                         surname = Validate.GetInput("Input new surname:", "Input cannot be empty. Try again.");
                         break;
-                    case CreateUserMenuOptions.EditEmail:
+                    case 4:
                         Console.Clear();
                         email = Validate.GetInput("Input new email address:", "Input cannot be empty. Try again.");
                         break;
-                    case CreateUserMenuOptions.EditPhoneNumber:
+                    case 5:
                         Console.Clear();
                         phoneNumber = Validate.StringToInt("Input new phone number (numbers only):",
                             "Input cannot be empty. Try again.", "Input was not a number. Try again.",
                             "Input was either too big or too small. Try again."
                             );
                         break;
-                    case CreateUserMenuOptions.EditAddress:
+                    case 6:
                         Console.Clear();
                         address = Validate.GetInput("Input new physical address:", "Input cannot be empty. Try again.");
                         break;
-                    case CreateUserMenuOptions.CreateUser:
+                    case 7:
                         if (username == string.Empty ||
                             password == string.Empty ||
                             name == string.Empty ||
@@ -130,7 +137,7 @@ namespace AFGRBank.Main
                         }
                         login.UserList = admin.CreateUser(username, password, name, surname, email, phoneNumber, address, login.UserList);
                         break;
-                    case CreateUserMenuOptions.Exit:
+                    case 8:
                         return;
                 }
             }
@@ -209,6 +216,125 @@ namespace AFGRBank.Main
                         return;
                 }
             }
+        }
+
+        private void CreateLoanMenu()
+        {
+            // Set the options to handle CurrencyName enum keys
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }, // Converts json string to Enum
+                WriteIndented = true // Essentially reformats the spaces for the json file for machine reading 
+            };
+
+            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+            string jsonString = File.ReadAllText(jsonPath);
+            var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyNames, decimal>>(jsonString, options);
+            
+
+            CurrencyNames currencyName = CurrencyNames.SEK;
+            User? loanTaker = null;
+            Account? loanTakerAccount = null;
+            decimal currencyRate = 0;
+            decimal loanAmount = 0;
+            DateTime? startDate = null;
+
+            // This will be used to display currencyName, currencyRate, loanAmount, startDate, endDate on the button text
+            string[] displayText = { string.Empty, string.Empty, string.Empty, string.Empty, string.Empty };
+            while (true)
+            {
+                string questionText = $"Create new loan request:";
+                string[] createLoanMenuOptions = {
+                    $"User:            {displayText[0]}",
+                    $"Bank Account ID: {displayText[1]}",
+                    $"Currency:        {displayText[2]}",
+                    $"Loan Amount:     {displayText[3]}",
+                    $"Date of Loan:    {displayText[4]}",
+                    $"Create new loan",
+                    $"Exit"
+                };
+
+                var selectedOption = Menu.ReadOptionIndex(questionText, createLoanMenuOptions);
+                switch (selectedOption)
+                {
+                    case 0: // Input username and find a matching User with LINQ. If there's no match to be found, break out of this case early
+                        Console.Clear();
+                        string getUsername = Validate.GetInput( $"Input username", $"Input cannot be empty. Try again." );
+
+                        loanTaker = login.UserList.FirstOrDefault(x => x.UserName == getUsername);
+                        if (loanTaker == null)
+                        {
+                            Console.WriteLine($"Failed to find any user with matching username. Press any key to exit...");
+                            Console.ReadKey();
+                            break;
+                        }
+
+                        displayText[0] = $"User: {loanTaker} Bank Account ID: {loanTaker.ToString()}";
+                        break;
+                    
+                    case 1: // Input and find a matching bank account ID within User using LINQ. If there's no match to be found, break out of this case early
+                        
+                        Console.Clear();
+                        // BankAccountID can only be set after an User has already been set in case 0
+                        if (loanTaker == null)
+                        {
+                            break;
+                        }
+
+                        Guid getBankAccountID = Validate.StringToGuid($"Input selected user's bank account ID.", $"Input cannot be empty. Try again.", $"Input failed to convert to a matching ID. Try again.");
+                        
+                        loanTakerAccount = loanTaker.Accounts.FirstOrDefault(x => x.AccountID == getBankAccountID);
+                        
+                        if (loanTakerAccount == null)
+                        {
+                            Console.WriteLine($"User does not have any bank accounts with that specific ID. Press any key to exit...");
+                            Console.ReadKey();
+                            break;
+                        }
+                        displayText[1] = loanTakerAccount.ToString();
+                        break;
+
+                    case 2: // Gets currency and that currency's exchange rate
+                        Console.Clear();
+                        currencyName = Validate.StringToCurrencyName(
+                            "Select currency (default is SEK):",
+                            $"Input cannot be empty. Try again.",
+                            $"Input did not match any existing currency. Try again."
+                            );
+
+                        currencyRate = currencyRates[currencyName];
+
+                        displayText[2] = $"{currencyName.ToString()} : Current exchange rate {currencyRate.ToString()} x {CurrencyNames.SEK.ToString()}";
+                        break;
+                    case 3: // Sets the amount of money to be lended
+                        Console.Clear();
+                        loanAmount = Validate.StringToDecimal(
+                            $"Input the selected loan amount",
+                            $"Input cannot be empty. Try again.",
+                            $"Input did not match any existing currency. Try again."
+                            );
+                        if (loanAmount <= 0 || loanAmount == null)
+                        {
+                            Console.WriteLine($"Loan can not be below 0. Press any key to continue...");
+                            Console.ReadKey();
+                        }
+                        displayText[3] = loanAmount.ToString();
+                        break;
+                    case 4:
+
+                        if (loanTaker != null && loanTakerAccount != null && currencyName != null && currencyRate >= 0)
+                        {
+                            Console.WriteLine($"One or more fields has no value. Please fill them.");
+                            break;
+                        }
+                        admin.CreateLoan(loanTaker, loanTakerAccount, loanAmount, currencyName, currencyRate);
+                        break;
+                    case 5:
+                        return;
+                }
+            }
+
+
         }
 
         #endregion

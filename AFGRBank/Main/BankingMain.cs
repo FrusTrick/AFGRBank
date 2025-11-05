@@ -35,8 +35,9 @@ namespace AFGRBank.Main
         CheckingsAccount cAccount = new CheckingsAccount();
         SavingsAccount sAccount = new SavingsAccount();
         Transaction transaction = new Transaction();
-        PendingTransaction pendingT = new PendingTransaction();
         Loan loan = new Loan();
+        
+        public static List<PendingTransaction> PTransaction { get; set; } = new();
 
 
 
@@ -57,8 +58,9 @@ namespace AFGRBank.Main
                 {
                     case MainMenuOptions.Login:
                         LoginMenu(loginAttempts);
-                        break;
+                        return;
                     case MainMenuOptions.Exit:
+                        Environment.FailFast("You have quit the program.");
                         return;
                 }
             }
@@ -137,8 +139,6 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                             continue;
                         }
-                        Console.WriteLine($"{login.LoggedInUser.UserName} + {login.LoggedInUser.Password}");
-                        Console.ReadKey();
                         return;
                     case 3:
                         return;
@@ -165,6 +165,7 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case UserMenuOptions.Borrow:
+                        BorrowMenu();
                         break;
                     case UserMenuOptions.SetCurrency:
                         break;
@@ -189,41 +190,33 @@ namespace AFGRBank.Main
             string[] adminMenuOptions = {
                 "Create new user",
                 "Update currency rate",
-                "Borrow money",
-                "Change currency",
-                "View your bank accounts",
-                "View interest rates",
-                "View transactions",
+                "Create new loan",
+                "View pending transactions",
                 "Logout"
             };
 
             bool isContinue = true;
             while (isContinue)
             {
-                AdminMenuOptions selectedOption = Menu.ReadOption<string, AdminMenuOptions>(text, adminMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(text, adminMenuOptions);
                 switch (selectedOption)
                 {
-                    case AdminMenuOptions.CreateUser:
+                    case 0:
                         // Create a new user and add it to Login.UserList
                         CreateUserMenu();
                         break;
-                    case AdminMenuOptions.UpdateCurrencyRate:
+                    case 1:
                         // Update exchange rate for a specified currency.
                         UpdateCurrencyRatesMenu();
-
                         break;
-                    case AdminMenuOptions.Borrow:
-                        BorrowMenu();
+                    case 2:
+                        // Creates loan 
+                        CreateLoanMenu();
                         break;
-                    case AdminMenuOptions.SetCurrency:
+                    case 3:
+                        admin.ViewPendingTransactions();
                         break;
-                    case AdminMenuOptions.ViewAccounts:
-                        break;
-                    case AdminMenuOptions.ViewInterests:
-                        break;
-                    case AdminMenuOptions.ViewTransactions:
-                        break;
-                    case AdminMenuOptions.Logout:
+                    case 4:
                         login.LogoutUser();
                         return;
                 }
@@ -378,7 +371,7 @@ namespace AFGRBank.Main
 
         public bool GetIsAdmin()
         {
-            if (login.LoggedInUser.IsAdmin == true)
+            if (login.LoggedInUser is Admin)
             {
                 return true;
             }
@@ -406,10 +399,29 @@ namespace AFGRBank.Main
             string password = "1";
             string name = "Ax";
             string surname = "Be";
-            string email = "admin@se.se";
-            int phonenumer = 777777;
+            string email = "ree@se.se";
+            int phonenumber = 777777;
             string address = "Address";
-            login.UserList = admin.CreateUser(username, password, name, surname, email, phonenumer, address, login.UserList);
+            login.UserList = admin.CreateUser(username, password, name, surname, email, phonenumber, address, login.UserList);
+
+            User seedUser = login.UserList[0];
+            cAccount.CreateAccount(seedUser.Accounts, CurrencyNames.DKK);             
+
+            admin.UserName = "admin";
+            admin.Password = "1";
+            admin.Name = "Mr.";
+            admin.Surname = "Admin";
+            admin.Email = "ad@min.se";
+            admin.PhoneNumber = 666;
+            admin.Address = "Address";
+            admin.IsAdmin = true;
+            login.UserList.Add(admin);
+            
+            sAccount.CreateAccount(seedUser.Accounts, CurrencyNames.USD);
+
+
+            PendingTransaction pending = new(transaction, login.UserList[0], login.UserList[1]);
+            PTransaction.Add(pending);
         }
 
 

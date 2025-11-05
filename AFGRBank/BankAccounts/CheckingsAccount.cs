@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AFGRBank.Exchange;
 using AFGRBank.Main;
 
 namespace AFGRBank.BankAccounts
@@ -11,7 +12,7 @@ namespace AFGRBank.BankAccounts
     {
         public bool isCheckings { get; set; } = true;
 
-        public override List<Account> CreateAccount(List<Account> accountList, string currency)
+        public override List<Account> CreateAccount(List<Account> accountList, CurrencyExchange.CurrencyNames currency)
         {
             CheckingsAccount newCheckingsAcc = new CheckingsAccount
             {
