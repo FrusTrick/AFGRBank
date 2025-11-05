@@ -18,7 +18,7 @@ namespace AFGRBank.UserType
 {
     public class Admin : User
     {
-        public bool IsAdmin { get; private set; } = true;
+        public bool IsAdmin { get; set; } = true;
 
         // Calls to create a new user
         // Loops through to make sure there are no duplicate UserNames
@@ -96,7 +96,7 @@ namespace AFGRBank.UserType
         }
 
         // Create's a Loan object with given parameters
-        public void CreateLoan(User user, Account account, decimal loanAmount, string currency, decimal interestRate, DateOnly startDate)
+        public void CreateLoan(User user, Account account, decimal loanAmount, CurrencyNames currency, decimal interestRate)
         {
             try
             {
@@ -120,7 +120,6 @@ namespace AFGRBank.UserType
                     Math.Log((double)(1 + monthlyInterest))
                 );
 
-
                 Loan newLoan = new Loan();
                 newLoan.CreateLoan(currency, interestRate, startDate, loanAmount, months);
                 user.AddLoan(newLoan);
@@ -140,7 +139,7 @@ namespace AFGRBank.UserType
             List<PendingTransaction> menuTransactions = new List<PendingTransaction>(); // For saving the pending transactions
 
             // Build the list of pending transactions
-            foreach (var pt in BankingMain.pendingTransactions.Where(t => !t.Confirmed))
+            foreach (var pt in BankingMain.PTransaction.Where(t => !t.Confirmed))
             {
                 menuOptions.Add(
                     $"From: {pt.CurrentSender.UserName} -> To: {pt.CurrentReceiver.UserName}," +
@@ -198,7 +197,7 @@ namespace AFGRBank.UserType
         // Confirms a pending transaction through sender and receiver IDs
         public void ConfirmTransaction(Guid senderID, Guid receiverID)
         {
-            var pending = BankingMain.pendingTransactions.FirstOrDefault(t => t.CurrentTransaction.SenderID == senderID && t.CurrentTransaction.ReceiverID == receiverID && !t.Confirmed);
+            var pending = BankingMain.PTransaction.FirstOrDefault(t => t.CurrentTransaction.SenderID == senderID && t.CurrentTransaction.ReceiverID == receiverID && !t.Confirmed);
 
             if (pending != null)
             {

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using AFGRBank.Exchange;
+using AFGRBank.Main;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AFGRBank.Main;
 
 namespace AFGRBank.BankAccounts
 {
@@ -17,7 +18,7 @@ namespace AFGRBank.BankAccounts
             
         }
 
-        public override List<Account> CreateAccount(List<Account> accountList, string currency)
+        public override List<Account> CreateAccount(List<Account> accountList, CurrencyExchange.CurrencyNames currency)
         {
             SavingsAccount newSavingsAcc = new SavingsAccount
             {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AFGRBank.Exchange;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -222,5 +223,46 @@ namespace AFGRBank.Utility
                 return parsedValue;
             }
         }
+
+        public static CurrencyExchange.CurrencyNames StringToCurrencyName(string msgPrompt, string msgErrorEmpty, string msgErrorParse)
+        {
+            while (true)
+            {
+                Console.WriteLine(msgPrompt);
+                string? stringToParse = Console.ReadLine().Trim();
+                if (string.IsNullOrWhiteSpace(stringToParse))
+                {
+                    Console.WriteLine(msgErrorEmpty);
+                    continue;
+                }
+                if (!Enum.TryParse(stringToParse, true, out CurrencyExchange.CurrencyNames parsedValue))
+                {
+                    Console.WriteLine(msgErrorParse);
+                    continue;
+                }
+                return parsedValue;
+            }
+        }
+
+        public static Guid StringToGuid(string msgPrompt, string msgErrorEmpty, string msgErrorParse)
+        {
+            while (true)
+            {
+                Console.WriteLine(msgPrompt);
+                string? stringToParse = Console.ReadLine().Trim();
+                if (string.IsNullOrWhiteSpace(stringToParse))
+                {
+                    Console.WriteLine(msgErrorEmpty);
+                    continue;
+                }
+                if (!Guid.TryParse(stringToParse, out Guid parsedValue))
+                {
+                    Console.WriteLine(msgErrorParse);
+                    continue;
+                }
+                return parsedValue;
+            }
+        }
+
     }
 }

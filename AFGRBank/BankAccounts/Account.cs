@@ -12,7 +12,7 @@ namespace AFGRBank.BankAccounts
     public class Account
     {
         public Guid AccountID { get; set; } 
-        public string Currency { get; set; }
+        public CurrencyExchange.CurrencyNames Currency { get; set; }
         public decimal Funds { get; set; }
         public List<Transaction> AccTransList { get; set; }
 
@@ -31,7 +31,7 @@ namespace AFGRBank.BankAccounts
 
 
 
-        public virtual List<Account> CreateAccount(List<Account> accountList, string currency)
+        public virtual List<Account> CreateAccount(List<Account> accountList, CurrencyExchange.CurrencyNames currency)
         {
             return accountList;
         }
@@ -65,6 +65,7 @@ namespace AFGRBank.BankAccounts
         //Transfers funds between two accounts.
         public List<User> TransferFunds(List<User> userList, Guid senderAccID, Guid recipientAccID, decimal funds)
         {
+            
             try
             {
                 //Find both sender account and recipient account.
@@ -90,8 +91,13 @@ namespace AFGRBank.BankAccounts
                         //Fetch currencies and convert. Converted currency saved in variable converted rate and
                         //added instead of funds to the recipient account.
                         CurrencyExchange exhange = new CurrencyExchange();
-                        string senderCurrency = sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Currency;
-                        string recipientCurrency = recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Currency;
+                        CurrencyExchange.CurrencyNames toSenderCurrency = sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Currency;
+                        CurrencyExchange.CurrencyNames toRecipientCurrency = recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Currency;
+
+                        // Alex: Converts enums to string
+                        string senderCurrency = toSenderCurrency.ToString();
+                        string recipientCurrency = toRecipientCurrency.ToString();
+                        
                         decimal convertedRate = exhange.CalculateExchangeRate(senderCurrency, recipientCurrency, funds);
 
                         sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Funds -= funds;

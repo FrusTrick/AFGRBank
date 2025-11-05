@@ -1,12 +1,13 @@
-﻿using System;
+﻿using AFGRBank.BankAccounts;
+using AFGRBank.Exchange;
+using AFGRBank.Loans;
+using AFGRBank.Main;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using AFGRBank.Main;
-using AFGRBank.BankAccounts;
-using AFGRBank.Loans;
 
 namespace AFGRBank.UserType
 {
@@ -31,7 +32,7 @@ namespace AFGRBank.UserType
         }
 
         // Set the currency of an account (can't be done yet, need to have the conversion rates)
-        public void SetCurrency(Account account, string currency)
+        public void SetCurrency(Account account, CurrencyExchange.CurrencyNames currency)
         {
             account.Currency = currency;
         }
@@ -48,7 +49,7 @@ namespace AFGRBank.UserType
             try
             {
                 decimal funds = account.Funds;
-                string currency = account.Currency;
+                CurrencyExchange.CurrencyNames currency = account.Currency;
                 interestRate = (funds * interestRate);
             }
             catch
