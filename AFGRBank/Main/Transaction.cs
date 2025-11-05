@@ -20,4 +20,9 @@ namespace AFGRBank.Main
         }
 
     }
+
+    public class PendingTransaction 
+    {
+        
+    }
 }

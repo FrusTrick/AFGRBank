@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AFGRBank.Main;
 
-
 namespace AFGRBank.BankAccounts
 {
     public class SavingsAccount : Account
