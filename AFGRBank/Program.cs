@@ -9,9 +9,9 @@ namespace AFGRBank
         static void Main(string[] args)
         {
             // loginAttempts is used for checking how many tries user has to login before being automatically locked out 
+            // BankingMain menus will be used to call every menu which can access the other classes
+            // PopulateList() data seeds a list with users so we can log in as one of those users
             short loginAttempts = 3;
-            
-            // BankingMain menus will be used to call every menu which can access the other classes.
             BankingMain menus = new BankingMain();
             
             menus.PopulateList();
@@ -20,11 +20,11 @@ namespace AFGRBank
 
             while (true)
             {
-                bool isLoggedIn = menus.GetUserIsLoggedIn();
+                bool isLoggedIn = menus.GetLoggedInUser();
                 while (isLoggedIn == false)
                 {
                     menus.MainMenu(loginAttempts);
-                    isLoggedIn = menus.GetUserIsLoggedIn();
+                    isLoggedIn = menus.GetLoggedInUser();
                 } 
                 while (isLoggedIn == true)
                 {
@@ -37,7 +37,7 @@ namespace AFGRBank
                     {
                         menus.UserMenu();
                     }
-                    isLoggedIn = menus.GetUserIsLoggedIn();
+                    isLoggedIn = menus.GetLoggedInUser();
                 }
             }
 
