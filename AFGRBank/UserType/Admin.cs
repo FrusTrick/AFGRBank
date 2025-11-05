@@ -24,7 +24,7 @@ namespace AFGRBank.UserType
 
         // Calls to create a new user
         // Loops through to make sure there are no duplicate UserNames
-        // If there aren't, returns a new userlist with the created user
+        // If there aren't, returns a new userlist with the created user ...
         public List<User> CreateUser(string username, string password, string name, string surName, string email, int phoneNumber, string address, List<User> userList)
         {
             try
