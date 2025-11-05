@@ -23,27 +23,32 @@ namespace AFGRBank.Main
             {
 
                 LoggedInUser = UserList.FirstOrDefault(u => u.UserName == username && u.Password == password);
-
-            }
+            var user = UserList.FirstOrDefault(u => u.UserName == username && u.Password == password);
+            if (user != null)
+            {
+                LoggedInUser = user;
+                Console.WriteLine($"\nInloggad som: {user.UserName}");
+                Console.WriteLine($"\nInloggad som: {user.UserName}");
             catch (Exception ex)
-            {
+            else
                 Console.WriteLine("\nWrong user or password.");
-            }
-        }
+                Console.WriteLine("\nFel användarnamn eller lösenord.");
 
+        }
         //Logs out the current user if any is loggd in.
+
         public void LogoutUser()
-        {
             if (LoggedInUser != null)
-            {
+            if(LoggedInUser != null)
                 Console.WriteLine($"\n{LoggedInUser.UserName} has been logged out.");
-                LoggedInUser = null;
+                Console.WriteLine($"\n{LoggedInUser.UserName} har loggats ut.");
+                IsAdmin = false;
             }
             else
-            {
                 Console.WriteLine($"No one is logged in.");
             }
 
+            }
         }
     }
 }

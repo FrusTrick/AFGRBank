@@ -27,7 +27,7 @@ namespace AFGRBank.UserType
         public List<Loan> LoanList { get; set; } = new List<Loan>();
 
         public User()
-        {
+        {   
         }
 
         // Set the currency of an account (can't be done yet, need to have the conversion rates)
