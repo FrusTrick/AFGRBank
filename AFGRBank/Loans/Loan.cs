@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AFGRBank.Exchange;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -59,5 +60,33 @@ namespace AFGRBank.Loans
             Console.WriteLine($"Maximum loan calculated: {LoanAmount}");
         }
 
+        //  // Change this... 
+        //  public string Currency { get; set; } 
+        //
+        //  // To this...
+        //  public CurrencyExchange.CurrencyNames Currency { get; set; } 
+        //
+        //  public List<Loan> CreateLoan(CurrencyExchange.CurrencyNames currency, decimal interestRate, DateOnly startDate, DateOnly endDate, decimal loanAmount, List<Loan> loanList)
+        //  {
+        //      try
+        //      {
+        //          Loan newLoan = new Loan
+        //          {
+        //              Curreny = currency;
+        //              InterestRate = interestRate;
+        //              StartDate = startDate;
+        //              EndDate = endDate;
+        //              LoanAmount = amount
+        //          }
+        //
+        //          userList.Add(newUser);
+        //          Console.WriteLine($"Loan successfully created.");
+        //      }
+        //      catch (Exception ex)
+        //      {
+        //          Console.WriteLine($"Loan failed to process: {ex.Message}");
+        //      }
+        //      return loanList;
+        //  }
     }
 }

@@ -16,6 +16,40 @@ namespace AFGRBank.Main
 {
     public partial class BankingMain
     {
+        #region "UserMenu() methods"
+        private void BorrowMenu()
+        {
+            while (true)
+            {
+                string test = "Borrow:";
+                string[] borrowMenuOptions = { 
+                    $"Create loan request",
+                $"Edit loan request",
+                $"Get loan information"
+                };
+                var selectedOptions = Menu.ReadOptionIndex(test, borrowMenuOptions);
+                switch (selectedOptions)
+                {
+                    case 1:
+                        CreateLoan();
+                        break;
+                }
+            }
+        }
+
+        private void CreateLoan()
+        {
+            login.LoggedInUser.LoanList = loan.CreateLoan();
+        }
+
+        private void GetLoanList()
+        {
+            
+            List<Loan> loanList = login.LoggedInUser.LoanList;
+        }
+        #endregion
+
+
 
         #region "AdminMenu() methods"
         private void CreateUserMenu()

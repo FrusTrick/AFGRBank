@@ -25,6 +25,7 @@ namespace AFGRBank.Main
         // "cAccount" is the blueprint for a checkings bank account.
         // "sAccount" is the blueprint for a checkings bank account.
         // "transaction" is used create a new transaction between users, and save it to their history
+        // "pendingT" is used for async every 15 minutes.
         // "loan" is used to create a new bank loan, and save it to user history
 
         User user = new User();
@@ -34,6 +35,7 @@ namespace AFGRBank.Main
         CheckingsAccount cAccount = new CheckingsAccount();
         SavingsAccount sAccount = new SavingsAccount();
         Transaction transaction = new Transaction();
+        PendingTransaction pendingT = new PendingTransaction();
         Loan loan = new Loan();
 
 
@@ -167,6 +169,7 @@ namespace AFGRBank.Main
                     case UserMenuOptions.SetCurrency:
                         break;
                     case UserMenuOptions.ViewAccounts:
+                        AccountMenu();
                         break;
                     case UserMenuOptions.ViewInterests:
                         break;
@@ -210,6 +213,7 @@ namespace AFGRBank.Main
 
                         break;
                     case AdminMenuOptions.Borrow:
+                        BorrowMenu();
                         break;
                     case AdminMenuOptions.SetCurrency:
                         break;
