@@ -139,7 +139,7 @@ namespace AFGRBank.UserType
         }
 
         // Provides the admin a list of all pending transactions and allows them to view & confirm them
-        public void ViewPendingTransaction()
+        public void ViewPendingTransactions()
         {
             string promptText = "Choose a transaction to confirm or exit";
             List<string> menuOptions = new List<string>(); // For saving the menu options
