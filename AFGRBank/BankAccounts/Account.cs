@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AFGRBank.Exchange;
 using AFGRBank.Main;
+using AFGRBank.UserType;
 
 namespace AFGRBank.BankAccounts
 {
@@ -29,13 +31,13 @@ namespace AFGRBank.BankAccounts
 
 
 
-        public void CreateAccount(Account account, string currency)
+        public virtual List<Account> CreateAccount(List<Account> accountList, string currency)
         {
-            account.AccountID = Guid.NewGuid();
-            account.Currency = currency;
+            return accountList;
         }
 
-        //Removes an account from the user account list. Checks if account 
+        //Removes an account from the user account list. Checks if account ID matches the recieved one, then checks the available funds.
+        //If available funds in 0, the account will be closed.
         public List<CheckingsAccount> DeleteAccount(List<CheckingsAccount> accountList, Guid accountId)
         {
             foreach (CheckingsAccount account in accountList) 
@@ -61,44 +63,72 @@ namespace AFGRBank.BankAccounts
         }
 
         //Transfers funds between two accounts.
-        //ADD CURRENCY CHECK AND CONVERSION!!!!!!
-        public List<Account> TransferFunds(List<Account> accountList, Guid senderAccID, Guid recipientAccID, decimal funds)
+        public List<User> TransferFunds(List<User> userList, Guid senderAccID, Guid recipientAccID, decimal funds)
         {
-            //Fetches both accounts from account list.
-            Account sender = accountList.FirstOrDefault(x => x.AccountID == senderAccID);
-            Account reciever = new Account();
-
             try
             {
-                reciever = accountList.FirstOrDefault(x => x.AccountID == recipientAccID);
-            }
-            catch{Console.WriteLine($"Could not find a recipient acount with account number: {recipientAccID}");}
+                //Find both sender account and recipient account.
+                var sender = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderAccID));
+                var recipient = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderAccID));
 
-            //Checks that both accounts have been found and that sender has balance to cover trasnfer.
-            //Transfers and confirms if possible. 
-            if (sender != null && reciever != null && sender.Funds > funds) 
-            {
-                accountList.Where(x => x.AccountID == senderAccID);
+                //Create new transaction instance to save to accounts later.
+                Transaction currentTransaction = new Transaction
                 {
-                    //ADD CURRENCY CHECK AND CONVERSION HERE
-                    Funds = Funds - funds;
-                }
-                accountList.Where(x => x.AccountID == recipientAccID);
-                {
-                    //ADD CURRENCY CHECK AND CONVERSION HERE
-                    Funds = Funds + funds;
-                }
-                Console.WriteLine($"You have transfered {funds} to {recipientAccID}");
+                    SenderID = senderAccID,
+                    RecieverID = recipientAccID,
+                    Funds = funds,
+                    TransDate = DateTime.Now
+                };
 
-                //Returns updated values.
-                return accountList;
+                try
+                {
+                    //If account retriaval isn't null and the funds sent do not exceed account balance
+                    //the funds will be deducted from the sender, converted and aded to the reciever. 
+                    //transaction will be saved to each accounts transaction history.
+                    if (sender != null && recipient != null && sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Funds > funds)
+                    {
+                        //Fetch currencies and convert. Converted currency saved in variable converted rate and
+                        //added instead of funds to the recipient account.
+                        CurrencyExchange exhange = new CurrencyExchange();
+                        string senderCurrency = sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Currency;
+                        string recipientCurrency = recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Currency;
+                        decimal convertedRate = exhange.CalculateExchangeRate(senderCurrency, recipientCurrency, funds);
+
+                        sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Funds -= funds;
+                        sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).AccTransList.Add(currentTransaction);
+
+                        //currentTransaction updated with recipient currency value to reflect the recieved funds correctly in accordance with the recipient currency.
+                        currentTransaction.Funds = convertedRate;
+                        recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Funds += convertedRate;
+                        recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).AccTransList.Add(currentTransaction);
+
+                        //Replaces values of acounts in the userlist with updated values, using index to identify
+                        //their locations and overwriting the old data with the updated sender and recipient data.
+                        var indexSender = userList.IndexOf(sender);
+                        var indexRecipient = userList.IndexOf(recipient);
+                        if (indexSender > -1 && indexRecipient > -1)
+                        {
+                            userList[indexSender] = sender;
+                            userList[indexRecipient] = recipient;
+                        }
+
+                        return userList;
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Transaction failed");
+                    return userList;
+                }
+
             }
-            else
+            catch
             {
-                //Returns unchanged values.
-                return accountList;
+                Console.WriteLine($"Could not find the account with account number:{recipientAccID}");
+                return userList;
             }
-            
+
+            return userList;
         }
 
         //Method shows all transactions related to the specific account.

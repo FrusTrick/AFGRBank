@@ -12,6 +12,7 @@ namespace AFGRBank.UserType
 {
     public class User
     {
+        // UserName and Password is used to login
         public string UserName { get; set; }
         public string Password { get; set; }
         public string Name { get; set; }
@@ -19,6 +20,7 @@ namespace AFGRBank.UserType
         public string Email { get; set; }
         public string Address { get; set; }
         public int PhoneNumber { get; set; }
+        public bool IsAdmin { get; private set; } = false;
         private decimal TotalFunds { get; set; } = 0;
         public List<Account> Accounts { get; set; } = new List<Account>();
         public List<Transaction> TransactionList { get; set; } = new List<Transaction>();
