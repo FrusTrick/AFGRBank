@@ -33,6 +33,7 @@ namespace AFGRBank.Main
 
         }
 
+        //Logs out the current user if any is loggd in.
         public void LogoutUser()
         {
             if (LoggedInUser != null)
