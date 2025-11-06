@@ -11,6 +11,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Diagnostics;
 
 namespace AFGRBank.Main
 {
@@ -42,7 +43,7 @@ namespace AFGRBank.Main
 
 
         // The first screen, contains the options to login or exit program.
-        // "loginAttempts"
+        // "loginAttempts" is used to
         public void MainMenu(short loginAttempts)
         {
             string asciiArt =
@@ -60,13 +61,14 @@ namespace AFGRBank.Main
                         LoginMenu(loginAttempts);
                         return;
                     case MainMenuOptions.Exit:
-                        Environment.FailFast("You have quit the program.");
+                        Process.GetCurrentProcess().Kill();
                         return;
                 }
             }
         }
 
         // Login screen, here user can input their username and password, as well as try to sign in or exit back to MainMenu()
+        // User has a certain amount of tries to login as defined by the "loginAttempts" parameter
         public void LoginMenu(short loginAttempts)
         {
             string username = string.Empty;
@@ -106,7 +108,7 @@ namespace AFGRBank.Main
                             {
                                 Console.WriteLine($"Failed to login.");
                                 Console.ReadKey();
-                                Environment.FailFast("Shit!");
+                                Process.GetCurrentProcess().Kill();
                             }
                             if (username == string.Empty)
                             {
@@ -131,7 +133,7 @@ namespace AFGRBank.Main
                             {
                                 Console.WriteLine($"Failed to login.");
                                 Console.ReadKey();
-                                Environment.FailFast("Shit!");
+                                Process.GetCurrentProcess().Kill();
                             }
                             // If no matching user could be found, this error message will be displayed, and then resets this loop
                             Console.WriteLine("Failed to login. Username or password was wrong.");
