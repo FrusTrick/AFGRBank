@@ -1,17 +1,19 @@
 ﻿using AFGRBank.BankAccounts;
 using AFGRBank.Exchange;
 using AFGRBank.Loans;
-using AFGRBank.Utility;
 using AFGRBank.UserType;
-using static AFGRBank.Exchange.CurrencyExchange;
+using AFGRBank.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Diagnostics;
+using static AFGRBank.Exchange.CurrencyExchange;
 
 namespace AFGRBank.Main
 {
@@ -36,10 +38,22 @@ namespace AFGRBank.Main
         CheckingsAccount cAccount = new CheckingsAccount();
         SavingsAccount sAccount = new SavingsAccount();
         Transaction transaction = new Transaction();
+        PendingTransaction pTransaction = new PendingTransaction();
         Loan loan = new Loan();
+
         
         public static List<PendingTransaction> PTransaction { get; set; } = new();
 
+        public static List<Transaction> pendingTransaction { get; set; } = new();
+
+
+        /*
+        GEORGE PLACE YOUR BULLSHIT HERE
+
+
+
+
+        */
 
 
         // The first screen, contains the options to login or exit program.
@@ -159,25 +173,24 @@ namespace AFGRBank.Main
                 "Logout" 
             };
             
-            bool isContinue = true;
-            while (isContinue)
+            while (true)
             {
-                UserMenuOptions selectedOption = Menu.ReadOption<string, UserMenuOptions>(text, userMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(text, userMenuOptions);
                 switch (selectedOption)
                 {
-                    case UserMenuOptions.Borrow:
+                    case 0:
                         BorrowMenu();
                         break;
-                    case UserMenuOptions.SetCurrency:
+                    case 1:
                         break;
-                    case UserMenuOptions.ViewAccounts:
-                        ViewAccountMenu();
+                    case 2:
+                        ListAccountsMenu(login.LoggedInUser.Accounts);
                         break;
-                    case UserMenuOptions.ViewInterests:
+                    case 3:
                         break;
-                    case UserMenuOptions.ViewTransactions:
+                    case 4:
                         break;
-                    case UserMenuOptions.Logout:
+                    case 5:
                         login.LogoutUser();
                         return;
                 }
@@ -207,14 +220,16 @@ namespace AFGRBank.Main
                         CreateUserMenu();
                         break;
                     case 1:
-                        // Update exchange rate for a specified currency.
+                        // Update exchange rate for a specified CurrencyNames currency.
                         UpdateCurrencyRatesMenu();
                         break;
                     case 2:
-                        // Creates loan 
+                        // Creates loan for a specified User
                         CreateLoanMenu();
                         break;
                     case 3:
+                        // View all transactions that is waiting to be confirmed by a 15 minute timer
+                        // Includes an option for admin to confirm transactions early
                         admin.ViewPendingTransactions();
                         break;
                     case 4:
@@ -353,6 +368,34 @@ namespace AFGRBank.Main
                 return false;
             }
         }
+
+
+        /// <summary>
+        /// Gets the content of CurrencyRates.JSON to a string
+        /// </summary>
+        public static string GetJSONCurrencyRatesToString()
+        {
+            // Set the options to handle CurrencyName enum keys
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }, // Converts json string to Enum
+                WriteIndented = true // Essentially reformats the spaces for the json file for machine reading 
+            };
+
+            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
+            string jsonString = File.ReadAllText(jsonPath);
+            var currencyAndRates = JsonSerializer.Deserialize<Dictionary<CurrencyNames, decimal>>(jsonString, options);
+
+            string toString = string.Empty;
+
+            foreach (KeyValuePair<CurrencyNames, decimal> item in currencyAndRates)
+            {
+                toString += $"\t{item}\n";
+            }
+            return toString.Replace("[", "").Replace("]", " x SEK").Replace(",", ":");
+        }
+
+
 
         // Test method for populating UserList
         public void PopulateList()

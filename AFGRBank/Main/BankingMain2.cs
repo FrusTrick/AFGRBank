@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Xml.Linq;
 using static AFGRBank.Exchange.CurrencyExchange;
 
@@ -58,122 +59,6 @@ namespace AFGRBank.Main
             List<Loan> loanList = login.LoggedInUser.LoanList;
         }
 
-
-
-        private void ViewAccountMenu()
-        {
-            // promptText will be displayed above menu buttons
-            // menuOptions are the menu buttons the user can navigate through
-            string promptText = "Your bank accounts" +
-                "\nSelect a account to view info:";
-            List<string> menuOptions = new List<string>();
-            List<Account> menuAccounts = new List<Account>();
-
-            // Build the list of all user accounts
-            foreach (var account in login.LoggedInUser.Accounts)
-            {
-                if (account is CheckingsAccount)
-                {
-                    menuOptions.Add(
-                        $"Bank ID:      {account.AccountID}\n" + 
-                        $"Type:         Savings account\n" +
-                        $"Total funds:  {account.Currency} {account.Funds}\n"
-                    );
-                }
-                if (account is SavingsAccount)
-                {
-                    menuOptions.Add(
-                        $"Bank ID:      {account.AccountID}\n" +
-                        $"Type:         Savings account\n" +
-                        $"Total funds:  {account.Currency} {account.Funds}\n"
-                    );
-                }
-                menuAccounts.Add(account);
-            }
-            // Adds the exit button last
-            menuOptions.Add("Exit");
-
-            while (true)
-            {
-                // Promp the ReadOptionIndexList 
-                int selectedIndex = Menu.ReadOptionIndexList(promptText, menuOptions);
-                var chosenOption = menuOptions[selectedIndex];
-
-                if (chosenOption == "Exit")
-                {
-                    return;
-                }
-
-                if (selectedIndex < menuAccounts.Count)
-                {
-                    Console.Clear();
-                    
-                    Account selectedAccount = menuAccounts[selectedIndex];
-                    if (selectedAccount is CheckingsAccount)
-                    {
-                        ViewSelectedAccountMenu(selectedAccount,
-                            $"Account ID:   {selectedAccount.AccountID}\n" +
-                            $"Account Type: Checkings account\n" +
-                            $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}\n"
-                        );
-                    }
-                    if (selectedAccount is SavingsAccount)
-                    {
-                        ViewSelectedAccountMenu(selectedAccount,
-                            $"Account ID:   {selectedAccount.AccountID}\n" +
-                            $"Account Type: Savings account\n" +
-                            $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}\n"
-                        );
-                    }
-
-                    Console.ReadKey();
-                }
-            }
-        }
-
-        // Used by ViewAccountMenu() to
-        private void ViewSelectedAccountMenu(Account selectedAccount, string promptText)
-        {
-            string[] ViewSelectedAccountMenuOptions = {
-                $"Edit currency",
-                $"View all transactions",
-                $"Exit"
-            };
-
-            while (true)
-            {
-                var selectedOption = Menu.ReadOptionIndex(promptText, ViewSelectedAccountMenuOptions);
-                
-                switch (selectedOption)
-                {
-                    case 0:
-
-                        break;
-
-                    case 1:
-                        // Prints out transaction history of selected bank account
-                        
-                        Console.Clear();
-
-                        if (selectedAccount is CheckingsAccount)
-                        {
-                            cAccount.ViewAccountInfo(selectedAccount);
-                        }
-                        if (selectedAccount is SavingsAccount)
-                        {
-                            sAccount.ViewAccountInfo(selectedAccount);
-                        }
-                        Console.WriteLine($"Press any key to continue...");
-                        Console.ReadKey();
-                        break;
-
-                    case 2:
-
-                        return;
-                }
-            }
-        }
-        
 
         #endregion
 
@@ -349,11 +234,9 @@ namespace AFGRBank.Main
                 Converters = { new JsonStringEnumConverter() }, // Converts json string to Enum
                 WriteIndented = true // Essentially reformats the spaces for the json file for machine reading 
             };
-
             string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
             string jsonString = File.ReadAllText(jsonPath);
-            var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyNames, decimal>>(jsonString, options);
-            
+            var currencyAndRates = JsonSerializer.Deserialize<Dictionary<CurrencyNames, decimal>>(jsonString, options);
 
             CurrencyNames currencyName = CurrencyNames.SEK;
             User? loanTaker = null;
@@ -368,11 +251,11 @@ namespace AFGRBank.Main
             {
                 string questionText = $"Create new loan request:";
                 string[] createLoanMenuOptions = {
-                    $"User:            {displayText[0]}",
-                    $"Bank Account ID: {displayText[1]}",
-                    $"Currency:        {displayText[2]}",
-                    $"Loan Amount:     {displayText[3]}",
-                    $"Date of Loan:    {displayText[4]}",
+                    $"Username:            {displayText[0]}",
+                    $"Bank Account ID:     {displayText[1]}",
+                    $"Currency:            {displayText[2]}",
+                    $"Loan Amount:         {displayText[3]}",
+                    $"Date of Loan:        {displayText[4]}",
                     $"Create new loan",
                     $"Exit"
                 };
@@ -392,43 +275,56 @@ namespace AFGRBank.Main
                             break;
                         }
 
-                        displayText[0] = $"User: {loanTaker} Bank Account ID: {loanTaker.ToString()}";
+                        displayText[0] = $"{loanTaker.UserName} [Name: {loanTaker.Name} Surname: {loanTaker.Surname}]";
                         break;
                     
-                    case 1: // Input and find a matching bank account ID within User using LINQ. If there's no match to be found, break out of this case early
-                        
+                    case 1: 
                         Console.Clear();
-                        // BankAccountID can only be set after an User has already been set in case 0
+                        
+                        // Input and find a matching bank account ID within User using LINQ. If there's no match to be found, break out of this case early
+                        // BankAccountID can only be inputed if User has been set in case 0 code block
                         if (loanTaker == null)
                         {
-                            break;
+                            Console.WriteLine($"User is empty. Please fill it and try again. Press any ket to continue...");
+                            Console.ReadKey();
+                            continue;
                         }
 
-                        Guid getBankAccountID = Validate.StringToGuid($"Input selected user's bank account ID.", $"Input cannot be empty. Try again.", $"Input failed to convert to a matching ID. Try again.");
+                        Guid getBankAccountID = Validate.StringToGuid(
+                            $"Input selected user's bank account ID. {Login.UserList[0].Accounts[0].AccountID}", 
+                            $"Input cannot be empty. Try again.", 
+                            $"Input failed to convert to a matching ID. Try again.");
                         
                         loanTakerAccount = loanTaker.Accounts.FirstOrDefault(x => x.AccountID == getBankAccountID);
                         
                         if (loanTakerAccount == null)
                         {
-                            Console.WriteLine($"User does not have any bank accounts with that specific ID. Press any key to exit...");
+                            Console.Clear();
+                            Console.WriteLine($"User does not have any bank accounts with that specific ID. Press any key to continue...");
                             Console.ReadKey();
-                            break;
+                            continue;
                         }
-                        displayText[1] = loanTakerAccount.ToString();
+                        displayText[1] = loanTakerAccount.AccountID.ToString();
                         break;
 
                     case 2: // Gets currency and that currency's exchange rate
+
+                        // Method used to display available currencies to be selected
+                        string displayCurrencyRates = GetJSONCurrencyRatesToString();
+
                         Console.Clear();
                         currencyName = Validate.StringToCurrencyName(
-                            "Select currency (default is SEK):",
+                            $"Select currency (default is SEK):" +
+                            $"\n{displayCurrencyRates}",
                             $"Input cannot be empty. Try again.",
                             $"Input did not match any existing currency. Try again."
                             );
 
-                        currencyRate = currencyRates[currencyName];
+                        currencyRate = currencyAndRates[currencyName];
 
                         displayText[2] = $"{currencyName.ToString()} : Current exchange rate {currencyRate.ToString()} x {CurrencyNames.SEK.ToString()}";
                         break;
+
                     case 3: // Sets the amount of money to be lended
                         Console.Clear();
                         loanAmount = Validate.StringToDecimal(
@@ -467,6 +363,151 @@ namespace AFGRBank.Main
 
 
         #region "AccountMenu() and SavingsAccountMenu() methods"
+
+
+        private void ListAccountsMenu(List<Account> accountList)
+        {
+            // promptText will be displayed above menu buttons
+            // menuOptions are the menu buttons the user can navigate through
+            string promptText = "Your bank accounts" +
+                "\nSelect a account to view info:";
+            List<string> menuOptions = new List<string>();
+            List<Account> menuAccounts = new List<Account>();
+
+            // Build the list of all user accounts
+            foreach (var account in accountList)
+            {
+                // Depending on the bank account type, it will print "Checkings" or "Savings"
+                if (account is CheckingsAccount)
+                {
+                    menuOptions.Add(
+                        $"Bank ID:      {account.AccountID}\n" +
+                        $"Type:         Savings account\n" +
+                        $"Total funds:  {account.Currency} {account.Funds}\n"
+                    );
+                }
+                if (account is SavingsAccount)
+                {
+                    menuOptions.Add(
+                        $"Bank ID:      {account.AccountID}\n" +
+                        $"Type:         Savings account\n" +
+                        $"Total funds:  {account.Currency} {account.Funds}\n"
+                    );
+                }
+                menuAccounts.Add(account);
+            }
+            // Adds the exit button last
+            menuOptions.Add("Exit");
+
+            while (true)
+            {
+                // Promp the ReadOptionIndexList 
+                int selectedIndex = Menu.ReadOptionIndexList(promptText, menuOptions);
+                var chosenOption = menuOptions[selectedIndex];
+
+                if (chosenOption == "Exit")
+                {
+                    return;
+                }
+
+                if (selectedIndex < menuAccounts.Count)
+                {
+                    Console.Clear();
+
+                    Account selectedAccount = menuAccounts[selectedIndex];
+                    if (selectedAccount is CheckingsAccount)
+                    {
+                        ViewSelectedAccountMenu(selectedAccount,
+                            $"Account ID:   {selectedAccount.AccountID}\n" +
+                            $"Account Type: Checkings account\n" +
+                            $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}\n"
+                        );
+                    }
+                    if (selectedAccount is SavingsAccount)
+                    {
+                        ViewSelectedAccountMenu(selectedAccount,
+                            $"Account ID:   {selectedAccount.AccountID}\n" +
+                            $"Account Type: Savings account\n" +
+                            $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}\n"
+                        );
+                    }
+
+                    Console.ReadKey();
+                }
+            }
+        }
+
+
+
+        // Used by ViewAccountMenu() to print out info about the selected bank account 
+        private void ViewSelectedAccountMenu(Account selectedAccount, string promptText)
+        {
+            string[] ViewSelectedAccountMenuOptions = {
+                $"Edit currency",
+                $"View all transactions",
+                $"Delete account",
+                $"Exit"
+            };
+
+            while (true)
+            {
+                var selectedOption = Menu.ReadOptionIndex(promptText, ViewSelectedAccountMenuOptions);
+
+                switch (selectedOption)
+                {
+                    case 0:
+                        // User inputs the new currency to overwrite the old 
+                        Console.Clear();
+                        
+                        string displayCurrencyRates = GetJSONCurrencyRatesToString();
+                        
+                        CurrencyNames newCurrency = Validate.StringToCurrencyName(
+                            $"Input the new currency:" +
+                            $"\n{displayCurrencyRates}",
+                            $"Input cannot be empty. Try again.",
+                            $"Input did not match any existing currency. Try again."
+                        );
+                        user.SetCurrency(selectedAccount, newCurrency);
+                        break;
+
+                    case 1:
+                        // Prints out transaction history of selected bank account
+                        Console.Clear();
+
+                        if (selectedAccount is CheckingsAccount)
+                        {
+                            cAccount.ViewAccountInfo(selectedAccount);
+                        }
+                        if (selectedAccount is SavingsAccount)
+                        {
+                            sAccount.ViewAccountInfo(selectedAccount);
+                        }
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
+                        break;
+                    
+                    case 2:
+                        Console.Clear();
+                        if (selectedAccount is CheckingsAccount)
+                        {
+                            cAccount.DeleteAccount(login.LoggedInUser.Accounts, selectedAccount.AccountID);
+                        }
+                        if (selectedAccount is SavingsAccount)
+                        {
+                            sAccount.DeleteAccount(login.LoggedInUser.Accounts, selectedAccount.AccountID);
+                        }
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
+                        return;
+
+                    case 3:
+
+                        return;
+                }
+            }
+        }
+
+
 
         private void CreateNewAccountMenu()
         {
@@ -558,6 +599,17 @@ namespace AFGRBank.Main
             }
         }
 
+        /// <summary>
+        /// Sets the bank account type during CreateNewAccountMenu()
+        /// </summary>
+        /// <param name="questionText">Text displayed above the buttons</param>
+        /// <param name="createNewAccountMenuOptions">The buttons tha</param>
+        /// <returns>
+        ///     <list type="bullet">
+        ///         <item>Returns "Checkings" if user wants the bank account type to be a checkings account</item>
+        ///         <item>returns "Savings" if user wants the bank account type to be a savings account</item>
+        ///     </list>
+        /// </returns>
         private string? SetBankAccountType(string questionText, string[] createNewAccountMenuOptions)
         {
             while (true)
@@ -578,6 +630,9 @@ namespace AFGRBank.Main
                 }
             }
         }
+
+
+
 
 
         private void TransferMenu()
@@ -699,7 +754,11 @@ namespace AFGRBank.Main
                             continue;
                         }
 
-                        //login.UserList = account.TransferFunds(login.UserList, senderID, recipientID, transferFunds);
+                        var temp = pTransaction.PrepFundsTransfer(Login.UserList, senderID, recipientID, transferFunds);
+                        foreach (var transaction in temp)
+                        {
+                            pendingTransaction.Add(transaction);
+                        }
                         break;
 
                     case 4:
