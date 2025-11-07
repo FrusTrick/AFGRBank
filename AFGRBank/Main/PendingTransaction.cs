@@ -13,6 +13,11 @@ namespace AFGRBank.Main
         public List<Transaction> CurrentTransaction { get; set; }
         public bool Confirmed { get; set; } = false;
 
+        public PendingTransaction()
+        {
+
+        }
+
         public PendingTransaction(List<Transaction> transaction)
         {
             CurrentTransaction = transaction;

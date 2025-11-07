@@ -313,37 +313,8 @@ namespace AFGRBank.Main
         }
 
 
-        public void LoanMenu()
-        {
-            string text = $"Borrow money from AFGR Bank.";
-            string[] transferMenuOptions = {
-                "Create loan",
-                "Get loan",
-                "Edit loan",
-                "Exit"
-            };
 
-            bool isContinue = true;
-            while (isContinue)
-            {
-                LoanMenuOptions selectedOption = Menu.ReadOption<string, LoanMenuOptions>(text, transferMenuOptions);
-                switch (selectedOption)
-                {
-                    case LoanMenuOptions.CreateLoan:
-                        break;
-                    case LoanMenuOptions.GetLoan:
-                        break;
-                    case LoanMenuOptions.EditLoan:
-                        break;
-                    case LoanMenuOptions.Exit:
-                        return;
-                }
-            }
-        }
-
-
-
-
+        
 
 
         public bool GetIsAdmin()
@@ -485,7 +456,6 @@ namespace AFGRBank.Main
                         TransferMenu();
                         break;
                     case "9":
-                        LoanMenu();
                         break;
                     default:
                         Console.WriteLine($"Error. Incorrect input. Try again.");

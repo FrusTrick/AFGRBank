@@ -754,11 +754,23 @@ namespace AFGRBank.Main
                             continue;
                         }
 
-                        var temp = pTransaction.PrepFundsTransfer(Login.UserList, senderID, recipientID, transferFunds);
-                        foreach (var transaction in temp)
+                        try
                         {
-                            pendingTransaction.Add(transaction);
+                            var temp = pTransaction.PrepFundsTransfer(Login.UserList, senderID, recipientID, transferFunds);
+                            foreach (var transaction in temp)
+                            {
+                                pendingTransaction.Add(transaction);
+                            }
                         }
+                        catch(Exception ex)
+                        {
+                            Console.WriteLine($"Transaction failed.");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                        }
+                        Console.WriteLine($"Transaction successfully created.");
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
                         break;
 
                     case 4:
