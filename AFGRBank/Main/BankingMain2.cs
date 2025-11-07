@@ -60,7 +60,7 @@ namespace AFGRBank.Main
 
 
 
-        private void ViewAccountMenu(List<Account> accountList)
+        private void ViewAccountMenu()
         {
             // promptText will be displayed above menu buttons
             // menuOptions are the menu buttons the user can navigate through
