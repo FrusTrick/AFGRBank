@@ -10,17 +10,19 @@ namespace AFGRBank.Loans
 {
     public class Loan
     {
-        // Egenskaer för lånet
+        // Represent the currency of the loan.
         public CurrencyExchange.CurrencyNames Currency { get; set; }
+        // The interest rate of the loan.
         public decimal InterestRate  { get; set; }
+        // The date when the loan starts.
         public DateTime StartDate { get; set; }
+        // The date when the loan ends.
         public DateTime EndDate { get; set; }
+        // The total amount of the borrowed loan.
         public decimal LoanAmount { get; set; }
 
-        
-       
 
-        // Skapar ett lån genom att sätta värden för objektet
+        // Create a loan by setting values for the object.
         public void CreateLoan(CurrencyExchange.CurrencyNames currency, decimal interestRate, decimal amount, int months)
         {
             Currency = currency;
@@ -31,18 +33,17 @@ namespace AFGRBank.Loans
             Console.WriteLine("Loan created successfully. ");
         }
 
-        // Visar låneinformation i konsolen
+        // Displays loan information in the console.
         public void GetLoan()
         {
             Console.WriteLine($"Currency: {Currency}");
             Console.WriteLine($"Interest Rate: {InterestRate}");
             Console.WriteLine($"Start Date: {StartDate}");
             Console.WriteLine($"End Date: {EndDate}");
-            Console.WriteLine($"Loan Amount: {LoanAmount}");
-            
+            Console.WriteLine($"Loan Amount: {LoanAmount}"); 
         }
 
-        // Redigerar ett lån genom att uppdatera objektets värden
+        // Update the loan with setting new values.
         public void EditLoan(CurrencyExchange.CurrencyNames currency, decimal interestRate, decimal amount, int months)
         {
             Currency = currency;
@@ -53,10 +54,10 @@ namespace AFGRBank.Loans
             Console.WriteLine("Loan created successfully. ");
         }
 
-        // Beräknar maxlån baserat på inkomst och en multiplikator
+        // Calculates the maximum possible loan based on income and multiplier.
         public void CalcMaxLoan(decimal income, decimal multiplier)
         {
-            LoanAmount = (income * multiplier); // Maxlån = inkomst * multiplikator
+            LoanAmount = (income * multiplier);
             Console.WriteLine($"Maximum loan calculated: {LoanAmount}");
         }
 
