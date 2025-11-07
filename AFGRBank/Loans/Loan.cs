@@ -23,6 +23,12 @@ namespace AFGRBank.Loans
 
 
         // Create a loan by setting values for the object.
+        /// <summary>
+        /// Creates a new loan with specified currency, interest rate amount, and duration in months</summary>
+        /// <param name="currency">The currency of the loan</param>
+        /// <param name="interestRate">The interest rate of the loan.</param>
+        /// <param name="amount">The principal amount of the loan.</param>
+        /// <param name="months">The duration of the loan in months.</param>
         public void CreateLoan(CurrencyExchange.CurrencyNames currency, decimal interestRate, decimal amount, int months)
         {
             Currency = currency;
@@ -33,7 +39,11 @@ namespace AFGRBank.Loans
             Console.WriteLine("Loan created successfully. ");
         }
 
+
         // Displays loan information in the console.
+        /// <summary>
+        /// Displays information about the current loan in the conosle.
+        /// </summary>
         public void GetLoan()
         {
             Console.WriteLine($"Currency: {Currency}");
@@ -43,7 +53,15 @@ namespace AFGRBank.Loans
             Console.WriteLine($"Loan Amount: {LoanAmount}"); 
         }
 
+
         // Update the loan with setting new values.
+        /// <summary>
+        /// Updates the loan with new values for currency, interest rate, amout, and duration.
+        /// </summary>
+        /// <param name="currency">The new currency of the loan.</param>
+        /// <param name="interestRate">The new interest rate of the loan.</param>
+        /// <param name="amount">The new principal amount of the loan.</param>
+        /// <param name="months">The new duration of the loan in months.</param>
         public void EditLoan(CurrencyExchange.CurrencyNames currency, decimal interestRate, decimal amount, int months)
         {
             Currency = currency;
@@ -54,7 +72,12 @@ namespace AFGRBank.Loans
             Console.WriteLine("Loan created successfully. ");
         }
 
-        // Calculates the maximum possible loan based on income and multiplier.
+        // Determine the max loan amount you can get based on your current income.
+        /// <summary>
+        /// Calculates the maximum possible loan based on income and a multiplier.
+        /// </summary>  
+        /// <param name="income">The income used to calculate the loan.</param>
+        /// <param name="multiplier">The multiplier applied to the income to determine the loan amount.</param>
         public void CalcMaxLoan(decimal income, decimal multiplier)
         {
             LoanAmount = (income * multiplier);
