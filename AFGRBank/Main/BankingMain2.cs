@@ -24,7 +24,6 @@ namespace AFGRBank.Main
         #region "UserMenu() methods"
 
 
-
         private void BorrowMenu()
         {
             while (true)
@@ -61,22 +60,37 @@ namespace AFGRBank.Main
 
 
 
-
         private void ViewAccountMenu(List<Account> accountList)
         {
-            string promptText = "Choose a transaction to confirm or exit";
-            List<string> menuOptions = new List<string>(); // For saving the menu options
+            // promptText will be displayed above menu buttons
+            // menuOptions are the menu buttons the user can navigate through
+            string promptText = "Your bank accounts" +
+                "\nSelect a account to view info:";
+            List<string> menuOptions = new List<string>();
+            List<Account> menuAccounts = new List<Account>();
 
-            // Build the list of pending transactions
-            foreach (var pt in BankingMain.PTransaction.Where(t => !t.Confirmed))
+            // Build the list of all user accounts
+            foreach (var account in login.LoggedInUser.Accounts)
             {
-                menuOptions.Add(
-                    $"From: {pt.CurrentSender.UserName} -> To: {pt.CurrentReceiver.UserName}," +
-                    $" Amount: {pt.CurrentTransaction.Funds}, Created: {pt.InitializedDate}"
-                );
-                menuTransactions.Add(pt);
+                if (account is CheckingsAccount)
+                {
+                    menuOptions.Add(
+                        $"Bank ID:      {account.AccountID}\n" + 
+                        $"Type:         Savings account\n" +
+                        $"Total funds:  {account.Currency} {account.Funds}\n"
+                    );
+                }
+                if (account is SavingsAccount)
+                {
+                    menuOptions.Add(
+                        $"Bank ID:      {account.AccountID}\n" +
+                        $"Type:         Savings account\n" +
+                        $"Total funds:  {account.Currency} {account.Funds}\n"
+                    );
+                }
+                menuAccounts.Add(account);
             }
-
+            // Adds the exit button last
             menuOptions.Add("Exit");
 
             while (true)
@@ -90,42 +104,80 @@ namespace AFGRBank.Main
                     return;
                 }
 
-                if (selectedIndex < menuTransactions.Count)
+                if (selectedIndex < menuAccounts.Count)
                 {
-                    PendingTransaction selectedTransaction = menuTransactions[selectedIndex];
                     Console.Clear();
-                    Console.WriteLine(
-                        $"You selected transaction: \n" +
-                        $"From: {selectedTransaction.CurrentSender.UserName}" +
-                        $"To: {selectedTransaction.CurrentReceiver.UserName}" +
-                        $"Amount: {selectedTransaction.CurrentTransaction.Funds}" +
-                        $"Created: {selectedTransaction.InitializedDate}"
-                    );
-
-                    Console.WriteLine("\nDo you want to confirm this transaction early? y/n");
-                    string input = Console.ReadLine()?.Trim().ToLower();
-
-                    if (input == "y")
+                    
+                    Account selectedAccount = menuAccounts[selectedIndex];
+                    if (selectedAccount is CheckingsAccount)
                     {
-                        selectedTransaction.Confirm();
-                        Console.WriteLine("Transaction has been confirmed.");
-                        break;
+                        ViewSelectedAccountMenu(selectedAccount,
+                            $"Account ID:   {selectedAccount.AccountID}\n" +
+                            $"Account Type: Checkings account\n" +
+                            $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}\n"
+                        );
                     }
-                    else
+                    if (selectedAccount is SavingsAccount)
                     {
-                        Console.WriteLine("Transaction not confirmed, returning to list...");
-                        continue;
+                        ViewSelectedAccountMenu(selectedAccount,
+                            $"Account ID:   {selectedAccount.AccountID}\n" +
+                            $"Account Type: Savings account\n" +
+                            $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}\n"
+                        );
                     }
 
                     Console.ReadKey();
                 }
             }
-
-        }
         }
 
+        // Used by ViewAccountMenu() to
+        private void ViewSelectedAccountMenu(Account selectedAccount, string promptText)
+        {
+            string[] ViewSelectedAccountMenuOptions = {
+                $"Edit currency",
+                $"View all transactions",
+                $"Exit"
+            };
+
+            while (true)
+            {
+                var selectedOption = Menu.ReadOptionIndex(promptText, ViewSelectedAccountMenuOptions);
+                
+                switch (selectedOption)
+                {
+                    case 0:
+
+                        break;
+
+                    case 1:
+                        // Prints out transaction history of selected bank account
+                        
+                        Console.Clear();
+
+                        if (selectedAccount is CheckingsAccount)
+                        {
+                            cAccount.ViewAccountInfo(selectedAccount);
+                        }
+                        if (selectedAccount is SavingsAccount)
+                        {
+                            sAccount.ViewAccountInfo(selectedAccount);
+                        }
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
+                        break;
+
+                    case 2:
+
+                        return;
+                }
+            }
+        }
+        
 
         #endregion
+
+
 
 
 
@@ -206,7 +258,7 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                             break;
                         }
-                        login.UserList = admin.CreateUser(username, password, name, surname, email, phoneNumber, address, login.UserList);
+                        Login.UserList = admin.CreateUser(username, password, name, surname, email, phoneNumber, address, Login.UserList);
                         break;
                     case 8:
                         return;
@@ -332,7 +384,7 @@ namespace AFGRBank.Main
                         Console.Clear();
                         string getUsername = Validate.GetInput( $"Input username", $"Input cannot be empty. Try again." );
 
-                        loanTaker = login.UserList.FirstOrDefault(x => x.UserName == getUsername);
+                        loanTaker = Login.UserList.FirstOrDefault(x => x.UserName == getUsername);
                         if (loanTaker == null)
                         {
                             Console.WriteLine($"Failed to find any user with matching username. Press any key to exit...");
@@ -410,8 +462,11 @@ namespace AFGRBank.Main
 
         #endregion
 
-        #region "AccountMenu() and SavingsAccountMenu() methods"
 
+
+
+
+        #region "AccountMenu() and SavingsAccountMenu() methods"
 
         private void CreateNewAccountMenu()
         {
@@ -493,8 +548,6 @@ namespace AFGRBank.Main
                         {
                             login.LoggedInUser.Accounts = sAccount.CreateAccount(login.LoggedInUser.Accounts, currency);
                         }
-                        account = login.LoggedInUser.Accounts.LastOrDefault();
-                        Console.WriteLine($"{account.Currency}");
                         Console.WriteLine($"Press any key to continue...");
                         Console.ReadKey();
                         break;
@@ -646,7 +699,7 @@ namespace AFGRBank.Main
                             continue;
                         }
 
-                        login.UserList = account.TransferFunds(login.UserList, senderID, recipientID, transferFunds);
+                        //login.UserList = account.TransferFunds(login.UserList, senderID, recipientID, transferFunds);
                         break;
 
                     case 4:

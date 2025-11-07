@@ -11,6 +11,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Diagnostics;
 
 namespace AFGRBank.Main
 {
@@ -60,7 +61,7 @@ namespace AFGRBank.Main
                         LoginMenu(loginAttempts);
                         return;
                     case MainMenuOptions.Exit:
-                        Environment.FailFast("You have quit the program.");
+                        Process.GetCurrentProcess().Kill();
                         return;
                 }
             }
@@ -106,7 +107,7 @@ namespace AFGRBank.Main
                             {
                                 Console.WriteLine($"Failed to login.");
                                 Console.ReadKey();
-                                Environment.FailFast("Shit!");
+                                Process.GetCurrentProcess().Kill();
                             }
                             if (username == string.Empty)
                             {
@@ -131,7 +132,7 @@ namespace AFGRBank.Main
                             {
                                 Console.WriteLine($"Failed to login.");
                                 Console.ReadKey();
-                                Environment.FailFast("Shit!");
+                                Process.GetCurrentProcess().Kill();
                             }
                             // If no matching user could be found, this error message will be displayed, and then resets this loop
                             Console.WriteLine("Failed to login. Username or password was wrong.");
@@ -170,7 +171,7 @@ namespace AFGRBank.Main
                     case UserMenuOptions.SetCurrency:
                         break;
                     case UserMenuOptions.ViewAccounts:
-                        AccountMenu();
+                        ViewAccountMenu();
                         break;
                     case UserMenuOptions.ViewInterests:
                         break;
@@ -297,45 +298,6 @@ namespace AFGRBank.Main
         }
 
 
-        public void TransferMenu()
-        {
-            string senderID = "None";
-            string receiverID = "None";
-            decimal amount = 0;
-
-            bool isContinue = true;
-            while (isContinue)
-            {
-                string text = $"Transfer funds:" +
-                    $"\nFrom:   {senderID}" +
-                    $"\nTo:     {receiverID}" +
-                    $"\nAmount: {amount}";
-            
-                string[] transferMenuOptions = {
-                    "Choose bank account to send from",
-                    "Choose bank account to send to",
-                    "Choose amount",
-                    "Exit"
-                };
-
-                TransferMenuOptions selectedOption = Menu.ReadOption<string, TransferMenuOptions>(text, transferMenuOptions);
-                switch (selectedOption)
-                {
-                    case TransferMenuOptions.SetSenderID:
-                        senderID = "TestAccount";
-                        break;
-                    case TransferMenuOptions.SetReceiverID:
-                        receiverID = "TestAccount";
-                        break;
-                    case TransferMenuOptions.SetAmount:
-                        amount = 1999.99M;
-                        break;
-                    case TransferMenuOptions.Exit:
-                        return;
-                }
-            }
-        }
-
         public void LoanMenu()
         {
             string text = $"Borrow money from AFGR Bank.";
@@ -402,9 +364,9 @@ namespace AFGRBank.Main
             string email = "ree@se.se";
             int phonenumber = 777777;
             string address = "Address";
-            login.UserList = admin.CreateUser(username, password, name, surname, email, phonenumber, address, login.UserList);
+            Login.UserList = admin.CreateUser(username, password, name, surname, email, phonenumber, address, Login.UserList);
 
-            User seedUser = login.UserList[0];
+            User seedUser = Login.UserList[0];
             cAccount.CreateAccount(seedUser.Accounts, CurrencyNames.DKK);             
 
             admin.UserName = "admin";
@@ -415,12 +377,12 @@ namespace AFGRBank.Main
             admin.PhoneNumber = 666;
             admin.Address = "Address";
             admin.IsAdmin = true;
-            login.UserList.Add(admin);
+            Login.UserList.Add(admin);
             
             sAccount.CreateAccount(seedUser.Accounts, CurrencyNames.USD);
 
 
-            PendingTransaction pending = new(transaction, login.UserList[0], login.UserList[1]);
+            PendingTransaction pending = new(transaction, Login.UserList[0], Login.UserList[1]);
             PTransaction.Add(pending);
         }
 
