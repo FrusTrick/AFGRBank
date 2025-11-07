@@ -214,7 +214,7 @@ namespace AFGRBank.UserType
 
                     if (input == "y")
                     {
-                        selectedTransaction.Confirm();
+                        selectedTransaction.FinalizeTransaction();
                         Console.WriteLine("Transaction has been confirmed.");
                         break;
                     }
@@ -245,7 +245,7 @@ namespace AFGRBank.UserType
 
             if (pending != null)
             {
-                pending.Confirm();
+                pending.FinalizeTransaction();
             }
         }
     }

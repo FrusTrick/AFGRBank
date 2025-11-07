@@ -445,7 +445,7 @@ namespace AFGRBank.Main
                         break;
                     case 4:
 
-                        if (loanTaker != null && loanTakerAccount != null && currencyName != null && currencyRate >= 0)
+                        if (loanTaker == null && loanTakerAccount == null && currencyName == null && currencyRate >= 0)
                         {
                             Console.WriteLine($"One or more fields has no value. Please fill them.");
                             break;
