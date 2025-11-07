@@ -220,7 +220,7 @@ namespace AFGRBank.UserType
 
                     if (input == "y")
                     {
-                        PendingTransaction pendingTransaction = new(pending);
+                        PendingTransaction pendingTransaction = new();
                         pendingTransaction.FinalizeTransaction(pending[0], pending[1]); // 0 refers to the sender, 1 refers to the recipient
                         Console.WriteLine("Transaction has been confirmed.");
                         break;
