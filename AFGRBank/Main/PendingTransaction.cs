@@ -10,18 +10,12 @@ namespace AFGRBank.Main
 {
     public class PendingTransaction
     {
-        public Transaction CurrentTransaction { get; set; }
+        public List<Transaction> CurrentTransaction { get; set; }
         public bool Confirmed { get; set; } = false;
-        public User CurrentSender { get; set; }
-        public User CurrentReceiver { get; set; }
-        public DateTime InitializedDate { get; set; }
 
-        public PendingTransaction(Transaction transaction, User sender, User receiver)
+        public PendingTransaction(List<Transaction> transaction)
         {
             CurrentTransaction = transaction;
-            CurrentSender = sender;
-            CurrentReceiver = receiver;
-            InitializedDate = DateTime.Now;
         }
 
         //Transfers funds between two accounts.
@@ -33,9 +27,8 @@ namespace AFGRBank.Main
         /// <param name="recipientAccID"></param>
         /// <param name="funds"></param>
         /// <returns></returns>
-        public async Task<List<User>> TransferFunds(List<User> userList, Guid senderAccID, Guid recipientAccID, decimal funds)
+        public List<Transaction> PrepFundsTransfer(List<User> userList, Guid senderAccID, Guid recipientAccID, decimal funds)
         {
-
             try
             {
                 //Find both sender account and recipient account.
@@ -43,13 +36,22 @@ namespace AFGRBank.Main
                 var recipient = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == recipientAccID));
 
                 //Create new transaction instance to save to accounts later.
-                Transaction currentTransaction = new Transaction
+                Transaction senderTransaction = new Transaction
                 {
                     SenderID = senderAccID,
                     ReceiverID = recipientAccID,
                     Funds = funds,
                     TransDate = DateTime.Now
                 };
+                Transaction recipientTransaction = new Transaction
+                {
+                    SenderID = senderAccID,
+                    ReceiverID = recipientAccID,
+                    Funds = funds,
+                    TransDate = DateTime.Now
+                };
+
+                List<Transaction> pending = new List<Transaction>();
 
                 try
                 {
@@ -70,71 +72,76 @@ namespace AFGRBank.Main
 
                         decimal convertedRate = exhange.CalculateExchangeRate(senderCurrency, recipientCurrency, funds);
 
+                        recipientTransaction.Funds = convertedRate;
 
+                        pending.Add(senderTransaction);
+                        pending.Add(recipientTransaction);
 
-                        //sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Funds -= funds;
-                        //sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).AccTransList.Add(currentTransaction);
-
-                        ////currentTransaction updated with recipient currency value to reflect the recieved funds correctly in accordance with the recipient currency.
-                        //currentTransaction.Funds = convertedRate;
-                        //recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Funds += convertedRate;
-                        //recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).AccTransList.Add(currentTransaction);
-
-                        ////Replaces values of acounts in the userlist with updated values, using index to identify
-                        ////their locations and overwriting the old data with the updated sender and recipient data.
-                        //var indexSender = userList.IndexOf(sender);
-                        //var indexRecipient = userList.IndexOf(recipient);
-                        //if (indexSender > -1 && indexRecipient > -1)
-                        //{
-                        //    userList[indexSender] = sender;
-                        //    userList[indexRecipient] = recipient;
-                        //}
-
-                        return userList;
+                        return pending;
                     }
                 }
                 catch
                 {
                     Console.WriteLine("Transaction failed");
-                    return userList;
+                    return pending;
                 }
 
             }
             catch
             {
                 Console.WriteLine($"Could not find the account with account number:{recipientAccID}");
-                return userList;
+                return new List<Transaction>();
             }
 
-            return userList;
+            return new List<Transaction>();
         }
-        public void FinalizeTransaction()
+
+
+
+        public void FinalizeTransaction(Transaction senderTransaction, Transaction recipientTransaction)
         {
-            if (!Confirmed)
+
+            var userList = Login.UserList;
+
+            User sender = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderTransaction.SenderID));
+            User recipient = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == recipientTransaction.ReceiverID));
+            if(sender != null && recipient != null)
             {
-                Confirmed = true;
+                // Deduct funds from sender
+                sender.Accounts.First(a => a.AccountID == senderTransaction.SenderID).Funds -= senderTransaction.Funds;
+                sender.Accounts.First(a => a.AccountID == senderTransaction.SenderID).AccTransList.Add(senderTransaction);
+                // Add funds to recipient
+                recipient.Accounts.First(a => a.AccountID == recipientTransaction.ReceiverID).Funds += recipientTransaction.Funds;
+                recipient.Accounts.First(a => a.AccountID == recipientTransaction.ReceiverID).AccTransList.Add(recipientTransaction);
 
-                // Matches the AccountID of the current sender & receiver with the current sender/receiver and changes their funds accordingly
-                CurrentSender.Accounts.First(a => a.AccountID == CurrentTransaction.SenderID).Funds -= CurrentTransaction.Funds;
-                CurrentReceiver.Accounts.First(a => a.AccountID == CurrentTransaction.ReceiverID).Funds += CurrentTransaction.Funds;
+                //Replaces values of acounts in the userlist with updated values, using index to identify
+                //their locations and overwriting the old data with the updated sender and recipient data.
+                var indexSender = userList.IndexOf(sender);
+                var indexRecipient = userList.IndexOf(recipient);
+                if (indexSender > -1 && indexRecipient > -1)
+                {
+                    userList[indexSender] = sender;
+                    userList[indexRecipient] = recipient;
 
-                // Same as above except adds the transaction to their transaction list
-                CurrentSender.Accounts.First(a => a.AccountID == CurrentTransaction.SenderID).AccTransList.Add(CurrentTransaction);
-                CurrentReceiver.Accounts.First(a => a.AccountID == CurrentTransaction.ReceiverID).AccTransList.Add(CurrentTransaction);
-
-                // Confirmation line
-                Console.WriteLine($"Transaction {CurrentTransaction.SenderID} -> {CurrentTransaction.ReceiverID} confirmed!");
+                    Login.UserList = userList;
+                }
+                Console.WriteLine($"Transaction {senderTransaction.SenderID} -> {recipientTransaction.ReceiverID} confirmed!");
             }
+            else
+            {
+                Console.WriteLine("Sender or recipient not found.");
+            }
+
         }
 
-        // Async method that initializes a Task and delays it from acting for x minutes and then calls on Confirm();
-        public async Task StartCountdown(int minutes = 15)
-        {
-            await Task.Delay(TimeSpan.FromMinutes(minutes));
-            if (!Confirmed)
-            {
-                FinalizeTransaction();
-            }
-        }
+        //// Async method that initializes a Task and delays it from acting for x minutes and then calls on Confirm();
+        //public async Task StartCountdown(int minutes = 15)
+        //{
+        //    await Task.Delay(TimeSpan.FromMinutes(minutes));
+        //    if (!Confirmed)
+        //    {
+        //        FinalizeTransaction();
+        //    }
+        //}
     }
 }

@@ -382,8 +382,8 @@ namespace AFGRBank.Main
             sAccount.CreateAccount(seedUser.Accounts, CurrencyNames.USD);
 
 
-            PendingTransaction pending = new(transaction, Login.UserList[0], Login.UserList[1]);
-            PTransaction.Add(pending);
+           //PendingTransaction pending = new(transaction, Login.UserList[0], Login.UserList[1]);
+            //PTransaction.Add(pending);
         }
 
 

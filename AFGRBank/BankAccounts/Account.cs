@@ -50,7 +50,7 @@ namespace AFGRBank.BankAccounts
         /// <param name="accountId">The unique identifier of the account to be removed.</param>
         /// <returns>The updated list of accounts after attempting to remove the specified account.  If the account cannot be
         /// removed, the original list is returned.</returns>
-        public List<CheckingsAccount> DeleteAccount(List<CheckingsAccount> accountList, Guid accountId)
+        public List<Account> DeleteAccount(List<Account> accountList, Guid accountId)
         {
             int menu = Menu.ReadOptionIndexList("Are you sure you want to close this account?", new List<string> { "Yes", "No" });
 
@@ -61,7 +61,7 @@ namespace AFGRBank.BankAccounts
             }
             else
             {
-                foreach (CheckingsAccount account in accountList)
+                foreach (Account account in accountList)
                 {
                     if (account.AccountID == accountId)
                     {
@@ -99,6 +99,7 @@ namespace AFGRBank.BankAccounts
                     Console.WriteLine($"Transaction date: {transaction.TransDate.ToShortTimeString()}");
                     Console.WriteLine($"Transfered funds: {transaction.Funds}{account.Currency}");
                     Console.WriteLine($"Recipient account: {transaction.ReceiverID}");
+                    Console.WriteLine($"Sender account: {transaction.SenderID}");
                     Console.WriteLine("________________________________________");
                 }
             }
