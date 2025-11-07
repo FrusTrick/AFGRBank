@@ -99,6 +99,7 @@ namespace AFGRBank.BankAccounts
                     Console.WriteLine($"Transaction date: {transaction.TransDate.ToShortTimeString()}");
                     Console.WriteLine($"Transfered funds: {transaction.Funds}{account.Currency}");
                     Console.WriteLine($"Recipient account: {transaction.ReceiverID}");
+                    Console.WriteLine($"Sender account: {transaction.SenderID}");
                     Console.WriteLine("________________________________________");
                 }
             }
