@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Xml.Linq;
 using static AFGRBank.Exchange.CurrencyExchange;
 
@@ -441,11 +442,6 @@ namespace AFGRBank.Main
         // Used by ViewAccountMenu() to print out info about the selected bank account 
         private void ViewSelectedAccountMenu(Account selectedAccount, string promptText)
         {
-            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
-            string jsonString = File.ReadAllText(jsonPath);
-            // var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyNames, decimal>>(jsonString, options);
-
-
             string[] ViewSelectedAccountMenuOptions = {
                 $"Edit currency",
                 $"View all transactions",
@@ -462,8 +458,12 @@ namespace AFGRBank.Main
                     case 0:
                         // User inputs the new currency to overwrite the old 
                         Console.Clear();
+                        
+                        string displayCurrencyRates = GetJSONCurrencyRatesToString();
+                        
                         CurrencyNames newCurrency = Validate.StringToCurrencyName(
-                            $"Input the new currency:",
+                            $"Input the new currency:" +
+                            $"\n{displayCurrencyRates}",
                             $"Input cannot be empty. Try again.",
                             $"Input did not match any existing currency. Try again."
                         );
@@ -754,7 +754,11 @@ namespace AFGRBank.Main
                             continue;
                         }
 
-                        //login.UserList = account.TransferFunds(login.UserList, senderID, recipientID, transferFunds);
+                        var temp = pTransaction.PrepFundsTransfer(Login.UserList, senderID, recipientID, transferFunds);
+                        foreach (var transaction in temp)
+                        {
+                            pendingTransaction.Add(transaction);
+                        }
                         break;
 
                     case 4:

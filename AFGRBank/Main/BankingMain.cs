@@ -38,10 +38,22 @@ namespace AFGRBank.Main
         CheckingsAccount cAccount = new CheckingsAccount();
         SavingsAccount sAccount = new SavingsAccount();
         Transaction transaction = new Transaction();
+        PendingTransaction pTransaction = new PendingTransaction();
         Loan loan = new Loan();
+
         
         public static List<PendingTransaction> PTransaction { get; set; } = new();
 
+        public static List<Transaction> pendingTransaction { get; set; } = new();
+
+
+        /*
+        GEORGE PLACE YOUR BULLSHIT HERE
+
+
+
+
+        */
 
 
         // The first screen, contains the options to login or exit program.
