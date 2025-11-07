@@ -27,7 +27,7 @@ namespace AFGRBank.UserType
         /// <param name="password">The password of the user.</param>
         /// <param name="name">The first name of the user.</param>
         /// <param name="surName">The last name of the user.</param>
-        /// <param name="email">The email of the user of the user in user@mail.xx format.</param>
+        /// <param name="email">The email of the user in user@mail.xx format.</param>
         /// <param name="phoneNumber">The phonenumber of the user as an integer.</param>
         /// <param name="address">The address of the user.</param>
         /// <param name="userList">A list of <see cref="User"/> objects to which the new user will be added.</param>
@@ -60,10 +60,13 @@ namespace AFGRBank.UserType
         }
 
         /// <summary>
-        /// Updates the local JSON file <c>"CurrencyRates.json"</c> with a new exchange rate.
+        /// Updates the local JSON file <c>CurrencyRates.json</c> with a new exchange rate.
         /// </summary>
         /// <param name="currencyName">The currency to update, provided as a <see cref="CurrencyNames"/> enum value.</param>
         /// <param name="updatedAmount">The new exchange rate for the specified currency.</param>
+        /// <remarks>
+        /// Ensures the exchange rate file exists before updating it.
+        /// </remarks>
         public void UpdateCurrencyRates(CurrencyNames currencyName, decimal updatedAmount)
         {
             try
@@ -111,7 +114,7 @@ namespace AFGRBank.UserType
         }
 
         /// <summary>
-        /// Creates a <see cref="Loan"/> object, adds it to the <see cref="User.LoanList"/> and pays out the funds
+        /// Creates a <see cref="Loan"/> object, adds it to the <see cref="User.LoanList"/> and pays out the funds.
         /// </summary>
         /// <param name="user">The <see cref="User"/> object to create a loan for.</param>
         /// <param name="account">The <see cref="Account"/> object to send the funds to.</param>
@@ -120,7 +123,7 @@ namespace AFGRBank.UserType
         /// /// <param name="interestRate">The interest rate of the loan.</param>
         /// <remarks>
         /// Loan eligibility is calculated by calling on the .GetTotalFunds() method and multiplying it by five, minus any existing loan balances.
-        /// If approved, the repayment period is calculated automatically based on the loan method
+        /// If approved, the repayment period is calculated automatically based on the loan amount and interest rate.
         /// </remarks>
         public void CreateLoan(User user, Account account, decimal loanAmount, CurrencyNames currency, decimal interestRate)
         {
@@ -158,7 +161,13 @@ namespace AFGRBank.UserType
             }
         }
 
-        // Provides the admin a list of all pending transactions and allows them to view & confirm them
+        /// <summary>
+        /// Display all pending transactions for the <see cref="Admin"/> to review.
+        /// </summary>
+        /// <remarks>
+        /// Calls on the ReadOptionIndexList method in Menu to list all of the available transactions.
+        /// When a transaction is chosen, confirm if the admin wants to confirm/decline it.
+        /// </remarks>
         public void ViewPendingTransactions()
         {
             string promptText = "Choose a transaction to confirm or exit";
@@ -169,8 +178,8 @@ namespace AFGRBank.UserType
             foreach (var pt in BankingMain.PTransaction.Where(t => !t.Confirmed))
             {
                 menuOptions.Add(
-                    $"From: {pt.CurrentSender.UserName} -> To: {pt.CurrentReceiver.UserName}," +
-                    $" Amount: {pt.CurrentTransaction.Funds}, Created: {pt.InitializedDate}"
+                    $"From: {pt.CurrentSender.UserName} -> To: {pt.CurrentReceiver.UserName}\n" +
+                    $"Amount: {pt.CurrentTransaction.Funds}\nCreated: {pt.InitializedDate}\n"
                 );
                 menuTransactions.Add(pt);
             }
@@ -194,10 +203,10 @@ namespace AFGRBank.UserType
                     Console.Clear();
                     Console.WriteLine(
                         $"You selected transaction: \n" +
-                        $"From: {selectedTransaction.CurrentSender.UserName}" +
-                        $"To: {selectedTransaction.CurrentReceiver.UserName}" +
-                        $"Amount: {selectedTransaction.CurrentTransaction.Funds}" +
-                        $"Created: {selectedTransaction.InitializedDate}"
+                        $"From: {selectedTransaction.CurrentSender.UserName}\n" +
+                        $"To: {selectedTransaction.CurrentReceiver.UserName}\n" +
+                        $"Amount: {selectedTransaction.CurrentTransaction.Funds}\n" +
+                        $"Created: {selectedTransaction.InitializedDate}\n"
                     );
 
                     Console.WriteLine("\nDo you want to confirm this transaction early? y/n");
@@ -221,7 +230,15 @@ namespace AFGRBank.UserType
             
         }
 
-        // Confirms a pending transaction through sender and receiver IDs
+        /// <summary>
+        /// Confirms a <see cref="PendingTransaction"/> by matching the sender and receiver IDs.
+        /// </summary>
+        /// <param name="senderID">The unique identifier of the account sending the funds.</param>
+        /// <param name="receiverID">The unique identifier of the account receiving the funds.</param>
+        /// <remarks>
+        /// Searches for the <see cref="PendingTransaction"/> with matching sender and receiver IDs.
+        /// If found, calls the <see cref="PendingTransaction.Confirm"/> method to finalize the transaction.
+        /// </remarks>
         public void ConfirmTransaction(Guid senderID, Guid receiverID)
         {
             var pending = BankingMain.PTransaction.FirstOrDefault(t => t.CurrentTransaction.SenderID == senderID && t.CurrentTransaction.ReceiverID == receiverID && !t.Confirmed);

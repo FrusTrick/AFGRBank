@@ -14,7 +14,7 @@ namespace AFGRBank.Main
         // If "LoggedInUser" is null, that means user is not logged in. 
         // The current signed in user info is stored inside LoggedInUser. Used Login.LoggedInUser.
         // DO NOT use the Login class to check for current user info.
-        public List<User> UserList { get; set; } = new List<User>();
+        public static List<User> UserList { get; set; } = new List<User>();
         public User? LoggedInUser { get; set; }
 
         // Attempts to log in a user by checking the provided username and password.
