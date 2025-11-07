@@ -162,7 +162,7 @@ namespace AFGRBank.Main
             string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}.";
             string[] userMenuOptions = { 
                 "Borrow money", 
-                "Change currency", 
+                "Create new bank account",
                 "View your bank accounts", 
                 "View interest rates",
                 "View transactions",
@@ -179,15 +179,15 @@ namespace AFGRBank.Main
                         BorrowMenu();
                         break;
                     case 1:
+                        CreateNewAccountMenu();
                         break;
                     case 2:
-                        AccountMenu();
+                        ViewAccountMenu(login.LoggedInUser.Accounts);
                         break;
                     case 3:
                         user.ViewAllTransactions();
                         break;
                     case 4:
-                        user.ViewAllTransactions();
                         break;
                     case 5:
                         login.LogoutUser();

@@ -143,7 +143,7 @@ namespace AFGRBank.UserType
             {
                 menuOptions.Add(
                     $"From: {pt.CurrentSender.UserName} -> To: {pt.CurrentReceiver.UserName}," +
-                    $" Amount: {pt.CurrentTransaction.Funds}, Created: {pt.InitializedDate}"
+                    $"\nAmount: {pt.CurrentTransaction.Funds}, \nCreated: {pt.InitializedDate}\n"
                 );
                 menuTransactions.Add(pt);
             }
