@@ -43,13 +43,18 @@ namespace AFGRBank.UserType
             return Accounts;
         }
 
-        // Calculates the interest rate for the specified account
+        /// <summary>
+        /// Calculates the interest amount for the specified savings account using the provided interest rate.
+        /// </summary>
+        /// <param name="account">The savings account for which to calculate interest. Must not be null.</param>
+        /// <param name="interestRate">The interest rate to apply, expressed as a non-negative decimal fraction (for example, 0.05 for 5%).</param>
+        /// <returns>The calculated interest amount for the account, based on its current funds and the specified interest rate.</returns>
         public decimal CalculateAccountInterest(SavingsAccount account, decimal interestRate)
         {
             try
             {
                 decimal funds = account.Funds;
-                CurrencyExchange.CurrencyNames currency = account.Currency;
+                // CurrencyExchange.CurrencyNames currency = account.Currency;
                 interestRate = (funds * interestRate);
             }
             catch
@@ -60,14 +65,20 @@ namespace AFGRBank.UserType
             return interestRate;
         }
 
-        // Returns interest rate
+        /* Redundant
         public decimal CalculateLoanInterestRate(Loan loan)
         {
             return loan.InterestRate;
         }
+        */
 
-        //Method loans out x amount of funds from the bank, to x account, at an x rate
-        //Also checks if the user is eligible for a loan
+        /// <summary>
+        /// Adds a loan to the bank's collection of active loans.
+        /// </summary>
+        /// <param name="loan">The loan to be added. Must not be null and should represent a valid, eligible loan for the account.</param>
+        /// <remarks>
+        /// Eligibility for loan is handled by <see cref="Admin.CreateLoan"/>
+        /// </remarks>
         public void AddLoan(Loan loan)
         {
             LoanList.Add(loan);
@@ -79,7 +90,16 @@ namespace AFGRBank.UserType
             return TransactionList;
         }
 
-        // Calculates the total funds across all bank account types
+        /// <summary>
+        /// Calculates the total sum of funds from all bank accounts
+        /// </summary>
+        /// <returns>
+        /// The total funds as a decimal
+        /// </returns>
+        /// <remarks>
+        /// Loops through every account in the User's account list.
+        /// For each account found, adds that amount to TotalFunds (Stored in User)
+        /// </remarks>
         public decimal GetTotalFunds()
         {
             try

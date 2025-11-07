@@ -144,7 +144,7 @@ namespace AFGRBank.UserType
                 decimal monthlyPayment = loanAmount * 0.05m;
                 decimal monthlyInterest = interestRate / 12m;
 
-                // Equation for calcultaing the monthly payment, Log(1 + ( Log(m / (m - l * mi) ) )
+                // Equation for calculating the monthly payment, Log(1 + ( Log(m / (m - l * mi) ) )
                 int months = (int)Math.Ceiling(
                     Math.Log((double)(monthlyPayment / (monthlyPayment - loanAmount * monthlyInterest))) /
                     Math.Log((double)(1 + monthlyInterest))
@@ -162,24 +162,26 @@ namespace AFGRBank.UserType
         }
 
         /// <summary>
-        /// Display all pending transactions for the <see cref="Admin"/> to review.
+        /// Display all pending transactions for the <see cref="Admin"/> to review/confirm.
         /// </summary>
         /// <remarks>
-        /// Calls on the ReadOptionIndexList method in Menu to list all of the available transactions.
+        /// Calls on the <see cref="Menu.ReadOptionIndexList()"/> method to list all of the available transactions.
         /// When a transaction is chosen, confirm if the admin wants to confirm/decline it.
         /// </remarks>
-        public void ViewPendingTransactions()
+        public void ViewPendingTransactions(List<Transaction> pending)
         {
             string promptText = "Choose a transaction to confirm or exit";
             List<string> menuOptions = new List<string>(); // For saving the menu options
-            List<PendingTransaction> menuTransactions = new List<PendingTransaction>(); // For saving the pending transactions
+            List<Transaction> menuTransactions = new List<Transaction>(); // For saving the transactions as a menu option
 
-            // Build the list of pending transactions
-            foreach (var pt in BankingMain.PTransaction.Where(t => !t.Confirmed))
+            // Build the list of transactions
+            foreach (var pt in pending)
             {
+                var sender = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == pt.SenderID));
+                var recipient = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == pt.ReceiverID));
                 menuOptions.Add(
-                    $"From: {pt.CurrentSender.UserName} -> To: {pt.CurrentReceiver.UserName}\n" +
-                    $"Amount: {pt.CurrentTransaction.Funds}\nCreated: {pt.InitializedDate}\n"
+                    $"From: {sender.UserName} -> To: {recipient.UserName}\n" +
+                    $"Amount: {pt.Funds}\nCreated: {pt.TransDate}\n"
                 );
                 menuTransactions.Add(pt);
             }
@@ -188,25 +190,29 @@ namespace AFGRBank.UserType
 
             while (true)
             {
-                // Promp the ReadOptionIndexList 
+                // Prompt the ReadOptionIndexList 
                 int selectedIndex = Menu.ReadOptionIndexList(promptText, menuOptions); 
                 var chosenOption = menuOptions[selectedIndex];
 
+                // If exit is chosen, exit the method
                 if (chosenOption == "Exit")
                 {
                     return;
                 }
-                
+
+                // Depending on the chosen index, check the matching transaction in the list
                 if (selectedIndex < menuTransactions.Count)
                 {
-                    PendingTransaction selectedTransaction = menuTransactions[selectedIndex];
+                    Transaction selectedTransaction = menuTransactions[selectedIndex];
+                    var sender = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == selectedTransaction.SenderID));
+                    var recipient = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == selectedTransaction.ReceiverID));
                     Console.Clear();
                     Console.WriteLine(
                         $"You selected transaction: \n" +
-                        $"From: {selectedTransaction.CurrentSender.UserName}\n" +
-                        $"To: {selectedTransaction.CurrentReceiver.UserName}\n" +
-                        $"Amount: {selectedTransaction.CurrentTransaction.Funds}\n" +
-                        $"Created: {selectedTransaction.InitializedDate}\n"
+                        $"From: {sender.UserName}\n" +
+                        $"To: {recipient.UserName}\n" +
+                        $"Amount: {selectedTransaction.Funds}\n" +
+                        $"Created: {selectedTransaction.TransDate}\n"
                     );
 
                     Console.WriteLine("\nDo you want to confirm this transaction early? y/n");
@@ -214,7 +220,8 @@ namespace AFGRBank.UserType
 
                     if (input == "y")
                     {
-                        selectedTransaction.FinalizeTransaction();
+                        PendingTransaction pendingTransaction = new(pending);
+                        pendingTransaction.FinalizeTransaction(pending[0], pending[1]); // 0 refers to the sender, 1 refers to the recipient
                         Console.WriteLine("Transaction has been confirmed.");
                         break;
                     }
@@ -230,14 +237,15 @@ namespace AFGRBank.UserType
             
         }
 
+        /* Redundant method, ViewPendingTransactions takes care of it.
         /// <summary>
         /// Confirms a <see cref="PendingTransaction"/> by matching the sender and receiver IDs.
         /// </summary>
         /// <param name="senderID">The unique identifier of the account sending the funds.</param>
         /// <param name="receiverID">The unique identifier of the account receiving the funds.</param>
         /// <remarks>
-        /// Searches for the <see cref="PendingTransaction"/> with matching sender and receiver IDs.
-        /// If found, calls the <see cref="PendingTransaction.Confirm"/> method to finalize the transaction.
+        /// Searches for the <see cref="PendingTransaction"/> with matching <paramref name="senderID"/> and <paramref name="receiverID"/>.
+        /// If found, calls the <see cref="PendingTransaction.Confirm()"/> method to finalize the transaction.
         /// </remarks>
         public void ConfirmTransaction(Guid senderID, Guid receiverID)
         {
@@ -248,5 +256,6 @@ namespace AFGRBank.UserType
                 pending.FinalizeTransaction();
             }
         }
+        */
     }
 }
