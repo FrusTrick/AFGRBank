@@ -1,12 +1,10 @@
-﻿using System;
+﻿using AFGRBank.Exchange;
+using AFGRBank.Main;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AFGRBank.Main;
-{
-    
-}
 
 namespace AFGRBank.BankAccounts
 {
@@ -20,14 +18,7 @@ namespace AFGRBank.BankAccounts
             
         }
 
-        /// <summary>
-        /// Takes a list of accounts and a currency string as parameters. 
-        /// Creates a new SavingsAccount with default values and adds it to the account list. Returns the updated account list.
-        /// </summary>
-        /// <param name="accountList"></param>
-        /// <param name="currency"></param>
-        /// <returns></returns>
-        public override List<Account> CreateAccount(List<Account> accountList, string currency)
+        public override List<Account> CreateAccount(List<Account> accountList, CurrencyExchange.CurrencyNames currency)
         {
             try
             {

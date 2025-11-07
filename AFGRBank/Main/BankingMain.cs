@@ -14,7 +14,7 @@ using System.Xml.Linq;
 
 namespace AFGRBank.Main
 {
-    public class BankingMain
+    public partial class BankingMain
     {
         // Every class should be instanced here (except the classes inside the Utility folder??)
         //
@@ -25,6 +25,7 @@ namespace AFGRBank.Main
         // "cAccount" is the blueprint for a checkings bank account.
         // "sAccount" is the blueprint for a checkings bank account.
         // "transaction" is used create a new transaction between users, and save it to their history
+        // "pendingT" is used for async every 15 minutes.
         // "loan" is used to create a new bank loan, and save it to user history
 
         User user = new User();
@@ -35,19 +36,9 @@ namespace AFGRBank.Main
         SavingsAccount sAccount = new SavingsAccount();
         Transaction transaction = new Transaction();
         Loan loan = new Loan();
+        
+        public static List<PendingTransaction> PTransaction { get; set; } = new();
 
-        // Test method for populating UserList
-        public void PopulateList()
-        {
-            string username = "1";
-            string password = "1";
-            string name = "Ax";
-            string surname = "Be";
-            string email = "admin@se.se";
-            int phonenumer = 777777;
-            string address = "Address";
-            login.UserList = admin.CreateUser(username, password, name, surname, email, phonenumer, address, login.UserList);
-        }
 
 
         // The first screen, contains the options to login or exit program.
@@ -67,8 +58,9 @@ namespace AFGRBank.Main
                 {
                     case MainMenuOptions.Login:
                         LoginMenu(loginAttempts);
-                        break;
+                        return;
                     case MainMenuOptions.Exit:
+                        Environment.FailFast("You have quit the program.");
                         return;
                 }
             }
@@ -112,7 +104,7 @@ namespace AFGRBank.Main
                             loginAttempts--;
                             if (loginAttempts <= 0)
                             {
-                                Console.WriteLine($"{loginAttempts} left. You cannot login.");
+                                Console.WriteLine($"Failed to login.");
                                 Console.ReadKey();
                                 Environment.FailFast("Shit!");
                             }
@@ -137,7 +129,7 @@ namespace AFGRBank.Main
                             loginAttempts--;
                             if (loginAttempts <= 0)
                             {
-                                Console.WriteLine($"{loginAttempts} left. You cannot login.");
+                                Console.WriteLine($"Failed to login.");
                                 Console.ReadKey();
                                 Environment.FailFast("Shit!");
                             }
@@ -147,8 +139,6 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                             continue;
                         }
-                        Console.WriteLine($"{login.LoggedInUser.UserName} + {login.LoggedInUser.Password}");
-                        Console.ReadKey();
                         return;
                     case 3:
                         return;
@@ -175,17 +165,19 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case UserMenuOptions.Borrow:
+                        BorrowMenu();
                         break;
                     case UserMenuOptions.SetCurrency:
                         break;
                     case UserMenuOptions.ViewAccounts:
+                        AccountMenu();
                         break;
                     case UserMenuOptions.ViewInterests:
                         break;
                     case UserMenuOptions.ViewTransactions:
                         break;
                     case UserMenuOptions.Logout:
-                        // login.LogoutUser();
+                        login.LogoutUser();
                         return;
                 }
             }
@@ -198,217 +190,41 @@ namespace AFGRBank.Main
             string[] adminMenuOptions = {
                 "Create new user",
                 "Update currency rate",
-                "Borrow money",
-                "Change currency",
-                "View your bank accounts",
-                "View interest rates",
-                "View transactions",
+                "Create new loan",
+                "View pending transactions",
                 "Logout"
             };
 
             bool isContinue = true;
             while (isContinue)
             {
-                AdminMenuOptions selectedOption = Menu.ReadOption<string, AdminMenuOptions>(text, adminMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(text, adminMenuOptions);
                 switch (selectedOption)
                 {
-                    case AdminMenuOptions.CreateUser:
+                    case 0:
+                        // Create a new user and add it to Login.UserList
                         CreateUserMenu();
                         break;
-                    case AdminMenuOptions.UpdateCurrencyRate:
+                    case 1:
                         // Update exchange rate for a specified currency.
-
-                        string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
-                        string jsonString = File.ReadAllText(jsonPath);
-
-                        // The default selected currency and values (TryParse doesn't allow null CurrencyNames)
-                        // These two will be used as parameter in UpdateExchangeRates method
-                        CurrencyNames selectedCurrency = CurrencyNames.SEK;
-                        decimal newRates = 1m;
-
-                        // These variables will be used to display the selected currency and the new exchange rates admin inputted
-                        string displaySelectedCurrency = string.Empty;
-                        string displayNewRates = string.Empty;
-                        
-                        bool isContinue2 = true;
-                        while (isContinue2 == true)
-                        {
-                            // Display .JSON content to string, replacing the curly brackets with whitespaces
-                            string promptText = $"Select which currency's exchange rate to update:" +
-                                $"\n{jsonString}"
-                                .Replace('{', ' ')
-                                .Replace('}', ' ');
-
-                            // Call ReadOptionIndex with parameters declared inside instead of declaring them outside the method first
-                            // This is used to update {displaySelectedCurrency} and {displayNewRates} in real time.
-                            // If you hover over ReadOptionIndex, you can see it takes in two parameters:
-                            //      questionTetxt is the text displayed above the menu buttons
-                            //      menuOptions contain the buttons, separated with the comma character ','
-                            // ReadOptionIndex returns an integer value which is used to compare the switch case below.
-                            int selectUpdateRateOptions = Menu.ReadOptionIndex(
-                                $"Select which currency's exchange rate to update:" +
-                                $"\n{jsonString}"
-                                .Replace('{', '\n')
-                                .Replace('}', '\n'),
-                                [ 
-                                $"Select currency:        {displaySelectedCurrency}",
-                                $"Set new exchange rate:  {displayNewRates}",
-                                $"Update",
-                                $"Exit",
-                                ]);
-
-                            switch (selectUpdateRateOptions)
-                            {
-                                case 0:
-                                    // Admin inputs which currency to update. There's validation to ensure input matches the correct enum.
-                                    Console.Clear();
-                                    string inputSelectedCurrency = Validate.GetInput(
-                                        $"\n{jsonString
-                                        .Replace('{', '\n')
-                                        .Replace('}', '\n')}" +
-                                        $"Input the currency which needs to update its exchange rate:",
-                                        $"Input cannot be empty, please try again.");
-                                    if (!Enum.TryParse(inputSelectedCurrency, true, out selectedCurrency))
-                                    {
-                                        Console.WriteLine($"Currency does not exists, please try again.");
-                                        break;
-                                    }
-                                    // displaySelectedCurrency is used to display which currency admin picked, in case they forget
-                                    displaySelectedCurrency = selectedCurrency.ToString();
-                                    break;
-                                case 1:
-                                    // Admin inputs the updated exchange rate. There's validation to ensure input is decimal.
-                                    newRates = Validate.StringToDecimal(
-                                        $"\n{jsonString
-                                        .Replace('{', '\n')
-                                        .Replace('}', '\n')}" +
-                                        $"Input the updated exchange rate:",
-                                        $"Input cannot be empty, please try again.",
-                                        $"Input failed to parse. Make sure the input doesn't contain invalid characters and try again.");
-                                    // displaySelectedCurrency is used to display the updated exchange rates the admin picked, in case they forget
-                                    displayNewRates = newRates.ToString();
-                                    break;
-                                case 2:
-                                    // Calls UpdateCurrencyRates which updates the selected currency with the new rates.
-                                    // Then read .JSON file and update displayText.
-                                    admin.UpdateCurrencyRates(selectedCurrency, newRates);
-                                    jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
-                                    jsonString = File.ReadAllText(jsonPath);
-                                    break;
-                                case 4:
-                                    // Exits AdminMenuOptions.UpdateCurrencyRate 
-                                    isContinue2 = false;
-                                    break;
-                            }
-                        }
-
+                        UpdateCurrencyRatesMenu();
                         break;
-                    case AdminMenuOptions.Borrow:
+                    case 2:
+                        // Creates loan 
+                        CreateLoanMenu();
                         break;
-                    case AdminMenuOptions.SetCurrency:
+                    case 3:
+                        admin.ViewPendingTransactions();
                         break;
-                    case AdminMenuOptions.ViewAccounts:
-                        break;
-                    case AdminMenuOptions.ViewInterests:
-                        break;
-                    case AdminMenuOptions.ViewTransactions:
-                        break;
-                    case AdminMenuOptions.Logout:
+                    case 4:
+                        login.LogoutUser();
                         return;
                 }
             }
         }
 
-        private void CreateUserMenu()
-        {
-            string username = string.Empty;
-            string password = string.Empty;
-            string name = string.Empty;
-            string surname = string.Empty;
-            string email = string.Empty;
-            int phoneNumber = 0;
-            string address = string.Empty;
 
-            //string username = "test";
-            //string password = "test";
-            //string name = "test";
-            //string surname = "test";
-            //string email = "test@test.se";
-            //int phoneNumber = 070;
-            //string address = "testHome";
-
-            bool isContinue = true;
-            while (isContinue)
-            {
-                string text = $"User account creation:";
-                string[] createUserMenuOptions = {
-                    $"Edit username              Current: {username}",
-                    $"Edit password              Current: {password}",
-                    $"Edit name                  Current: {name}",
-                    $"Edit surname               Current: {surname}",
-                    $"Edit email address         Current: {email}",
-                    $"Edit phone number          Current: {phoneNumber}",
-                    $"Edit address               Current: {address}",
-                    $"Create new user",
-                    $"Exit"
-                };
-
-                CreateUserMenuOptions selectedOption = Menu.ReadOption<string, CreateUserMenuOptions>(text, createUserMenuOptions);
-                switch (selectedOption)
-                {
-                    case CreateUserMenuOptions.EditUsername:
-                        Console.Clear();
-                        username = Validate.GetInput("Input new username:", "Input cannot be empty. Try again.");
-                        break;
-                    case CreateUserMenuOptions.EditPassword:
-                        Console.Clear();
-                        password = Validate.GetInput("Input new password:", "Input cannot be empty. Try again.");
-                        break;
-                    case CreateUserMenuOptions.EditName:
-                        Console.Clear();
-                        name = Validate.GetInput("Input new name:", "Input cannot be empty. Try again.");
-                        break;
-                    case CreateUserMenuOptions.EditSurname:
-                        Console.Clear();
-                        surname = Validate.GetInput("Input new surname:", "Input cannot be empty. Try again.");
-                        break;
-                    case CreateUserMenuOptions.EditEmail:
-                        Console.Clear();
-                        email = Validate.GetInput("Input new email address:", "Input cannot be empty. Try again.");
-                        break;
-                    case CreateUserMenuOptions.EditPhoneNumber:
-                        Console.Clear();
-                        phoneNumber = Validate.StringToInt("Input new phone number (numbers only):", 
-                            "Input cannot be empty. Try again.", "Input was not a number. Try again.", 
-                            "Input was either too big or too small. Try again."
-                            );
-                        break;
-                    case CreateUserMenuOptions.EditAddress:
-                        Console.Clear();
-                        address = Validate.GetInput("Input new physical address:", "Input cannot be empty. Try again.");
-                        break;
-                    case CreateUserMenuOptions.CreateUser:
-                        if (username == string.Empty || 
-                            password == string.Empty || 
-                            name == string.Empty || 
-                            surname == string.Empty ||
-                            email == string.Empty ||
-                            phoneNumber <= 0 ||
-                            address == string.Empty)
-                        {
-                            Console.WriteLine();
-                            Console.WriteLine($"Error. One or more fields are empty." +
-                                $"\nPress any key to continue...");
-                            Console.ReadKey();
-                            break;
-                        }
-                        login.UserList = admin.CreateUser(username, password, name, surname, email, phoneNumber, address, login.UserList);
-                        break;
-                    case CreateUserMenuOptions.Exit:
-                        return;
-                }
-            }
-        }
+        
 
         public void AccountMenu()
         {
@@ -548,6 +364,68 @@ namespace AFGRBank.Main
             }
         }
 
+
+
+
+
+
+        public bool GetIsAdmin()
+        {
+            if (login.LoggedInUser is Admin)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public bool GetLoggedInUser()
+        {
+            if (login.LoggedInUser != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // Test method for populating UserList
+        public void PopulateList()
+        {
+            string username = "1";
+            string password = "1";
+            string name = "Ax";
+            string surname = "Be";
+            string email = "ree@se.se";
+            int phonenumber = 777777;
+            string address = "Address";
+            login.UserList = admin.CreateUser(username, password, name, surname, email, phonenumber, address, login.UserList);
+
+            User seedUser = login.UserList[0];
+            cAccount.CreateAccount(seedUser.Accounts, CurrencyNames.DKK);             
+
+            admin.UserName = "admin";
+            admin.Password = "1";
+            admin.Name = "Mr.";
+            admin.Surname = "Admin";
+            admin.Email = "ad@min.se";
+            admin.PhoneNumber = 666;
+            admin.Address = "Address";
+            admin.IsAdmin = true;
+            login.UserList.Add(admin);
+            
+            sAccount.CreateAccount(seedUser.Accounts, CurrencyNames.USD);
+
+
+            PendingTransaction pending = new(transaction, login.UserList[0], login.UserList[1]);
+            PTransaction.Add(pending);
+        }
+
+
+
         public void Testing(short loginAttempt)
         {
             PopulateList();
@@ -565,14 +443,14 @@ namespace AFGRBank.Main
                     $"\n[7] SavingsAccountMenu()" +
                     $"\n[8] TransferMenu()" +
                     $"\n[9] LoanMenu()");
-            
+
                 string input = Console.ReadLine().Trim();
                 if (string.IsNullOrEmpty(input))
                 {
                     Console.WriteLine($"Input was empty, please try again.");
                     continue;
                 }
-                switch (input) 
+                switch (input)
                 {
                     case "0":
                         return;
@@ -581,6 +459,8 @@ namespace AFGRBank.Main
                         break;
                     case "2":
                         LoginMenu(loginAttempt);
+                        Console.WriteLine($"{login.LoggedInUser.UserName} + {login.LoggedInUser.Password}");
+                        Console.ReadKey();
                         break;
                     case "3":
                         UserMenu();
@@ -608,5 +488,6 @@ namespace AFGRBank.Main
                 }
             }
         }
+
     }
 }

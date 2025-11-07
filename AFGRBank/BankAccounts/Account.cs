@@ -6,14 +6,13 @@ using System.Threading.Tasks;
 using AFGRBank.Exchange;
 using AFGRBank.Main;
 using AFGRBank.UserType;
-using AFGRBank.Utility;
 
 namespace AFGRBank.BankAccounts
 {
     public class Account
     {
         public Guid AccountID { get; set; } 
-        public string Currency { get; set; }
+        public CurrencyExchange.CurrencyNames Currency { get; set; }
         public decimal Funds { get; set; }
         public List<Transaction> AccTransList { get; set; }
 
@@ -42,14 +41,9 @@ namespace AFGRBank.BankAccounts
             }
         }
 
-        /// <summary>
-        /// Creates a new Account with default values and adds it to the incoming account list.
-        /// Takes a list of accounts and a currency string as parameters.
-        /// </summary>
-        /// <param name="accountList"></param>
-        /// <param name="currency"></param>
-        /// <returns></returns>
-        public virtual List<Account> CreateAccount(List<Account> accountList, string currency)
+
+
+        public virtual List<Account> CreateAccount(List<Account> accountList, CurrencyExchange.CurrencyNames currency)
         {
             try
             {
@@ -85,38 +79,24 @@ namespace AFGRBank.BankAccounts
         /// <returns>The updated list of accounts after attempting to remove the specified account.</returns>
         public List<CheckingsAccount> DeleteAccount(List<CheckingsAccount> accountList, Guid accountId)
         {
-            bool accountFound = false;
-
-            foreach (CheckingsAccount account in accountList)
+            foreach (CheckingsAccount account in accountList) 
             {
-                if (account.AccountID == accountId)
+                if (account.AccountID == accountId) 
                 {
-                    accountFound = true;
-                    var choice = Menu.ReadOptionIndex("Are you sure you want to delete the following account? \n Selected account: " + accountId, new string[] { "Yes", "No" });
-                    if (choice == 0)
+                    if (account.Funds == 0)
                     {
-                        if (account.Funds == 0)
-                        {
-                            accountList.Remove(account);
-                            Console.WriteLine($"Account {accountId} has been deleted.");
-                            return accountList;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Account still has funds. Please transfer the funds before closing the account.");
-                            return accountList;
-                        }
+                        accountList.Remove(account);
+                        Console.WriteLine("Account has been successfully closed");
                     }
                     else
                     {
-                        Console.WriteLine("Account deletion cancelled.");
-                        return accountList;
+                        Console.WriteLine("The account you are trying to close still has funds in it, please transfer the funds from the account and try again.");
                     }
                 }
-            }
-            if(accountFound == false)
-            {
-                Console.WriteLine($"Could not find the account with account number: {accountId}");
+                else
+                {
+                    Console.WriteLine("Cannot find an account with the given AccountID");
+                }
             }
             return accountList;
         }
@@ -133,6 +113,7 @@ namespace AFGRBank.BankAccounts
         /// <returns></returns>
         public List<User> TransferFunds(List<User> userList, Guid senderAccID, Guid recipientAccID, decimal funds)
         {
+            
             try
             {
                 //Find both sender account and recipient account.
@@ -143,7 +124,7 @@ namespace AFGRBank.BankAccounts
                 Transaction currentTransaction = new Transaction
                 {
                     SenderID = senderAccID,
-                    RecieverID = recipientAccID,
+                    ReceiverID = recipientAccID,
                     Funds = funds,
                     TransDate = DateTime.Now
                 };
@@ -158,8 +139,13 @@ namespace AFGRBank.BankAccounts
                         //Fetch currencies and convert. Converted currency saved in variable converted rate and
                         //added instead of funds to the recipient account.
                         CurrencyExchange exhange = new CurrencyExchange();
-                        string senderCurrency = sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Currency;
-                        string recipientCurrency = recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Currency;
+                        CurrencyExchange.CurrencyNames toSenderCurrency = sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Currency;
+                        CurrencyExchange.CurrencyNames toRecipientCurrency = recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Currency;
+
+                        // Alex: Converts enums to string
+                        string senderCurrency = toSenderCurrency.ToString();
+                        string recipientCurrency = toRecipientCurrency.ToString();
+                        
                         decimal convertedRate = exhange.CalculateExchangeRate(senderCurrency, recipientCurrency, funds);
 
                         sender.Accounts.FirstOrDefault(x => x.AccountID == senderAccID).Funds -= funds;
@@ -218,7 +204,7 @@ namespace AFGRBank.BankAccounts
                     Console.WriteLine("________________________________________");
                     Console.WriteLine($"Transaction date: {transaction.TransDate.ToShortTimeString()}");
                     Console.WriteLine($"Transfered funds: {transaction.Funds}{account.Currency}");
-                    Console.WriteLine($"Recipient account: {transaction.RecieverID}");
+                    Console.WriteLine($"Recipient account: {transaction.ReceiverID}");
                     Console.WriteLine("________________________________________");
                 }
             }
