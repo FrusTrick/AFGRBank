@@ -20,9 +20,20 @@ namespace AFGRBank.UserType
     {
         public bool IsAdmin { get; set; } = true;
 
-        // Calls to create a new user
-        // Loops through to make sure there are no duplicate UserNames
-        // If there aren't, returns a new userlist with the created user ...
+        /// <summary>
+        /// Creates a new <see cref="User"/> object and adds it to the user list.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="password">The password of the user.</param>
+        /// <param name="name">The first name of the user.</param>
+        /// <param name="surName">The last name of the user.</param>
+        /// <param name="email">The email of the user of the user in user@mail.xx format.</param>
+        /// <param name="phoneNumber">The phonenumber of the user as an integer.</param>
+        /// <param name="address">The address of the user.</param>
+        /// <param name="userList">A list of <see cref="User"/> objects to which the new user will be added.</param>
+        /// <returns>
+        /// The updated list of <see cref="User"/> objects including the newly created user.
+        /// </returns>
         public List<User> CreateUser(string username, string password, string name, string surName, string email, int phoneNumber, string address, List<User> userList)
         {
             try
@@ -48,7 +59,11 @@ namespace AFGRBank.UserType
             return userList;
         }
 
-        // TODO: Implement real currency update logic
+        /// <summary>
+        /// Updates the local JSON file <c>"CurrencyRates.json"</c> with a new exchange rate.
+        /// </summary>
+        /// <param name="currencyName">The currency to update, provided as a <see cref="CurrencyNames"/> enum value.</param>
+        /// <param name="updatedAmount">The new exchange rate for the specified currency.</param>
         public void UpdateCurrencyRates(CurrencyNames currencyName, decimal updatedAmount)
         {
             try
@@ -95,7 +110,18 @@ namespace AFGRBank.UserType
             }
         }
 
-        // Create's a Loan object with given parameters
+        /// <summary>
+        /// Creates a <see cref="Loan"/> object, adds it to the <see cref="User.LoanList"/> and pays out the funds
+        /// </summary>
+        /// <param name="user">The <see cref="User"/> object to create a loan for.</param>
+        /// <param name="account">The <see cref="Account"/> object to send the funds to.</param>
+        /// /// <param name="loanAmount">The amount of funds the user is loaning.</param>
+        /// /// <param name="currency">The currency as a <see cref="CurrencyNames"/> enum value.</param>
+        /// /// <param name="interestRate">The interest rate of the loan.</param>
+        /// <remarks>
+        /// Loan eligibility is calculated by calling on the .GetTotalFunds() method and multiplying it by five, minus any existing loan balances.
+        /// If approved, the repayment period is calculated automatically based on the loan method
+        /// </remarks>
         public void CreateLoan(User user, Account account, decimal loanAmount, CurrencyNames currency, decimal interestRate)
         {
             try
@@ -115,13 +141,14 @@ namespace AFGRBank.UserType
                 decimal monthlyPayment = loanAmount * 0.05m;
                 decimal monthlyInterest = interestRate / 12m;
 
+                // Equation for calcultaing the monthly payment, Log(1 + ( Log(m / (m - l * mi) ) )
                 int months = (int)Math.Ceiling(
                     Math.Log((double)(monthlyPayment / (monthlyPayment - loanAmount * monthlyInterest))) /
                     Math.Log((double)(1 + monthlyInterest))
                 );
 
                 Loan newLoan = new Loan();
-                newLoan.CreateLoan(currency, interestRate, startDate, loanAmount, months);
+                newLoan.CreateLoan(currency, interestRate, loanAmount, months);
                 user.AddLoan(newLoan);
                 Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
             }
