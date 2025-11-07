@@ -339,6 +339,135 @@ namespace AFGRBank.Main
 
         #endregion
 
+        #region "AccountMenu() and SavingsAccountMenu() methods"
 
+        private void TransferMenu()
+        {
+            // displayText will be used for showing user inputted values in the menu 
+            //      displayText[0] = senderID
+            //      displayText[1] = recipientID
+            //      displayText[2] = transferFunds
+            string[] displayText = { string.Empty, string.Empty, string.Empty };
+
+            string toSenderID = string.Empty;
+            string toRecipientID = string.Empty;
+            decimal transferFunds = 0;
+
+            bool isContinue = true;
+            while (isContinue)
+            {
+                string questionText = $"Transfer funds:" +
+                    $"\nSender ID:   {displayText[0]}" +
+                    $"\nReceiver ID: {displayText[1]}" +
+                    $"\nAmount:      {displayText[2]}";
+
+                string[] transferMenuOptions = {
+                    "Choose bank account to send from",
+                    "Choose bank account to send to",
+                    "Choose how much to transfer",
+                    "Exit"
+                };
+
+                var selectedOption = Menu.ReadOptionIndex(questionText, transferMenuOptions);
+
+                switch (selectedOption)
+                {
+                    case 0:
+                        Console.Clear();
+
+                        while (true)
+                        {
+                            toSenderID = Validate.GetInput(
+                                $"Input your bank account ID to send from:",
+                                $"Input cannot be empty. Try again."
+                                );
+                            if (!Guid.TryParse(toSenderID, out Guid success))
+                            {
+                                Console.WriteLine($"Could ");
+                                continue;
+                            }
+                            break;
+                        }
+                        displayText[0] = toSenderID;
+                        break;
+
+                    case 1:
+                        Console.Clear();
+
+                        while (true)
+                        {
+                            toRecipientID = Validate.GetInput(
+                                $"Input the bank account ID to send to:",
+                                $"Input cannot be empty. Try again."
+                                );
+                            if (!Guid.TryParse(toSenderID, out Guid success))
+                            {
+                                Console.WriteLine($"Could ");
+                                continue;
+                            }
+                            break;
+                        }
+                        displayText[1] = toRecipientID;
+                        break;
+
+                    case 2:
+                        Console.Clear();
+
+                        transferFunds = Validate.StringToDecimal(
+                            $"Input amount to transfer",
+                            $"Input cannot be empty. Try again",
+                            $"Input contained non-numerical characters. Try again."
+                            );
+                        if (transferFunds <= 0)
+                        {
+                            transferFunds = 0;
+                        }
+                        displayText[2] = transferFunds.ToString();
+                        break;
+
+                    case 3:
+
+                        if (toSenderID == string.Empty || toRecipientID == string.Empty || transferFunds == 0)
+                        {
+                            Console.Clear();
+
+                            if (toSenderID == string.Empty)
+                            {
+                                Console.WriteLine($"Invalid transfer. Sender ID cannot be empty.");
+                            }
+                            if (toRecipientID == string.Empty)
+                            {
+                                Console.WriteLine($"Invalid transfer. Recipient ID cannot be empty.");
+                            }
+                            if (transferFunds == 0)
+                            {
+                                Console.WriteLine($"Invalid transfer. Transfer amount can not be zero.");
+                            }
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+                        if (!Guid.TryParse(toSenderID, out Guid senderID))
+                        {
+                            Console.WriteLine($"Failed. Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+                        if (!Guid.TryParse(toRecipientID, out Guid recipientID))
+                        {
+                            Console.WriteLine($"Failed. Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+
+                        login.UserList = account.TransferFunds(login.UserList, senderID, recipientID, transferFunds);
+                        break;
+
+                    case 4:
+                        return;
+                }
+            }
+        }
+        #endregion
     }
 }

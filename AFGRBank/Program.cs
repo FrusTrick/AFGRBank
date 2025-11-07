@@ -13,19 +13,21 @@ namespace AFGRBank
             // PopulateList() data seeds a list with users so we can log in as one of those users
             short loginAttempts = 3;
             BankingMain menus = new BankingMain();
-            
             menus.PopulateList();
-            
-            
 
+            
             while (true)
             {
+                // GetLoggedInUser() checks if user is already logged in
+                // As there's no way to stay logged in after closing program, this will return false
                 bool isLoggedIn = menus.GetLoggedInUser();
+
                 while (isLoggedIn == false)
                 {
                     menus.MainMenu(loginAttempts);
                     isLoggedIn = menus.GetLoggedInUser();
                 } 
+
                 while (isLoggedIn == true)
                 {
                     bool isAdmin = menus.GetIsAdmin();
