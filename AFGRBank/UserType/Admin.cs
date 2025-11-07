@@ -203,10 +203,10 @@ namespace AFGRBank.UserType
                     Console.Clear();
                     Console.WriteLine(
                         $"You selected transaction: \n" +
-                        $"From: {selectedTransaction.CurrentSender.UserName}" +
-                        $"To: {selectedTransaction.CurrentReceiver.UserName}" +
-                        $"Amount: {selectedTransaction.CurrentTransaction.Funds}" +
-                        $"Created: {selectedTransaction.InitializedDate}"
+                        $"From: {selectedTransaction.CurrentSender.UserName}\n" +
+                        $"To: {selectedTransaction.CurrentReceiver.UserName}\n" +
+                        $"Amount: {selectedTransaction.CurrentTransaction.Funds}\n" +
+                        $"Created: {selectedTransaction.InitializedDate}\n"
                     );
 
                     Console.WriteLine("\nDo you want to confirm this transaction early? y/n");
