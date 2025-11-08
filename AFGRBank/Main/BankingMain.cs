@@ -358,64 +358,64 @@ namespace AFGRBank.Main
 
 
 
-        public void Testing(short loginAttempt)
-        {
-            PopulateList();
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine($"Pick a BankingMain menu to test!" +
-                    $"\n[0] Quit" +
-                    $"\n[1] MainMenu()" +
-                    $"\n[2] LoginMenu()" +
-                    $"\n[3] UserMenu()" +
-                    $"\n[4] AdminMenu()" +
-                    $"\n[5] CreateUserMenu()" +
-                    $"\n[6] AccountMenu()" +
-                    $"\n[7] SavingsAccountMenu()" +
-                    $"\n[8] TransferMenu()" +
-                    $"\n[9] LoanMenu()");
+        //public void Testing(short loginAttempt)
+        //{
+        //    PopulateList();
+        //    while (true)
+        //    {
+        //        Console.Clear();
+        //        Console.WriteLine($"Pick a BankingMain menu to test!" +
+        //            $"\n[0] Quit" +
+        //            $"\n[1] MainMenu()" +
+        //            $"\n[2] LoginMenu()" +
+        //            $"\n[3] UserMenu()" +
+        //            $"\n[4] AdminMenu()" +
+        //            $"\n[5] CreateUserMenu()" +
+        //            $"\n[6] AccountMenu()" +
+        //            $"\n[7] SavingsAccountMenu()" +
+        //            $"\n[8] TransferMenu()" +
+        //            $"\n[9] LoanMenu()");
 
-                string input = Console.ReadLine().Trim();
-                if (string.IsNullOrEmpty(input))
-                {
-                    Console.WriteLine($"Input was empty, please try again.");
-                    continue;
-                }
-                switch (input)
-                {
-                    case "0":
-                        return;
-                    case "1":
-                        MainMenu(loginAttempt);
-                        break;
-                    case "2":
-                        LoginMenu(loginAttempt);
-                        Console.WriteLine($"{login.LoggedInUser.UserName} + {login.LoggedInUser.Password}");
-                        Console.ReadKey();
-                        break;
-                    case "3":
-                        UserMenu();
-                        break;
-                    case "4":
-                        AdminMenu();
-                        break;
-                    case "5":
-                        break;
-                    case "6":
-                        break;
-                    case "7":
-                        break;
-                    case "8":
-                        break;
-                    case "9":
-                        break;
-                    default:
-                        Console.WriteLine($"Error. Incorrect input. Try again.");
-                        break;
-                }
-            }
-        }
+        //        string input = Console.ReadLine().Trim();
+        //        if (string.IsNullOrEmpty(input))
+        //        {
+        //            Console.WriteLine($"Input was empty, please try again.");
+        //            continue;
+        //        }
+        //        switch (input)
+        //        {
+        //            case "0":
+        //                return;
+        //            case "1":
+        //                MainMenu(loginAttempt);
+        //                break;
+        //            case "2":
+        //                LoginMenu(loginAttempt);
+        //                Console.WriteLine($"{login.LoggedInUser.UserName} + {login.LoggedInUser.Password}");
+        //                Console.ReadKey();
+        //                break;
+        //            case "3":
+        //                UserMenu();
+        //                break;
+        //            case "4":
+        //                AdminMenu();
+        //                break;
+        //            case "5":
+        //                break;
+        //            case "6":
+        //                break;
+        //            case "7":
+        //                break;
+        //            case "8":
+        //                break;
+        //            case "9":
+        //                break;
+        //            default:
+        //                Console.WriteLine($"Error. Incorrect input. Try again.");
+        //                break;
+        //        }
+        //    }
+        //}
 
         public static void RunTask(object state)
         {
