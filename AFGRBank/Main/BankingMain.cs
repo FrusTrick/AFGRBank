@@ -66,13 +66,13 @@ namespace AFGRBank.Main
             string[] mainMenuOptions = { "Login", "Exit" };
             while (true)
             {
-                MainMenuOptions selectedOption = Menu.ReadOption<string, MainMenuOptions>(asciiArt, mainMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(asciiArt, mainMenuOptions);
                 switch (selectedOption)
                 {
-                    case MainMenuOptions.Login:
+                    case 0:
                         LoginMenu(loginAttempts);
                         return;
-                    case MainMenuOptions.Exit:
+                    case 1:
                         Process.GetCurrentProcess().Kill();
                         return;
                 }
@@ -183,7 +183,6 @@ namespace AFGRBank.Main
                     case 1:
                         // Opens submenu that list every account in User's account list
                         // If user exits instead, skip the "if" code block
-
                         Account? selectedAccount = null;
                         do
                         {

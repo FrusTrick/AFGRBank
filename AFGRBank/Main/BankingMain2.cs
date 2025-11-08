@@ -365,6 +365,9 @@ namespace AFGRBank.Main
                             $"Input cannot be empty. Try again.",
                             $"Input did not match any existing currency. Try again."
                             );
+
+                        currency = tempCurrency;
+                        displayText[1] = tempCurrency.ToString();
                         break;
 
                     case 2:
