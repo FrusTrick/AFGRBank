@@ -74,8 +74,8 @@ namespace AFGRBank.UserType
                 // Set the options to handle CurrencyName enum keys
                 var options = new JsonSerializerOptions
                 {
-                    Converters = { new JsonStringEnumConverter() }, // Converts json string to Enum
-                    WriteIndented = true // Essentially reformats the spaces for the json file for machine reading 
+                    Converters = { new JsonStringEnumConverter() }, // Converts JSON string to Enum
+                    WriteIndented = true // Reformats the spaces for the JSON file for optimized machine reading
                 };
                 
                 // Ensures the file path that is being updated is the currenct directory we're using and not the debugger files that vss generates
@@ -88,16 +88,17 @@ namespace AFGRBank.UserType
                     File.WriteAllText(jsonPath, "{}");
                 }
 
+                // Read the JSON file
                 string jsonString = File.ReadAllText(jsonPath);
-
-                // Debugging, feel free to remove
+                
                 /*
+                // Debugging
                 Console.WriteLine("JSON read.");
                 Console.WriteLine(File.Exists(jsonPath));  // Should print True
                 Console.WriteLine(File.ReadAllText(jsonPath));  // Should show updated JSON
                 */
 
-                // Decodes the json file into dictionary format CurrencyName: decimal
+                // Decodes the JSON file into dictionary format CurrencyName: decimal
                 var currencyRates = JsonSerializer.Deserialize<Dictionary<CurrencyExchange.CurrencyNames, decimal>>(jsonString, options)
                                     ?? new Dictionary<CurrencyNames, decimal>(); // Creates a dictionary to ensure that the program doesn't crash in case the file is empty
                 
@@ -118,9 +119,9 @@ namespace AFGRBank.UserType
         /// </summary>
         /// <param name="user">The <see cref="User"/> object to create a loan for.</param>
         /// <param name="account">The <see cref="Account"/> object to send the funds to.</param>
-        /// /// <param name="loanAmount">The amount of funds the user is loaning.</param>
-        /// /// <param name="currency">The currency as a <see cref="CurrencyNames"/> enum value.</param>
-        /// /// <param name="interestRate">The interest rate of the loan.</param>
+        /// <param name="loanAmount">The amount of funds the user is loaning.</param>
+        /// <param name="currency">The currency as a <see cref="CurrencyNames"/> enum value.</param>
+        /// <param name="interestRate">The interest rate of the loan.</param>
         /// <remarks>
         /// Loan eligibility is calculated by calling on the .GetTotalFunds() method and multiplying it by five, minus any existing loan balances.
         /// If approved, the repayment period is calculated automatically based on the loan amount and interest rate.
@@ -170,6 +171,10 @@ namespace AFGRBank.UserType
         /// </remarks>
         public void ViewPendingTransactions(List<Transaction> pending)
         {
+            // Removes all expired transactions
+            RemoveExpiredTransactions();
+
+            // Initializing the menu
             string promptText = "Choose a transaction to confirm or exit";
             List<string> menuOptions = new List<string>(); // For saving the menu options
             List<Transaction> menuTransactions = new List<Transaction>(); // For saving the transactions as a menu option
@@ -186,8 +191,10 @@ namespace AFGRBank.UserType
                 menuTransactions.Add(pt);
             }
 
+            // Adds the Exit option
             menuOptions.Add("Exit");
 
+            // Loop for error handling and repetitive inputs
             while (true)
             {
                 // Prompt the ReadOptionIndexList 
@@ -235,6 +242,37 @@ namespace AFGRBank.UserType
                 }
             }
             
+        }
+
+        /// <summary>
+        /// Removes any expired <see cref="Transaction"/> in the static <see cref="BankingMain.pendingTransaction"/> list
+        /// </summary>
+        /// <remarks>
+        /// Searches for <see cref="Transaction"/> objects with Date's past x minutes in the 
+        /// <see cref="BankingMain.pendingTransaction"/> list and saves them as a local expiredTransactions list.
+        /// If found, removes them from the <see cref="BankingMain.pendingTransaction"/> list
+        /// </remarks>
+        public void RemoveExpiredTransactions()
+        {
+            // The time in minutes before a transaction expires
+            double transactionTimeout = 15;
+
+            // Find all expired transactions
+            var expiredTransactions = BankingMain.pendingTransaction
+                .Where(pt => (DateTime.Now - pt.TransDate) >= TimeSpan.FromMinutes(transactionTimeout))
+                .ToList();
+
+            // Loops through the static list in banking main
+            foreach (var pt in expiredTransactions)
+            {
+                BankingMain.pendingTransaction.Remove(pt);
+                Console.WriteLine($"Removed expired transaction from: {pt.SenderID} to: receiver ID: {pt.ReceiverID}");
+            }
+
+            if (expiredTransactions.Count == 0)
+            {
+                Console.WriteLine("No expired transactions found.");
+            }
         }
 
         /* Redundant method, ViewPendingTransactions takes care of it.
