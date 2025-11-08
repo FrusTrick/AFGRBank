@@ -44,7 +44,7 @@ namespace AFGRBank.BankAccounts
         /// available funds.
         /// </summary>
         /// <remarks>The method prompts the user for confirmation before attempting to close the account. 
-        /// If the account has funds, it cannot be closed, and the user is notified.  If the account ID does not match
+        /// If the account has funds, it cannot be closed, and the user is notified. If the account ID does not match
         /// any account in the list, the user is informed.</remarks>
         /// <param name="accountList">The list of accounts to search for the account to be removed.</param>
         /// <param name="accountId">The unique identifier of the account to be removed.</param>
@@ -61,25 +61,21 @@ namespace AFGRBank.BankAccounts
             }
             else
             {
-                foreach (Account account in accountList)
+                var accountToDelete = accountList.Find(account => account.AccountID == accountId);
+                if (accountToDelete == null)
                 {
-                    if (account.AccountID == accountId)
-                    {
-                        if (account.Funds == 0)
-                        {
-                            accountList.Remove(account);
-                            Console.WriteLine("Account has been successfully closed");
-                        }
-                        else
-                        {
-                            Console.WriteLine("The account you are trying to close still has funds in it, please transfer the funds from the account and try again.");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Cannot find an account with the given AccountID");
-                    }
+                    Console.WriteLine("Account does not exist.");
+                    return accountList;
                 }
+                if (accountToDelete.Funds > 0)
+                {
+                    Console.WriteLine("The account you are trying to close still has funds in it, please transfer the funds from the account and try again.");
+                    return accountList;
+                }
+
+                accountList.Remove(accountToDelete);
+                Console.WriteLine("The account was successfully closed.");
+                return accountList;
             }
                 
             return accountList;
