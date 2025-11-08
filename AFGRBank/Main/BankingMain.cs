@@ -209,8 +209,11 @@ namespace AFGRBank.Main
 
                     case 4:
                         // Display every loan user has received
-
+                        loan.DisplayAllLoans(login.LoggedInUser);
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
                         break;
+
                     case 5:
                         // Logout user and exit UserMenu()
                         login.LogoutUser();

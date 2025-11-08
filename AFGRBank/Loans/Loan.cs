@@ -1,4 +1,6 @@
-﻿using AFGRBank.Exchange;
+﻿using AFGRBank.BankAccounts;
+using AFGRBank.Exchange;
+using AFGRBank.UserType;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,33 +86,39 @@ namespace AFGRBank.Loans
             Console.WriteLine($"Maximum loan calculated: {LoanAmount}");
         }
 
-        //  // Change this... 
-        //  public string Currency { get; set; } 
-        //
-        //  // To this...
-        //  public CurrencyExchange.CurrencyNames Currency { get; set; } 
-        //
-        //  public List<Loan> CreateLoan(CurrencyExchange.CurrencyNames currency, decimal interestRate, DateOnly startDate, DateOnly endDate, decimal loanAmount, List<Loan> loanList)
-        //  {
-        //      try
-        //      {
-        //          Loan newLoan = new Loan
-        //          {
-        //              Curreny = currency;
-        //              InterestRate = interestRate;
-        //              StartDate = startDate;
-        //              EndDate = endDate;
-        //              LoanAmount = amount
-        //          }
-        //
-        //          userList.Add(newUser);
-        //          Console.WriteLine($"Loan successfully created.");
-        //      }
-        //      catch (Exception ex)
-        //      {
-        //          Console.WriteLine($"Loan failed to process: {ex.Message}");
-        //      }
-        //      return loanList;
-        //  }
+        /// <summary>
+        ///     Displays all loans in user
+        /// </summary>
+        /// <remarks>
+        ///     If no loans exists in user's loan list are found, a message informing of that will be displayed instead
+        /// </remarks>
+        /// <param name="user"></param>
+        public void DisplayAllLoans(User user)
+        {
+            List<Loan> allLoans = new List<Loan>();
+
+            foreach (Loan loan in user.LoanList)
+            {
+                allLoans.Add(loan);
+            }
+
+            if (allLoans.Count > 0)
+            {
+
+                foreach (var loan in allLoans)
+                {
+                    Console.WriteLine($"________________________________________________________");
+                    Console.WriteLine($"You borrowed:  {loan.LoanAmount} {loan.Currency}");
+                    Console.WriteLine($"Interest rate: {loan.InterestRate}");
+                    Console.WriteLine($"Date of loan:  {loan.StartDate} - {loan.EndDate}");
+                    Console.WriteLine($"________________________________________________________");
+
+                }
+            }
+            else
+            {
+                Console.WriteLine("Your loan history is empty.");
+            }
+        }
     }
 }
