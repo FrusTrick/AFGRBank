@@ -41,6 +41,16 @@ namespace AFGRBank.UserType
         {
             try
             {
+                // Checks if username already exists in Login.UserList
+                if (userList.Count != 0)
+                {
+                    var check = userList.First(x => x.UserName == username);
+                    if (check != null)
+                    {
+                        Console.WriteLine($"User creation failed. \"{username}\" is an already existing user.");
+                        return userList;
+                    }
+                }
                 User newUser = new User
                 {
                     UserName = username,

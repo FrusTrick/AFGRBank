@@ -446,8 +446,12 @@ namespace AFGRBank.Main
 
 
         #region "AdminMenu() methods"
+        /// <summary>
+        ///     Opens menu where admin can create new User
+        /// </summary>
         private void CreateUserMenu()
         {
+            // Variables to be used for User fields
             string username = string.Empty;
             string password = string.Empty;
             string name = string.Empty;
@@ -456,43 +460,60 @@ namespace AFGRBank.Main
             int phoneNumber = 0;
             string address = string.Empty;
 
+            // Displays each of the above variables as text in the menu
+            string[] displayText = {
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+            };
+
             while (true)
             {
                 string questionText = $"User account creation:";
                 string[] createUserMenuOptions = {
-                    $"Edit username              Current: {username}",
-                    $"Edit password              Current: {password}",
-                    $"Edit name                  Current: {name}",
-                    $"Edit surname               Current: {surname}",
-                    $"Edit email address         Current: {email}",
-                    $"Edit phone number          Current: {phoneNumber}",
-                    $"Edit address               Current: {address}",
+                    $"Edit username              Current: {displayText[0]}",
+                    $"Edit password              Current: {displayText[1]}",
+                    $"Edit name                  Current: {displayText[2]}",
+                    $"Edit surname               Current: {displayText[3]}",
+                    $"Edit email address         Current: {displayText[4]}",
+                    $"Edit phone number          Current: {displayText[5]}",
+                    $"Edit address               Current: {displayText[6]}",
                     $"Create new user",
                     $"Exit"
                 };
 
                 var selectedOption = Menu.ReadOptionIndex(questionText, createUserMenuOptions);
+
                 switch (selectedOption)
                 {
                     case 0:
                         Console.Clear();
                         username = Validate.GetInput("Input new username:", "Input cannot be empty. Try again.");
+                        displayText[0] = username;
                         break;
                     case 1:
                         Console.Clear();
                         password = Validate.GetInput("Input new password:", "Input cannot be empty. Try again.");
+                        displayText[1] = password;
                         break;
                     case 2:
                         Console.Clear();
                         name = Validate.GetInput("Input new name:", "Input cannot be empty. Try again.");
+                        displayText[2] = name;
                         break;
                     case 3:
                         Console.Clear();
                         surname = Validate.GetInput("Input new surname:", "Input cannot be empty. Try again.");
+                        displayText[3] = surname;
                         break;
                     case 4:
                         Console.Clear();
                         email = Validate.GetInput("Input new email address:", "Input cannot be empty. Try again.");
+                        displayText[4] = email;
                         break;
                     case 5:
                         Console.Clear();
@@ -500,12 +521,15 @@ namespace AFGRBank.Main
                             "Input cannot be empty. Try again.", "Input was not a number. Try again.",
                             "Input was either too big or too small. Try again."
                             );
+                        displayText[5] = phoneNumber.ToString();
                         break;
                     case 6:
                         Console.Clear();
                         address = Validate.GetInput("Input new physical address:", "Input cannot be empty. Try again.");
+                        displayText[6] = address;
                         break;
                     case 7:
+                        Console.Clear();
                         if (username == string.Empty ||
                             password == string.Empty ||
                             name == string.Empty ||
@@ -520,8 +544,11 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                             break;
                         }
+
                         Login.UserList = admin.CreateUser(username, password, name, surname, email, phoneNumber, address, Login.UserList);
-                        break;
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
+                        return;
                     case 8:
                         return;
                 }
@@ -612,8 +639,7 @@ namespace AFGRBank.Main
                 string[] createLoanMenuOptions = {
                     $"Username:            {displayText[0]}",
                     $"Bank Account ID:     {displayText[1]}",
-                    $"Currency:            {displayText[2]}",
-                    $"Loan Amount:         {displayText[3]}",
+                    $"Loan Amount:         {displayText[3]}{displayText[2]}",
                     $"Interest rate:       {displayText[4]}",
                     $"Create new loan",
                     $"Exit"
@@ -635,17 +661,19 @@ namespace AFGRBank.Main
                             break;
                         }
 
-                        displayText[0] = $"{loanTaker.UserName} [Name: {loanTaker.Name} Surname: {loanTaker.Surname}]";
+                        displayText[0] = $"{loanTaker.UserName} [ {loanTaker.Name} {loanTaker.Surname} | {loanTaker.Email} | {loanTaker.PhoneNumber} ]";
                         break;
                     
                     case 1: 
                         // Select an account to lend money to.
                         // If loanTaker has not been set yet, display text and exit this case
+                        // Also automatically sets currency
                         Console.Clear();
 
                         if (loanTaker == null)
                         {
-                            Console.WriteLine($"User is empty. Please fill it and try again. Press any ket to continue...");
+                            Console.WriteLine($"Failed to load bank accounts. A user must be selected beforehand.");
+                            Console.WriteLine($"Press any key to continue...");
                             Console.ReadKey();
                             continue;
                         }
@@ -658,70 +686,62 @@ namespace AFGRBank.Main
                             continue;
                         }
 
+                        currencyName = loanTakerAccount.Currency;
                         displayText[1] = loanTakerAccount.AccountID.ToString();
+                        displayText[2] = loanTakerAccount.Currency.ToString();
                         break;
 
                     case 2:
-                        // Select which currency the loan should be in
-                        Console.Clear();
-
-                        // GetJSONCurrencyRatesToString display available currencies to be selected
-                        string displayCurrencyRates = GetJSONCurrencyRatesToString();
-
-                        currencyName = Validate.StringToCurrencyName(
-                            $"Select currency (default is SEK):" +
-                            $"\n{displayCurrencyRates}",
-                            $"Input cannot be empty. Try again.",
-                            $"Input did not match any existing currency. Try again."
-                            );
-
-                        displayText[2] = $"{currencyName.ToString()}";
-                        break;
-
-                    case 3: 
                         // Sets the amount of money to be lended
                         Console.Clear();
                         loanAmount = Validate.StringToDecimal(
-                            $"Input the selected loan amount",
+                            $"Input the loan amount",
                             $"Input cannot be empty. Try again.",
-                            $"Input did not match any existing currency. Try again."
+                            $"Invalid input. Only numbers and decimal symbol allowed. Try again."
                             );
                         if (loanAmount <= 0 || loanAmount == null)
                         {
-                            Console.WriteLine($"Loan can not be below 0. Press any key to continue...");
+                            Console.WriteLine($"Loan amount can not be below 0. Press any key to continue...");
                             Console.ReadKey();
                         }
-                        displayText[3] = loanAmount.ToString();
+                        displayText[3] = $"{loanAmount.ToString()} ";
                         break;
 
-                    case 4:
+                    case 3: 
                         // Sets the loan interest rate
                         Console.Clear();
                         interestRate = Validate.StringToDecimal(
-                            $"Input the selected loan amount",
+                            $"Input the interest rate in percentage",
                             $"Input cannot be empty. Try again.",
-                            $"Input did not match any existing currency. Try again."
+                            $"Invalid input. Only numbers and decimal symbol allowed. Try again."
                             );
                         if (interestRate <= 0 || interestRate == null)
                         {
-                            Console.WriteLine($"Loan can not be below 0. Press any key to continue...");
+                            Console.WriteLine($"Interest rate can not be below 0. Press any key to continue...");
                             Console.ReadKey();
                         }
                         displayText[4] = interestRate.ToString();
                         break;
 
-                    case 5:
+                    case 4:
                         // Creates a loan for the specified user to that particular bank account
+
+                        Console.Clear();
                         if (loanTaker == null || loanTakerAccount == null || currencyName == null || loanAmount <= 0 || interestRate <= 0)
                         {
                             Console.WriteLine($"One or more fields has no value. Please fill them.");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
                             break;
                         }
                         admin.CreateLoan(loanTaker, loanTakerAccount, loanAmount, currencyName, interestRate);
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
                         break;
 
-                    case 6:
+                    case 5:
                         return;
+
                 }
             }
 

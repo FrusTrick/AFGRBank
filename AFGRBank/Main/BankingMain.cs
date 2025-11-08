@@ -217,6 +217,7 @@ namespace AFGRBank.Main
 
                     case 5:
                         // Logout user and exit UserMenu()
+                        Console.Clear();
                         login.LogoutUser();
                         return;
                 }
@@ -260,6 +261,7 @@ namespace AFGRBank.Main
                         break;
                     case 4:
                         // Logout user and exit AdminMenu()
+                        Console.Clear();
                         login.LogoutUser();
                         return;
                 }
