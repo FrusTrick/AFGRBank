@@ -128,18 +128,19 @@ namespace AFGRBank.Main
                         if (toSenderID == string.Empty || toRecipientID == string.Empty || transferFunds == 0)
                         {
                             Console.Clear();
+                            Console.WriteLine($"Invalid transfer.");
 
                             if (toSenderID == string.Empty)
                             {
-                                Console.WriteLine($"Invalid transfer. Sender ID cannot be empty.");
+                                Console.WriteLine($"Sender ID cannot be empty.");
                             }
                             if (toRecipientID == string.Empty)
                             {
-                                Console.WriteLine($"Invalid transfer. Recipient ID cannot be empty.");
+                                Console.WriteLine($"Recipient ID cannot be empty.");
                             }
                             if (transferFunds == 0)
                             {
-                                Console.WriteLine($"Invalid transfer. Transfer amount can not be zero.");
+                                Console.WriteLine($"Transfer amount can not be zero.");
                             }
                             Console.WriteLine($"Press any key to continue...");
                             Console.ReadKey();
@@ -170,13 +171,15 @@ namespace AFGRBank.Main
                             continue;
                         }
 
-                        // When all information is validated, call PrepFundsTransfer() which will add two Transaction objects,
+                        // When all information is validated, call PrepFundsTransfer() which will add create Transaction objects,
                         //      first object is to be stored in sender transaction history,
                         //      second object is to be stored in recipient transaction history;
-                        // into PendingTransaction objects awaiting confirmation by an admin or a 15 minute global timer
+                        // these are inserted into PendingTransaction awaiting confirmation by an admin or a 15 minute global timer
                         try
                         {
+                            Console.Clear();
                             var temp = pTransaction.PrepFundsTransfer(Login.UserList, senderID, recipientID, transferFunds);
+
                             foreach (var transaction in temp)
                             {
                                 pendingTransaction.Add(transaction);
@@ -185,8 +188,6 @@ namespace AFGRBank.Main
                         catch (Exception)
                         {
                             Console.WriteLine($"Transaction failed.");
-                            Console.WriteLine($"Press any key to continue...");
-                            Console.ReadKey();
                         }
 
                         Console.WriteLine($"Press any key to continue...");
@@ -435,14 +436,6 @@ namespace AFGRBank.Main
                         return null;
                 }
             }
-        }
-
-
-
-        private void GetLoanList()
-        {
-            
-            List<Loan> loanList = login.LoggedInUser.LoanList;
         }
 
 
@@ -818,11 +811,8 @@ namespace AFGRBank.Main
             }
         }
 
-        
-
-
-
-
         #endregion
+
+
     }
 }

@@ -82,6 +82,12 @@ namespace AFGRBank.Main
                         pending.Add(senderTransaction);
                         pending.Add(recipientTransaction);
 
+                        Console.WriteLine($"Transaction created successfully.");
+                        return pending;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Transaction failed. Transfer amount cannot exceed sender account balance.");
                         return pending;
                     }
                 }
