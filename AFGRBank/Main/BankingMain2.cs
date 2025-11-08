@@ -286,13 +286,14 @@ namespace AFGRBank.Main
                     Console.Clear();
 
                     selectedAccount.DeleteAccount(accountList, selectedAccount.AccountID);
-
                     Console.WriteLine($"Press any key to continue...");
                     Console.ReadKey();
                     return;
                 }
                 else if (chosenOption == "Check savings forecast")
                 {
+                    // Displays the savings forecast of a savings account
+                    Console.Clear();
                     int years = Validate.StringToInt(
                         $"Input the amount of years to calculate:", 
                         $"Input cannot be empty. Try again.", 
@@ -300,6 +301,8 @@ namespace AFGRBank.Main
                         );
                     
                     sAccount.SavingsForecast((SavingsAccount)selectedAccount, years);
+                    Console.WriteLine($"Press any key to continue...");
+                    Console.ReadKey();
                 }
             }
         }

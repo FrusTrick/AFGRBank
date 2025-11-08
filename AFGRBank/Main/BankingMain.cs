@@ -192,7 +192,7 @@ namespace AFGRBank.Main
                             {
                                 ViewSelectedAccountMenu(selectedAccount, login.LoggedInUser.Accounts);
                             }
-                        } while (selectedAccount == null);
+                        } while (selectedAccount != null);
                         break;
 
                     case 2:
@@ -202,6 +202,7 @@ namespace AFGRBank.Main
 
                     case 3:
                         // Display every transactions user has sent and received
+                        Console.Clear();
                         transaction.DisplayAllTransactions(login.LoggedInUser);
                         Console.WriteLine($"Press any key to continue...");
                         Console.ReadKey();
@@ -209,6 +210,7 @@ namespace AFGRBank.Main
 
                     case 4:
                         // Display every loan user has received
+                        Console.Clear();
                         loan.DisplayAllLoans(login.LoggedInUser);
                         Console.WriteLine($"Press any key to continue...");
                         Console.ReadKey();
