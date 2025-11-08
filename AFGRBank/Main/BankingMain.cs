@@ -165,10 +165,9 @@ namespace AFGRBank.Main
         {
             string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}.";
             string[] userMenuOptions = { 
-                "Borrow money", 
-                "Change currency", 
+                "Transfer funds",
                 "View your bank accounts", 
-                "View interest rates",
+                //"View interest rates",
                 "View transactions",
                 "Logout" 
             };
@@ -179,7 +178,7 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case 0:
-                        BorrowMenu();
+                        TransferMenu();
                         break;
                     case 1:
                         break;
@@ -187,6 +186,7 @@ namespace AFGRBank.Main
                         ListAccountsMenu(login.LoggedInUser.Accounts);
                         break;
                     case 3:
+                        
                         break;
                     case 4:
                         break;
@@ -230,7 +230,7 @@ namespace AFGRBank.Main
                     case 3:
                         // View all transactions that is waiting to be confirmed by a 15 minute timer
                         // Includes an option for admin to confirm transactions early
-                        admin.ViewPendingTransactions();
+                        admin.ViewPendingTransactions(pendingTransaction);
                         break;
                     case 4:
                         login.LogoutUser();

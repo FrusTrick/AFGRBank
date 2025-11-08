@@ -25,6 +25,159 @@ namespace AFGRBank.Main
         #region "UserMenu() methods"
 
 
+        private void TransferMenu()
+        {
+            // displayText will be used for showing user inputted values in the menu 
+            //      displayText[0] = senderID
+            //      displayText[1] = recipientID
+            //      displayText[2] = transferFunds
+            string[] displayText = { string.Empty, string.Empty, string.Empty };
+
+            string toSenderID = string.Empty;
+            string toRecipientID = string.Empty;
+            decimal transferFunds = 0;
+
+            bool isContinue = true;
+            while (isContinue)
+            {
+                string questionText = $"Transfer funds:" +
+                    $"\nSender ID:   {displayText[0]}" +
+                    $"\nReceiver ID: {displayText[1]}" +
+                    $"\nAmount:      {displayText[2]}";
+
+                string[] transferMenuOptions = {
+                    "Choose bank account to send from",
+                    "Choose bank account to send to",
+                    "Choose how much to transfer",
+                    "Exit"
+                };
+
+                var selectedOption = Menu.ReadOptionIndex(questionText, transferMenuOptions);
+
+                switch (selectedOption)
+                {
+                    case 0:
+                        // Sets the bank account to send money from
+                        Console.Clear();
+
+                        while (true)
+                        {
+                            toSenderID = Validate.GetInput(
+                                $"Input your bank account ID to send from:",
+                                $"Input cannot be empty. Try again."
+                                );
+                            if (!Guid.TryParse(toSenderID, out Guid success))
+                            {
+                                Console.WriteLine($"Recipient account ID was in an invalid format.");
+                                Console.WriteLine($"Press any key to continue...");
+                                Console.ReadKey();
+                                continue;
+                            }
+                            break;
+                        }
+                        displayText[0] = toSenderID;
+                        break;
+
+                    case 1:
+                        // Sets the bank account that will receive the money
+                        Console.Clear();
+
+                        while (true)
+                        {
+                            toRecipientID = Validate.GetInput(
+                                $"Input the bank account ID to send to:",
+                                $"Input cannot be empty. Try again."
+                                );
+                            if (!Guid.TryParse(toRecipientID, out Guid success))
+                            {
+                                Console.WriteLine($"Recipient account ID was in an invalid format.");
+                                Console.WriteLine($"Press any key to continue...");
+                                Console.ReadKey();
+                                continue;
+                            }
+                            break;
+                        }
+                        displayText[1] = toRecipientID;
+                        break;
+
+                    case 2:
+                        // Sets the amount of money that will be transferred.
+                        // Transfer amount cannot be less than or equal to 0
+                        Console.Clear();
+                        transferFunds = Validate.StringToDecimal(
+                            $"Input amount to transfer",
+                            $"Input cannot be empty. Try again",
+                            $"Input contained non-numerical characters. Try again."
+                            );
+                        if (transferFunds <= 0)
+                        {
+                            transferFunds = 0;
+                        }
+                        displayText[2] = transferFunds.ToString();
+                        break;
+
+                    case 3:
+
+                        if (toSenderID == string.Empty || toRecipientID == string.Empty || transferFunds == 0)
+                        {
+                            Console.Clear();
+
+                            if (toSenderID == string.Empty)
+                            {
+                                Console.WriteLine($"Invalid transfer. Sender ID cannot be empty.");
+                            }
+                            if (toRecipientID == string.Empty)
+                            {
+                                Console.WriteLine($"Invalid transfer. Recipient ID cannot be empty.");
+                            }
+                            if (transferFunds == 0)
+                            {
+                                Console.WriteLine($"Invalid transfer. Transfer amount can not be zero.");
+                            }
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+                        if (!Guid.TryParse(toSenderID, out Guid senderID))
+                        {
+                            Console.WriteLine($"Sender account ID could not be parsed");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+                        if (!Guid.TryParse(toRecipientID, out Guid recipientID))
+                        {
+                            Console.WriteLine($"Failed. Press any key to continue...");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+
+                        try
+                        {
+                            var temp = pTransaction.PrepFundsTransfer(Login.UserList, senderID, recipientID, transferFunds);
+                            foreach (var transaction in temp)
+                            {
+                                pendingTransaction.Add(transaction);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine($"Transaction failed.");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                        }
+                        Console.WriteLine($"Transaction successfully created.");
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
+                        break;
+
+                    case 4:
+                        return;
+                }
+            }
+        }
+
         private void BorrowMenu()
         {
             while (true)
@@ -236,17 +389,22 @@ namespace AFGRBank.Main
             };
             string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
             string jsonString = File.ReadAllText(jsonPath);
+
+            // This Dictionary will be accessed to get the currency rate based on user inputted currency name
             var currencyAndRates = JsonSerializer.Deserialize<Dictionary<CurrencyNames, decimal>>(jsonString, options);
 
+
+
+            // These variables will used as user defined parameter in CreateLoan() 
             CurrencyNames currencyName = CurrencyNames.SEK;
             User? loanTaker = null;
             Account? loanTakerAccount = null;
             decimal currencyRate = 0;
             decimal loanAmount = 0;
-            DateTime? startDate = null;
 
             // This will be used to display currencyName, currencyRate, loanAmount, startDate, endDate on the button text
             string[] displayText = { string.Empty, string.Empty, string.Empty, string.Empty, string.Empty };
+
             while (true)
             {
                 string questionText = $"Create new loan request:";
@@ -270,7 +428,8 @@ namespace AFGRBank.Main
                         loanTaker = Login.UserList.FirstOrDefault(x => x.UserName == getUsername);
                         if (loanTaker == null)
                         {
-                            Console.WriteLine($"Failed to find any user with matching username. Press any key to exit...");
+                            Console.WriteLine($"Failed to find any user with matching username.");
+                            Console.WriteLine($"Press any key to exit...");
                             Console.ReadKey();
                             break;
                         }
@@ -304,6 +463,7 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                             continue;
                         }
+
                         displayText[1] = loanTakerAccount.AccountID.ToString();
                         break;
 
@@ -382,7 +542,7 @@ namespace AFGRBank.Main
                 {
                     menuOptions.Add(
                         $"Bank ID:      {account.AccountID}\n" +
-                        $"Type:         Savings account\n" +
+                        $"Type:         Checkings account\n" +
                         $"Total funds:  {account.Currency} {account.Funds}\n"
                     );
                 }
@@ -501,7 +661,6 @@ namespace AFGRBank.Main
                         return;
 
                     case 3:
-
                         return;
                 }
             }
@@ -511,11 +670,11 @@ namespace AFGRBank.Main
 
         private void CreateNewAccountMenu()
         {
-            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
-            string jsonString = File.ReadAllText(jsonPath);
-
             CurrencyNames currency = CurrencyNames.SEK;
             short? accountType = null;
+
+            // Display available currencies
+            string displayCurrencyRates = GetJSONCurrencyRatesToString();
 
             string[] displayText = { string.Empty, string.Empty };
 
@@ -565,9 +724,7 @@ namespace AFGRBank.Main
 
                         CurrencyNames tempCurrency = Validate.StringToCurrencyName(
                             $"Select which currency your new bank account will use:" + 
-                            $"\n{jsonString}"
-                                .Replace('{', ' ')
-                                .Replace('}', ' '),
+                            $"\n{displayCurrencyRates}",
                             $"Input cannot be empty. Try again.",
                             $"Input did not match any existing currency. Try again."
                             );
@@ -598,6 +755,7 @@ namespace AFGRBank.Main
                 }
             }
         }
+
 
         /// <summary>
         /// Sets the bank account type during CreateNewAccountMenu()
@@ -634,150 +792,6 @@ namespace AFGRBank.Main
 
 
 
-
-        private void TransferMenu()
-        {
-            // displayText will be used for showing user inputted values in the menu 
-            //      displayText[0] = senderID
-            //      displayText[1] = recipientID
-            //      displayText[2] = transferFunds
-            string[] displayText = { string.Empty, string.Empty, string.Empty };
-
-            string toSenderID = string.Empty;
-            string toRecipientID = string.Empty;
-            decimal transferFunds = 0;
-
-            bool isContinue = true;
-            while (isContinue)
-            {
-                string questionText = $"Transfer funds:" +
-                    $"\nSender ID:   {displayText[0]}" +
-                    $"\nReceiver ID: {displayText[1]}" +
-                    $"\nAmount:      {displayText[2]}";
-
-                string[] transferMenuOptions = {
-                    "Choose bank account to send from",
-                    "Choose bank account to send to",
-                    "Choose how much to transfer",
-                    "Exit"
-                };
-
-                var selectedOption = Menu.ReadOptionIndex(questionText, transferMenuOptions);
-
-                switch (selectedOption)
-                {
-                    case 0:
-                        Console.Clear();
-
-                        while (true)
-                        {
-                            toSenderID = Validate.GetInput(
-                                $"Input your bank account ID to send from:",
-                                $"Input cannot be empty. Try again."
-                                );
-                            if (!Guid.TryParse(toSenderID, out Guid success))
-                            {
-                                Console.WriteLine($"Could ");
-                                continue;
-                            }
-                            break;
-                        }
-                        displayText[0] = toSenderID;
-                        break;
-
-                    case 1:
-                        Console.Clear();
-
-                        while (true)
-                        {
-                            toRecipientID = Validate.GetInput(
-                                $"Input the bank account ID to send to:",
-                                $"Input cannot be empty. Try again."
-                                );
-                            if (!Guid.TryParse(toSenderID, out Guid success))
-                            {
-                                Console.WriteLine($"Could ");
-                                continue;
-                            }
-                            break;
-                        }
-                        displayText[1] = toRecipientID;
-                        break;
-
-                    case 2:
-                        Console.Clear();
-
-                        transferFunds = Validate.StringToDecimal(
-                            $"Input amount to transfer",
-                            $"Input cannot be empty. Try again",
-                            $"Input contained non-numerical characters. Try again."
-                            );
-                        if (transferFunds <= 0)
-                        {
-                            transferFunds = 0;
-                        }
-                        displayText[2] = transferFunds.ToString();
-                        break;
-
-                    case 3:
-
-                        if (toSenderID == string.Empty || toRecipientID == string.Empty || transferFunds == 0)
-                        {
-                            Console.Clear();
-
-                            if (toSenderID == string.Empty)
-                            {
-                                Console.WriteLine($"Invalid transfer. Sender ID cannot be empty.");
-                            }
-                            if (toRecipientID == string.Empty)
-                            {
-                                Console.WriteLine($"Invalid transfer. Recipient ID cannot be empty.");
-                            }
-                            if (transferFunds == 0)
-                            {
-                                Console.WriteLine($"Invalid transfer. Transfer amount can not be zero.");
-                            }
-                            Console.WriteLine($"Press any key to continue...");
-                            Console.ReadKey();
-                            continue;
-                        }
-                        if (!Guid.TryParse(toSenderID, out Guid senderID))
-                        {
-                            Console.WriteLine($"Failed. Press any key to continue...");
-                            Console.ReadKey();
-                            continue;
-                        }
-                        if (!Guid.TryParse(toRecipientID, out Guid recipientID))
-                        {
-                            Console.WriteLine($"Failed. Press any key to continue...");
-                            Console.ReadKey();
-                            continue;
-                        }
-
-                        try
-                        {
-                            var temp = pTransaction.PrepFundsTransfer(Login.UserList, senderID, recipientID, transferFunds);
-                            foreach (var transaction in temp)
-                            {
-                                pendingTransaction.Add(transaction);
-                            }
-                        }
-                        catch(Exception ex)
-                        {
-                            Console.WriteLine($"Transaction failed.");
-                            Console.WriteLine($"Press any key to continue...");
-                            Console.ReadKey();
-                        }
-                        Console.WriteLine($"Transaction successfully created.");
-                        Console.WriteLine($"Press any key to continue...");
-                        Console.ReadKey();
-                        break;
-
-                    case 4:
-                        return;
-                }
-            }
-        }
         #endregion
     }
 }
