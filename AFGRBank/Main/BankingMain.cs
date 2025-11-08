@@ -3,6 +3,7 @@ using AFGRBank.Exchange;
 using AFGRBank.Loans;
 using AFGRBank.UserType;
 using AFGRBank.Utility;
+using AFGRBank.Main;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Xml.Linq;
 using static AFGRBank.Exchange.CurrencyExchange;
 
@@ -45,15 +46,7 @@ namespace AFGRBank.Main
         public static List<PendingTransaction> PTransaction { get; set; } = new();
 
         public static List<Transaction> pendingTransaction { get; set; } = new();
-
-
-        /*
-        GEORGE PLACE YOUR BULLSHIT HERE
-
-
-
-
-        */
+        
 
 
         // The first screen, contains the options to login or exit program.
@@ -169,6 +162,7 @@ namespace AFGRBank.Main
                 "View your bank accounts", 
                 "Create new bank account",
                 "View transactions",
+                "View loans",
                 "Logout" 
             };
             
@@ -202,9 +196,17 @@ namespace AFGRBank.Main
                         break;
 
                     case 3:
+                        List<Transaction> transactionsList = login.LoggedInUser.ViewAllTransactions(login.LoggedInUser);
+                        foreach (var transaction in transactionsList)
+                        {
+
+                        }
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
                         break;
+
                     case 4:
-                        login.LoggedInUser.ViewAllTransactions();
+                        
                         break;
                     case 5:
                         login.LogoutUser();
@@ -216,7 +218,7 @@ namespace AFGRBank.Main
         public void AdminMenu()
         {
             string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}." +
-                $"\nYou're logged in as Admin.";
+                $"\nYou're logged in as admin.";
             string[] adminMenuOptions = {
                 "Create new user",
                 "Update currency rate",
@@ -258,77 +260,7 @@ namespace AFGRBank.Main
 
         
 
-        public void AccountMenu()
-        {
-            string text = $"Your bank account menu.";
-            string[] accountMenuOptions = { 
-                "View your account info",
-                "View your account transactions",
-                "Transfer funds",
-                "Create account",
-                "Delete account",
-                "Exit" 
-            };
-
-            bool isContinue = true;
-            while (isContinue)
-            {
-                AccountMenuOptions selectedOption = Menu.ReadOption<string, AccountMenuOptions>(text, accountMenuOptions);
-                switch (selectedOption)
-                {
-                    case AccountMenuOptions.ViewAccountInfo:
-                        break;
-                    case AccountMenuOptions.ViewAccountTransactions:
-                        break;
-                    case AccountMenuOptions.TransferFunds:
-                        break;
-                    case AccountMenuOptions.CreateAccount:
-                        break;
-                    case AccountMenuOptions.DeleteAccount:
-                        break;
-                    case AccountMenuOptions.Exit:
-                        return;
-                }
-            }
-        }
-        public void SavingsAccountMenu()
-        {
-            string text = $"Your bank account menu.";
-            string[] savingAccountMenuOptions = {
-                "View your account info",
-                "View your account transactions",
-                "View savings forecast" +
-                "Transfer funds",
-                "Create account",
-                "Delete account",
-                "Exit"
-            };
-
-            bool isContinue = true;
-            while (isContinue)
-            {
-                SavingsAccountMenuOptions selectedOption = Menu.ReadOption<string, SavingsAccountMenuOptions>(text, savingAccountMenuOptions);
-                switch (selectedOption)
-                {
-                    case SavingsAccountMenuOptions.ViewAccountInfo:
-                        break;
-                    case SavingsAccountMenuOptions.ViewAccountTransactions:
-                        break;
-                    case SavingsAccountMenuOptions.ViewSavingsForecast:
-                        break;
-                    case SavingsAccountMenuOptions.TransferFunds:
-                        break;
-                    case SavingsAccountMenuOptions.CreateAccount:
-                        break;
-                    case SavingsAccountMenuOptions.DeleteAccount:
-                        break;
-                    case SavingsAccountMenuOptions.Exit:
-                        return;
-                }
-            }
-        }
-
-
+        
 
         
 
@@ -469,7 +401,6 @@ namespace AFGRBank.Main
                     case "7":
                         break;
                     case "8":
-                        TransferMenu();
                         break;
                     case "9":
                         break;
@@ -480,5 +411,15 @@ namespace AFGRBank.Main
             }
         }
 
+        public static void RunTask(object state)
+        {
+            TransactionCheck();
+        }
+
+        public static void TransactionCheck()
+        {
+            PendingTransaction pTransaction = new PendingTransaction();
+            pTransaction.ExecutePendingTransactions();
+        }
     }
 }

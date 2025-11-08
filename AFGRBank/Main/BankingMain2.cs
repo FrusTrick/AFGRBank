@@ -21,12 +21,12 @@ namespace AFGRBank.Main
     {
 
 
-
         #region "UserMenu() methods"
 
         /// <summary>
         ///     Display menu that allows user to pick one of their accounts to send money to another
         /// </summary>
+        /// <param name="senderUser">The currently logged in user</param>
         private void TransferMenu(User senderUser)
         {
             // displayText will be used for showing user inputted values in the menu 
@@ -39,8 +39,7 @@ namespace AFGRBank.Main
             string toRecipientID = string.Empty;
             decimal transferFunds = 0;
 
-            bool isContinue = true;
-            while (isContinue)
+            while (true)
             {
                 string questionText = $"Transfer funds:" +
                     $"\nSender ID:   {displayText[0]}" +
@@ -59,34 +58,23 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case 0:
-                        // Sets the bank account to send money from
+                        // Set one of your bank accounts to send money from
                         Console.Clear();
 
-                        string toSender = Validate.GetInput(
-                            $"Input your bank account ID to send from:",
-                            $"Input cannot be empty. Try again."
-                            );
-                        if (!Guid.TryParse(toSender, out Guid tempSenderID))
-                        {
-                            Console.WriteLine($"Sender account ID is in an invalid format.");
-                            Console.WriteLine($"Press any key to continue...");
-                            Console.ReadKey();
-                            break;
-                        }
-                        Account senderAccount = senderUser.Accounts.FirstOrDefault(x => x.AccountID == getBankAccountID);
+                        Account? senderAccount = ListUserAccountsMenu(senderUser);
                         if (senderAccount == null)
                         {
-                            Console.Clear();
-                            Console.WriteLine($"You do not have any bank accounts with that specific ID. Press any key to continue...");
-                            Console.ReadKey();
+                            // If user exit ListUserAccountsMenu without picking an account
+                            // Exit this case early
                             continue;
                         }
-                        toSenderID = toSenderID;
+
+                        toSenderID = senderAccount.AccountID.ToString();
                         displayText[0] = toSenderID;
                         break;
 
                     case 1:
-                        // Sets the bank account that will receive the money
+                        // Input your bank account ID that will receive the money
                         Console.Clear();
 
                         while (true)
@@ -146,6 +134,7 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                             continue;
                         }
+                        // Then tries parse into Guid
                         if (!Guid.TryParse(toSenderID, out Guid senderID))
                         {
                             Console.WriteLine($"Sender account ID is an invalid format.");
@@ -161,6 +150,10 @@ namespace AFGRBank.Main
                             continue;
                         }
 
+                        // When all information is validated, call PrepFundsTransfer() which will add two Transaction objects,
+                        //      first object is to be stored in sender transaction history,
+                        //      second object is to be stored in recipient transaction history;
+                        // into PendingTransaction objects awaiting confirmation by an admin or a 15 minute global timer
                         try
                         {
                             var temp = pTransaction.PrepFundsTransfer(Login.UserList, senderID, recipientID, transferFunds);
@@ -195,7 +188,7 @@ namespace AFGRBank.Main
         ///     Should be used after the ListUserAccountsMenu() returns a <paramref name="selectedAccount"/>
         /// </remarks>
         /// <param name="selectedAccount">The account to have its properties printed out</param>
-        /// <param name="accountList"></param>
+        /// <param name="accountList">List of user accounts that the <paramref name="selectedAccount"/> belongs to</param>
         private void ViewSelectedAccountMenu(Account selectedAccount, List<Account> accountList)
         {
             // Default text to be displayed above menu buttons
@@ -269,7 +262,10 @@ namespace AFGRBank.Main
         }
 
 
-
+        /// <summary>
+        ///     Opens menu to be able to create an new bank account
+        /// </summary>
+        /// <param name="user">The user in which the new account will be stored</param>
         private void CreateNewAccountMenu(User user)
         {
             CurrencyNames currency = CurrencyNames.SEK;
@@ -353,12 +349,13 @@ namespace AFGRBank.Main
 
 
         /// <summary>
-        /// Menu for selecting and returning a bank account type
+        /// Opens menu for selecting and returning a bank account type
         /// </summary>
         /// <returns>
         ///     <list type="bullet">
-        ///         <item>Returns "Checkings" if user wants the bank account type to be a checkings account</item>
-        ///         <item>returns "Savings" if user wants the bank account type to be a savings account</item>
+        ///         <item>Returns "Checkings" <see cref="string"/> if user wants the bank account type to be a checkings account</item>
+        ///         <item>returns "Savings" <see cref="string"/> if user wants the bank account type to be a savings account</item>
+        ///         <item>returns <see langword="null"/> if user exits without choosing</item>
         ///     </list>
         /// </returns>
         private string? SetBankAccountType()
