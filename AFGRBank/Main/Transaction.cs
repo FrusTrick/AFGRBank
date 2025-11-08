@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AFGRBank.Main;
+using AFGRBank.BankAccounts;
 
 namespace AFGRBank.Main
 {
@@ -80,6 +81,58 @@ namespace AFGRBank.Main
             if (expiredTransactions.Count == 0)
             {
                 Console.WriteLine("No expired transactions found.");
+            }
+        }
+
+
+        /// <summary>
+        /// Displays all transactions to and from all user accounts
+        /// </summary>
+        /// <remarks>Will write all transctions to console and adjust message based on 
+        /// the account holder being the sender or recipient of the funds.
+        /// If no trasnactions are found, a message informing of that will be displayed instead</remarks>
+        /// <param name="user"></param>
+        public void DisplayAllTransactions(User user)
+        {
+            List<Transaction> allTranactions = new List<Transaction>();
+
+            foreach (Account account in user.Accounts) 
+            {
+                foreach (Transaction trasnaction in account.AccTransList)
+                { 
+                    allTranactions.Add(trasnaction);
+                }
+            }
+
+            if (allTranactions.Count > 0) {
+
+                foreach (Transaction transaction in allTranactions)
+                {
+                    bool sent;
+                    sent = user.Accounts.Exists(x => x.AccountID == transaction.SenderID);
+                    if (sent)
+                    {
+                        var account = user.Accounts.Find(x => x.AccountID == transaction.SenderID);
+                        Console.WriteLine($"____________________________________");
+                        Console.WriteLine($"You sent {transaction.Funds} {account.Currency.ToString()} " +
+                            $"\nFrom: {account.AccountID} \nTo: {transaction.ReceiverID}" +
+                            $"\nTransaction Date: {transaction.TransDate.ToShortTimeString()}");
+                        Console.WriteLine($"____________________________________");
+                    }
+                    else if (!sent)
+                    {
+                        var account = user.Accounts.Find(x => x.AccountID == transaction.ReceiverID);
+                        Console.WriteLine($"____________________________________");
+                        Console.WriteLine($"You Recieved {transaction.Funds} {account.Currency.ToString()} " +
+                            $"\nFrom: {transaction.SenderID} \nTo: {account.AccountID}" +
+                            $"\nTransaction Date: {transaction.TransDate.ToShortTimeString()}");
+                        Console.WriteLine($"____________________________________");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("You have no transaction history");
             }
         }
     }

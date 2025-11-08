@@ -93,7 +93,7 @@ namespace AFGRBank.BankAccounts
             Console.WriteLine($"Transaction history for {AccountID}:");
             if (account.AccTransList != null)
             {
-                foreach(Transaction transaction in account.AccTransList)
+                foreach (Transaction transaction in account.AccTransList)
                 {
                     Console.WriteLine("________________________________________");
                     Console.WriteLine($"Transaction date: {transaction.TransDate.ToShortTimeString()}");
@@ -102,6 +102,9 @@ namespace AFGRBank.BankAccounts
                     Console.WriteLine($"Sender account: {transaction.SenderID}");
                     Console.WriteLine("________________________________________");
                 }
+            }
+            else {
+                Console.WriteLine("Your trasnaction history is empty");
             }
             
         }
