@@ -20,6 +20,9 @@ namespace AFGRBank.UserType
     {
         public bool IsAdmin { get; set; } = true;
 
+        // Initializing to access the RemoveExpiredTransactions() method.
+        Transaction transaction = new Transaction();
+
         /// <summary>
         /// Creates a new <see cref="User"/> object and adds it to the user list.
         /// </summary>
@@ -172,7 +175,7 @@ namespace AFGRBank.UserType
         public void ViewPendingTransactions(List<Transaction> pending)
         {
             // Removes all expired transactions
-            RemoveExpiredTransactions();
+            transaction.RemoveExpiredTransactions();
 
             // Initializing the menu
             string promptText = "Choose a transaction to confirm or exit";
@@ -244,56 +247,6 @@ namespace AFGRBank.UserType
             
         }
 
-        /// <summary>
-        /// Removes any expired <see cref="Transaction"/> in the static <see cref="BankingMain.pendingTransaction"/> list
-        /// </summary>
-        /// <remarks>
-        /// Searches for <see cref="Transaction"/> objects with Date's past x minutes in the 
-        /// <see cref="BankingMain.pendingTransaction"/> list and saves them as a local expiredTransactions list.
-        /// If found, removes them from the <see cref="BankingMain.pendingTransaction"/> list
-        /// </remarks>
-        public void RemoveExpiredTransactions()
-        {
-            // The time in minutes before a transaction expires
-            double transactionTimeout = 15;
 
-            // Find all expired transactions
-            var expiredTransactions = BankingMain.pendingTransaction
-                .Where(pt => (DateTime.Now - pt.TransDate) >= TimeSpan.FromMinutes(transactionTimeout))
-                .ToList();
-
-            // Loops through the static list in banking main
-            foreach (var pt in expiredTransactions)
-            {
-                BankingMain.pendingTransaction.Remove(pt);
-                Console.WriteLine($"Removed expired transaction from: {pt.SenderID} to: receiver ID: {pt.ReceiverID}");
-            }
-
-            if (expiredTransactions.Count == 0)
-            {
-                Console.WriteLine("No expired transactions found.");
-            }
-        }
-
-        /* Redundant method, ViewPendingTransactions takes care of it.
-        /// <summary>
-        /// Confirms a <see cref="PendingTransaction"/> by matching the sender and receiver IDs.
-        /// </summary>
-        /// <param name="senderID">The unique identifier of the account sending the funds.</param>
-        /// <param name="receiverID">The unique identifier of the account receiving the funds.</param>
-        /// <remarks>
-        /// Searches for the <see cref="PendingTransaction"/> with matching <paramref name="senderID"/> and <paramref name="receiverID"/>.
-        /// If found, calls the <see cref="PendingTransaction.Confirm()"/> method to finalize the transaction.
-        /// </remarks>
-        public void ConfirmTransaction(Guid senderID, Guid receiverID)
-        {
-            var pending = BankingMain.PTransaction.FirstOrDefault(t => t.CurrentTransaction.SenderID == senderID && t.CurrentTransaction.ReceiverID == receiverID && !t.Confirmed);
-
-            if (pending != null)
-            {
-                pending.FinalizeTransaction();
-            }
-        }
-        */
     }
 }

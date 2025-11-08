@@ -16,10 +16,71 @@ namespace AFGRBank.Main
         public decimal Funds { get; set; }
         public DateTime TransDate { get; set; }
 
+        // Initializing to access the FinalizeTransaction() method.
+        PendingTransaction pTransaction = new PendingTransaction();
+
         public Transaction()
         {
 
         }
 
+        /// <summary>
+        /// Confirms a transaction by finalizing the transfer between a sender and a recipient.
+        /// </summary>
+        /// <param name="senderTransaction">The transaction representing the sender's side of the transfer.</param>
+        /// <param name="recipientTransaction">The transaction representing the recipient's side of the transfer.</param>
+        /// <remarks>
+        /// Calls <see cref="PendingTransaction.FinalizeTransaction(Transaction, Transaction)"/> to apply the transfer.
+        /// After finalizing, both transactions are removed from <see cref="BankingMain.pendingTransaction"/>.
+        /// Ensures that both transactions are non-null before processing.
+        /// </remarks>
+        public void ConfirmTransaction(Transaction senderTransaction, Transaction recipientTransaction)
+        {
+            // If the objects null exit the method with a message.
+            if (senderTransaction == null || recipientTransaction == null)
+            {
+                Console.WriteLine("Sender or recipient is null.");
+                return;
+            }
+
+            pTransaction.FinalizeTransaction(senderTransaction, recipientTransaction);
+
+            // Removes the same reference object as
+            BankingMain.pendingTransaction.Remove(senderTransaction);
+            BankingMain.pendingTransaction.Remove(recipientTransaction);
+
+            Console.WriteLine($"Transaction {senderTransaction.SenderID} -> {recipientTransaction.ReceiverID} confirmed and removed.");
+        }
+
+        /// <summary>
+        /// Removes any expired <see cref="Transaction"/> in the static <see cref="BankingMain.pendingTransaction"/> list
+        /// </summary>
+        /// <remarks>
+        /// Searches for <see cref="Transaction"/> objects with Date's past x minutes in the 
+        /// <see cref="BankingMain.pendingTransaction"/> list and saves them as a local expiredTransactions list.
+        /// If found, removes them from the <see cref="BankingMain.pendingTransaction"/> list
+        /// </remarks>
+        public void RemoveExpiredTransactions()
+        {
+            // The time in minutes before a transaction expires
+            double transactionTimeout = 15;
+
+            // Find all expired transactions
+            var expiredTransactions = BankingMain.pendingTransaction
+                .Where(pt => (DateTime.Now - pt.TransDate) >= TimeSpan.FromMinutes(transactionTimeout))
+                .ToList();
+
+            // Loops through the static list in banking main
+            foreach (var pt in expiredTransactions)
+            {
+                BankingMain.pendingTransaction.Remove(pt);
+                Console.WriteLine($"Removed expired transaction from: {pt.SenderID} to: receiver ID: {pt.ReceiverID}");
+            }
+
+            if (expiredTransactions.Count == 0)
+            {
+                Console.WriteLine("No expired transactions found.");
+            }
+        }
     }
 }
