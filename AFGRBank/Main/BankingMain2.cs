@@ -33,7 +33,8 @@ namespace AFGRBank.Main
             //      displayText[0] = senderID
             //      displayText[1] = recipientID
             //      displayText[2] = transferFunds
-            string[] displayText = { string.Empty, string.Empty, string.Empty };
+            //      displayText[3] = Used to display currency type
+            string[] displayText = { string.Empty, string.Empty, string.Empty, string.Empty };
 
             string toSenderID = string.Empty;
             string toRecipientID = string.Empty;
@@ -44,12 +45,13 @@ namespace AFGRBank.Main
                 string questionText = $"Transfer funds:" +
                     $"\nSender ID:   {displayText[0]}" +
                     $"\nReceiver ID: {displayText[1]}" +
-                    $"\nAmount:      {displayText[2]}";
+                    $"\nAmount:      {displayText[2]} {displayText[3]}";
 
                 string[] transferMenuOptions = {
                     "Choose bank account to send from",
                     "Choose bank account to send to",
                     "Choose how much to transfer",
+                    "Confirm transfer",
                     "Exit"
                 };
 
@@ -71,31 +73,40 @@ namespace AFGRBank.Main
 
                         toSenderID = senderAccount.AccountID.ToString();
                         displayText[0] = toSenderID;
+                        displayText[3] = senderAccount.Currency.ToString();
                         break;
 
                     case 1:
                         // Input your bank account ID that will receive the money
                         Console.Clear();
 
-                        while (true)
+                        string accountList = string.Empty;
+                        foreach (var account in senderUser.Accounts)
                         {
-                            string toRecipient = Validate.GetInput(
-                                $"Input the bank account ID to send to:" + $"\nFormat: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-                                $"Input cannot be empty. Try again."
-                                );
-                            if (!Guid.TryParse(toRecipient, out Guid tempRecipientID))
-                            {
-                                Console.WriteLine($"Recipient account ID is in an invalid format.");
-                                Console.WriteLine($"Press any key to continue...");
-                                Console.ReadKey();
-                                continue;
-                            }
-                            break;
+                            accountList += $"\t{account.AccountID}\n";
                         }
-                        displayText[1] = toRecipientID;
+
+                        string useless = Validate.GetInput(
+                            $"Input the bank account ID to send to" + 
+                                $"\n(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx):" + 
+                                $"\nYour bank account ID:" +
+                                $"\n{accountList}",
+                                $"Input cannot be empty. Try again."
+                            );
+                        if (!Guid.TryParse(useless, out Guid tempRecipientID))
+                        {
+                            Console.WriteLine($"Recipient account ID is in an invalid format.");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+
+                        toRecipientID = tempRecipientID.ToString();
+                        displayText[1] = tempRecipientID.ToString();
                         break;
 
                     case 2:
+                        
                         // Sets the amount of money that will be transferred.
                         // Transfer amount cannot be less than or equal to 0
                         Console.Clear();
@@ -150,6 +161,15 @@ namespace AFGRBank.Main
                             continue;
                         }
 
+                        // This check prevents the transfer of money to the same account
+                        if (senderID == recipientID)
+                        {
+                            Console.WriteLine($"Invalid transfer. Sender and recipient cannot be the same account.");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+
                         // When all information is validated, call PrepFundsTransfer() which will add two Transaction objects,
                         //      first object is to be stored in sender transaction history,
                         //      second object is to be stored in recipient transaction history;
@@ -169,7 +189,6 @@ namespace AFGRBank.Main
                             Console.ReadKey();
                         }
 
-                        Console.WriteLine($"Transaction successfully created.");
                         Console.WriteLine($"Press any key to continue...");
                         Console.ReadKey();
                         break;
