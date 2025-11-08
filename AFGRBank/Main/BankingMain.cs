@@ -54,9 +54,14 @@ namespace AFGRBank.Main
         public void MainMenu(short loginAttempts)
         {
             string asciiArt =
-                "ASCII Placeholder\n" +
-                "ASCII Placeholder\n" +
-                "ASCII Placeholder\n";
+                "\r\n    mm     mmmmmmmm     mmmm   mmmmmm              mmmmmm       mm     mmm   mm  mm   mmm " +
+                "\r\n   ####    ##\"\"\"\"\"\"   ##\"\"\"\"#  ##\"\"\"\"##            ##\"\"\"\"##    ####    ###   ##  ##  ##\"  " +
+                "\r\n   ####    ##        ##        ##    ##            ##    ##    ####    ##\"#  ##  ##m##    " +
+                "\r\n  ##  ##   #######   ##  mmmm  #######             #######    ##  ##   ## ## ##  #####    " +
+                "\r\n  ######   ##        ##  \"\"##  ##  \"##m            ##    ##   ######   ##  #m##  ##  ##m  " +
+                "\r\n m##  ##m  ##         ##mmm##  ##    ##            ##mmmm##  m##  ##m  ##   ###  ##   ##m " +
+                "\r\n \"\"    \"\"  \"\"           \"\"\"\"   \"\"    \"\"\"           \"\"\"\"\"\"\"   \"\"    \"\"  \"\"   \"\"\"  \"\"    \"\" ";
+
 
             string[] mainMenuOptions = { "Login", "Exit" };
             while (true)
@@ -196,19 +201,18 @@ namespace AFGRBank.Main
                         break;
 
                     case 3:
-                        List<Transaction> transactionsList = login.LoggedInUser.ViewAllTransactions(login.LoggedInUser);
-                        foreach (var transaction in transactionsList)
-                        {
-
-                        }
+                        // Display every transactions user has sent and received
+                        transaction.DisplayAllTransactions(login.LoggedInUser);
                         Console.WriteLine($"Press any key to continue...");
                         Console.ReadKey();
                         break;
 
                     case 4:
-                        
+                        // Display every loan user has received
+
                         break;
                     case 5:
+                        // Logout user and exit UserMenu()
                         login.LogoutUser();
                         return;
                 }
@@ -251,6 +255,7 @@ namespace AFGRBank.Main
                         admin.ViewPendingTransactions(pendingTransaction);
                         break;
                     case 4:
+                        // Logout user and exit AdminMenu()
                         login.LogoutUser();
                         return;
                 }

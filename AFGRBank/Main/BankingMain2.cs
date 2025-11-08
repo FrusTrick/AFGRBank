@@ -279,55 +279,10 @@ namespace AFGRBank.Main
                         $"Input cannot be empty. Try again.", 
                         $"Invalid input. Make sure it doesn't contain non-numerical numbers"
                         );
-                    sAccount.SavingsForecast(selectedAccount, years);
+                    
+                    sAccount.SavingsForecast((SavingsAccount)selectedAccount, years);
                 }
             }
-
-
-                while (true)
-                {
-                    var selectedOption = Menu.ReadOptionIndex(promptText, viewSelectedAccountMenuOptions);
-
-                    switch (selectedOption)
-                    {
-                        case 0:
-                            // Print out all transactions in selectedAccount
-                            Console.Clear();
-
-                            selectedAccount.ViewTransactions(selectedAccount);
-
-                            Console.WriteLine($"Press any key to continue...");
-                            Console.ReadKey();
-                            break;
-
-                        case 1:
-                            // Change the currency of the selectedAccount 
-                            Console.Clear();
-
-                            string displayCurrencyRates = GetJSONCurrencyRatesToString();
-
-                            CurrencyNames newCurrency = Validate.StringToCurrencyName(
-                                $"Input the new currency:" +
-                                $"\n{displayCurrencyRates}",
-                                $"Input cannot be empty. Try again.",
-                                $"Input did not match any existing currency. Try again."
-                            );
-                            user.SetCurrency(selectedAccount, newCurrency);
-                            break;
-
-                        case 2:
-                            // Delete selectedAccount
-                            Console.Clear();
-
-                            selectedAccount.DeleteAccount(accountList, selectedAccount.AccountID);
-
-                            Console.WriteLine($"Press any key to continue...");
-                            Console.ReadKey();
-                            return;
-                        case 3:
-                            break;
-                    }
-                }
         }
 
 
