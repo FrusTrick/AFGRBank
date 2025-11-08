@@ -393,10 +393,8 @@ namespace AFGRBank.Main
                         AdminMenu();
                         break;
                     case "5":
-                        CreateUserMenu();
                         break;
                     case "6":
-                        AccountMenu();
                         break;
                     case "7":
                         break;

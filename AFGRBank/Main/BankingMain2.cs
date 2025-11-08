@@ -191,25 +191,27 @@ namespace AFGRBank.Main
         /// <param name="accountList">List of user accounts that the <paramref name="selectedAccount"/> belongs to</param>
         private void ViewSelectedAccountMenu(Account selectedAccount, List<Account> accountList)
         {
-            // Default text to be displayed above menu buttons
+            // Default text and buttons to be displayed in the menu
             string promptText = $"Error. Could not load account info.";
-
-            string[] ViewSelectedAccountMenuOptions = {
-                $"View all transactions",
-                $"Edit currency",
-                $"Delete account",
-                $"Exit"
-            };
+            List<string> viewSelectedAccountMenuOptions = ["Exit"];
 
             while (true)
             {
-                // Overrides promptText with appropritate values if selectedAccount has a valid account type
+                // Overrides promptText with appropritate values depending on selectedAccount account type
+                // if no valid account type, then go with default text above
                 if (selectedAccount is CheckingsAccount)
                 {
                     promptText =
                         $"Account ID:   {selectedAccount.AccountID}\n" +
                         $"Account Type: Checkings account\n" +
                         $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}";
+
+                    viewSelectedAccountMenuOptions = [
+                        $"View all transactions",
+                        $"Edit currency",
+                        $"Delete account",
+                        $"Exit",
+                    ];
                 }
                 else if (selectedAccount is SavingsAccount)
                 {
@@ -217,48 +219,115 @@ namespace AFGRBank.Main
                         $"Account ID:   {selectedAccount.AccountID}\n" +
                         $"Account Type: Savings account\n" +
                         $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}";
+
+                    viewSelectedAccountMenuOptions = [
+                        $"View all transactions",
+                        $"Edit currency",
+                        $"Check savings forecast",
+                        $"Delete account",
+                        $"Exit",
+                    ];
                 }
 
-                var selectedOption = Menu.ReadOptionIndex(promptText, ViewSelectedAccountMenuOptions);
+                int selectedIndex = Menu.ReadOptionIndexList(promptText, viewSelectedAccountMenuOptions);
+                var chosenOption = viewSelectedAccountMenuOptions[selectedIndex];
 
-                switch (selectedOption)
+                if (chosenOption == "Exit")
                 {
-                    case 0:
-                        // Print out all transactions in selectedAccount
-                        Console.Clear();
+                    return;
+                }
+                else if (chosenOption == "View all transactions")
+                {
+                    // Print out all transactions in selectedAccount
+                    Console.Clear();
 
-                        selectedAccount.ViewTransactions(selectedAccount);
+                    selectedAccount.ViewTransactions(selectedAccount);
 
-                        Console.WriteLine($"Press any key to continue...");
-                        Console.ReadKey();
-                        break;
+                    Console.WriteLine($"Press any key to continue...");
+                    Console.ReadKey();
+                }
+                else if (chosenOption == "Edit currency")
+                {
+                    // Change the currency of the selectedAccount 
+                    Console.Clear();
 
-                    case 1:
-                        // Change the currency of the selectedAccount 
-                        Console.Clear();
+                    string displayCurrencyRates = GetJSONCurrencyRatesToString();
 
-                        string displayCurrencyRates = GetJSONCurrencyRatesToString();
+                    CurrencyNames newCurrency = Validate.StringToCurrencyName(
+                        $"Input the new currency:" +
+                        $"\n{displayCurrencyRates}",
+                        $"Input cannot be empty. Try again.",
+                        $"Input did not match any existing currency. Try again."
+                    );
+                    user.SetCurrency(selectedAccount, newCurrency);
+                }
+                else if (chosenOption == "Delete account")
+                {
+                    // Delete selectedAccount
+                    Console.Clear();
 
-                        CurrencyNames newCurrency = Validate.StringToCurrencyName(
-                            $"Input the new currency:" +
-                            $"\n{displayCurrencyRates}",
-                            $"Input cannot be empty. Try again.",
-                            $"Input did not match any existing currency. Try again."
+                    selectedAccount.DeleteAccount(accountList, selectedAccount.AccountID);
+
+                    Console.WriteLine($"Press any key to continue...");
+                    Console.ReadKey();
+                    return;
+                }
+                else if (chosenOption == "Check savings forecast")
+                {
+                    int years = Validate.StringToInt(
+                        $"Input the amount of years to calculate:", 
+                        $"Input cannot be empty. Try again.", 
+                        $"Invalid input. Make sure it doesn't contain non-numerical numbers"
                         );
-                        user.SetCurrency(selectedAccount, newCurrency);
-                        break;
-
-                    case 2:
-                        // Delete selectedAccount
-                        Console.Clear();
-
-                        selectedAccount.DeleteAccount(accountList, selectedAccount.AccountID);
-
-                        Console.WriteLine($"Press any key to continue...");
-                        Console.ReadKey();
-                        return;
+                    sAccount.SavingsForecast(selectedAccount, years);
                 }
             }
+
+
+                while (true)
+                {
+                    var selectedOption = Menu.ReadOptionIndex(promptText, viewSelectedAccountMenuOptions);
+
+                    switch (selectedOption)
+                    {
+                        case 0:
+                            // Print out all transactions in selectedAccount
+                            Console.Clear();
+
+                            selectedAccount.ViewTransactions(selectedAccount);
+
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            break;
+
+                        case 1:
+                            // Change the currency of the selectedAccount 
+                            Console.Clear();
+
+                            string displayCurrencyRates = GetJSONCurrencyRatesToString();
+
+                            CurrencyNames newCurrency = Validate.StringToCurrencyName(
+                                $"Input the new currency:" +
+                                $"\n{displayCurrencyRates}",
+                                $"Input cannot be empty. Try again.",
+                                $"Input did not match any existing currency. Try again."
+                            );
+                            user.SetCurrency(selectedAccount, newCurrency);
+                            break;
+
+                        case 2:
+                            // Delete selectedAccount
+                            Console.Clear();
+
+                            selectedAccount.DeleteAccount(accountList, selectedAccount.AccountID);
+
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            return;
+                        case 3:
+                            break;
+                    }
+                }
         }
 
 
@@ -389,34 +458,6 @@ namespace AFGRBank.Main
         }
 
 
-
-        private void BorrowMenu()
-        {
-            while (true)
-            {
-                string questionText = "Borrow:";
-                string[] borrowMenuOptions = { 
-                    $"Create loan request",
-                    $"Edit loan request",
-                    $"Get loan information",
-                    $"Exit"
-                };
-                var selectedOptions = Menu.ReadOptionIndex(questionText, borrowMenuOptions);
-                switch (selectedOptions)
-                {
-                    case 0:
-                        CreateLoanMenu();
-                        break;
-                    case 1:
-                        // EditLoan();
-                        break;
-                    case 2:
-                        break;
-                    case 3:
-                        return;
-                }
-            }
-        }
 
         private void GetLoanList()
         {
