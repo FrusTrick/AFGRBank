@@ -3,6 +3,7 @@ using AFGRBank.Exchange;
 using AFGRBank.Loans;
 using AFGRBank.UserType;
 using AFGRBank.Utility;
+using AFGRBank.Main;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Xml.Linq;
 using static AFGRBank.Exchange.CurrencyExchange;
 
@@ -45,15 +46,7 @@ namespace AFGRBank.Main
         public static List<PendingTransaction> PTransaction { get; set; } = new();
 
         public static List<Transaction> pendingTransaction { get; set; } = new();
-
-
-        /*
-        GEORGE PLACE YOUR BULLSHIT HERE
-
-
-
-
-        */
+        
 
 
         // The first screen, contains the options to login or exit program.
@@ -464,5 +457,15 @@ namespace AFGRBank.Main
             }
         }
 
+        public static void RunTask(object state)
+        {
+            TransactionCheck();
+        }
+
+        public static void TransactionCheck()
+        {
+            PendingTransaction pTransaction = new PendingTransaction();
+            pTransaction.ExecutePendingTransactions();
+        }
     }
 }

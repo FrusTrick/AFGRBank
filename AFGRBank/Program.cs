@@ -6,6 +6,8 @@ namespace AFGRBank
 {
     internal class Program
     {
+        private static Timer _timer;
+
         static void Main(string[] args)
         {
             // loginAttempts is used for checking how many tries user has to login before being automatically locked out 
@@ -15,8 +17,9 @@ namespace AFGRBank
             BankingMain menus = new BankingMain();
             
             menus.PopulateList();
-            
-            
+
+            //Starts a backgorund timer that checks pending transactions every minute and executes any transactions older than 15 minutes.
+            _timer = new Timer(BankingMain.RunTask, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
 
             while (true)
             {

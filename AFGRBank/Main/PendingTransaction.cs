@@ -139,14 +139,54 @@ namespace AFGRBank.Main
 
         }
 
-        //// Async method that initializes a Task and delays it from acting for x minutes and then calls on Confirm();
-        //public async Task StartCountdown(int minutes = 15)
-        //{
-        //    await Task.Delay(TimeSpan.FromMinutes(minutes));
-        //    if (!Confirmed)
-        //    {
-        //        FinalizeTransaction();
-        //    }
-        //}
+
+        /// <summary>
+        /// Executes pending transactions that have been delayed for more than 15 minutes.
+        /// </summary>
+        /// <remarks>This method processes transactions from the pending transaction list. It checks each
+        /// transaction's elapsed time and executes it if the transaction has been pending for more than 15 minutes.
+        /// Transactions are confirmed in pairs if they have the same sender, receiver, and transaction date.</remarks>
+        public void ExecutePendingTransactions()
+        {
+            Transaction trans = new Transaction();
+            List<Transaction> toBeExecuted = new List<Transaction>();
+
+            //Checks entire list of pending transactions
+            foreach (var transaction in BankingMain.pendingTransaction)
+            {
+                //transactionElapseTime variable functions as a check where we add 15 minutes to the saved time of the transfer and check it against the current time.
+                var transactionElapseTime = transaction.TransDate.AddMinutes(15);
+
+                //If the list is empty and more than 15 minutes have passed we add the first element to the toBeExecuted list. This element will always be the sender 
+                //based on the order they are saved to the PendingTransactions property by the PrepFundsTransfer method.
+                if (toBeExecuted.Count == 0 && DateTime.Now > transactionElapseTime)
+                {
+                    toBeExecuted.Add(transaction);
+                }
+                //Based on the above if statement, the Transaction object will be the recipient if the list is populated by one variable already.
+                //To ensure that this is the same transaction we compare the current incoming variable to the one already saved to the list.
+                //If the SenderID, RecipientID and TransDate properties of the incoming Transaction object are
+                //the same as in the one found in the toBeExecuted list we know that these are the same transaction and we send them to the
+                //ConfirmTransaction method to to execute the transaction and we clear the toBeExecuted list so that
+                //a new transaction pair can be processed.
+                else if (toBeExecuted.Count == 1 && DateTime.Now > transactionElapseTime)
+                {
+                    var existing = toBeExecuted.FirstOrDefault();
+                    if (existing.SenderID == transaction.SenderID && existing.ReceiverID == transaction.SenderID && existing.TransDate == transaction.TransDate)
+                    {
+                        toBeExecuted.Add(transaction);
+
+                        //Safety check in case an admin has manually processed the transaction while this is running
+                        var safety = BankingMain.pendingTransaction.First(x => x.SenderID == transaction.SenderID  && x.ReceiverID == transaction.ReceiverID && x.TransDate == transaction.TransDate);
+                        if (safety != null) 
+                        {
+                            trans.ConfirmTransaction(toBeExecuted[0], toBeExecuted[1]);
+                            toBeExecuted.Remove(toBeExecuted[0]);
+                            toBeExecuted.Remove(toBeExecuted[1]);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
