@@ -15,8 +15,8 @@ namespace AFGRBank
             short loginAttempts = 3;
             BankingMain menus = new BankingMain();
             PendingTransaction pTransaction = new PendingTransaction();
-            menus.PopulateList();
             
+            menus.PopulateList();
             
 
             while (true)

@@ -68,7 +68,7 @@ namespace AFGRBank.Main
                                 );
                             if (!Guid.TryParse(toSenderID, out Guid success))
                             {
-                                Console.WriteLine($"Recipient account ID was in an invalid format.");
+                                Console.WriteLine($"Sender account ID was in an invalid format.");
                                 Console.WriteLine($"Press any key to continue...");
                                 Console.ReadKey();
                                 continue;
@@ -117,7 +117,8 @@ namespace AFGRBank.Main
                         break;
 
                     case 3:
-
+                        // Before calling a method to create a new transaction does an validation check if any
+                        // inputs were empty
                         if (toSenderID == string.Empty || toRecipientID == string.Empty || transferFunds == 0)
                         {
                             Console.Clear();
@@ -140,14 +141,14 @@ namespace AFGRBank.Main
                         }
                         if (!Guid.TryParse(toSenderID, out Guid senderID))
                         {
-                            Console.WriteLine($"Sender account ID could not be parsed");
+                            Console.WriteLine($"Sender account ID was in an invalid format.");
                             Console.WriteLine($"Press any key to continue...");
                             Console.ReadKey();
                             continue;
                         }
                         if (!Guid.TryParse(toRecipientID, out Guid recipientID))
                         {
-                            Console.WriteLine($"Failed. Press any key to continue...");
+                            Console.WriteLine($"Recipient account ID was in an invalid format.");
                             Console.WriteLine($"Press any key to continue...");
                             Console.ReadKey();
                             continue;
@@ -167,6 +168,7 @@ namespace AFGRBank.Main
                             Console.WriteLine($"Press any key to continue...");
                             Console.ReadKey();
                         }
+
                         Console.WriteLine($"Transaction successfully created.");
                         Console.WriteLine($"Press any key to continue...");
                         Console.ReadKey();
@@ -306,72 +308,63 @@ namespace AFGRBank.Main
 
         private void UpdateCurrencyRatesMenu()
         {
-            string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
-            string jsonString = File.ReadAllText(jsonPath);
-
             // The default selected currency and values (TryParse doesn't allow CurrencyNames selectedCurrency = null)
             CurrencyNames selectedCurrency = CurrencyNames.SEK;
             decimal newRates = 1m;
 
-            // These variables will be used to display the selected currency and the new exchange rates in the menu
-            string displaySelectedCurrency = string.Empty;
-            string displayNewRates = string.Empty;
+            // This string array will be used to display the admin selected currency and the new exchange rates in the menu buttons
+            string[] displayNewCurrencyAndRates = { string.Empty, string.Empty };
+
+            // Convert .JSON content to string. This will automatically display the updated values
+            string displayJSON = GetJSONCurrencyRatesToString();
+
+            // "promptText" is used to for the text above menu buttons
+            // Each "updateCurrencyRatesMenuOptions" element are used for the menu buttons
+            string promptText = $"Select which currency's exchange rate to update:" +
+                $"\n{displayJSON}";
+            string[] updateCurrencyRatesMenuOptions = {
+                $"Select currency:        {displayNewCurrencyAndRates[0]}",
+                $"Set new exchange rate:  {displayNewCurrencyAndRates[1]}",
+                $"Update",
+                $"Exit",
+            };
 
             while (true)
             {
-                // Display .JSON content to string, replacing the curly brackets with whitespaces
-                string text = $"Select which currency's exchange rate to update:" +
-                    $"\n{jsonString}"
-                    .Replace('{', ' ')
-                    .Replace('}', ' ');
 
-                // Call ReadOptionIndex with parameters declared inside instead of declaring them outside the method first
-                // This is used to update {displaySelectedCurrency} and {displayNewRates} in real time.
-                // If you hover over ReadOptionIndex, you can see it takes in two parameters:
-                //      questionTetxt is the text displayed above the menu buttons
-                //      menuOptions contain the buttons, separated with the comma character ','
-                // ReadOptionIndex returns an integer value which is used to compare the switch case below.
-                int selectUpdateRateOptions = Menu.ReadOptionIndex(
-                    $"{text}",
-                    [
-                    $"Select currency:        {displaySelectedCurrency}",
-                    $"Set new exchange rate:  {displayNewRates}",
-                    $"Update",
-                    $"Exit",
-                    ]);
+                var selectedOption = Menu.ReadOptionIndex(promptText, updateCurrencyRatesMenuOptions);
 
-                switch (selectUpdateRateOptions)
+                switch (selectedOption)
                 {
                     case 0: 
                         Console.Clear();
                         // Admin picks which currency to update. There's validation to ensure input matches the correct enum.
                         selectedCurrency = Validate.StringToCurrencyName(
-                            $"{text}" +
-                            $"Select the currency which needs to update its exchange rate:",
+                            $"Select currency:" + 
+                                $"\n{displayJSON}",
                             $"Input cannot be empty. Try again.",
                             $"Input did not match any existing currency. Try again." 
                             );
 
-                        displaySelectedCurrency = selectedCurrency.ToString();
+                        displayNewCurrencyAndRates[0] = selectedCurrency.ToString();
                         break;
                     case 1:
                         Console.Clear();
                         // Admin inputs the updated exchange rate. There's validation to ensure input is decimal.
                         newRates = Validate.StringToDecimal(
-                            $"{text}" +
-                            $"Input the updated exchange rate:",
+                            $"Input updated exchange rate:" + 
+                                $"\n{displayJSON}",
                             $"Input cannot be empty. Try again.",
                             $"Input failed to parse. Make sure the input doesn't contain invalid characters and try again."
                             );
 
-                        displayNewRates = newRates.ToString();
+                        displayNewCurrencyAndRates[1] = newRates.ToString();
                         break;
                     case 2:
-                        // Calls UpdateCurrencyRates which updates the selected currency with the new rates.
-                        // Then read .JSON file and update displayText.
+                        // Updates the selected currency with the new rates.
+                        // Then calls 2nd method to update the text with the new rates.
                         admin.UpdateCurrencyRates(selectedCurrency, newRates);
-                        jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
-                        jsonString = File.ReadAllText(jsonPath);
+                        displayJSON = GetJSONCurrencyRatesToString();
                         break;
                     case 3:
                         return;
@@ -381,7 +374,7 @@ namespace AFGRBank.Main
 
         private void CreateLoanMenu()
         {
-            // Set the options to handle CurrencyName enum keys
+            // Converts JSON contents into Dictionary "currencyAndRates"
             var options = new JsonSerializerOptions
             {
                 Converters = { new JsonStringEnumConverter() }, // Converts json string to Enum
@@ -392,7 +385,6 @@ namespace AFGRBank.Main
 
             // This Dictionary will be accessed to get the currency rate based on user inputted currency name
             var currencyAndRates = JsonSerializer.Deserialize<Dictionary<CurrencyNames, decimal>>(jsonString, options);
-
 
 
             // These variables will used as user defined parameter in CreateLoan() 
@@ -423,7 +415,7 @@ namespace AFGRBank.Main
                 {
                     case 0: // Input username and find a matching User with LINQ. If there's no match to be found, break out of this case early
                         Console.Clear();
-                        string getUsername = Validate.GetInput( $"Input username", $"Input cannot be empty. Try again." );
+                        string getUsername = Validate.GetInput($"Input username", $"Input cannot be empty. Try again.");
 
                         loanTaker = Login.UserList.FirstOrDefault(x => x.UserName == getUsername);
                         if (loanTaker == null)
@@ -450,12 +442,12 @@ namespace AFGRBank.Main
                         }
 
                         Guid getBankAccountID = Validate.StringToGuid(
-                            $"Input selected user's bank account ID. {Login.UserList[0].Accounts[0].AccountID}", 
+                            $"Input selected user's bank account ID. {Login.UserList[0].Accounts[0].AccountID}" +
+                            $"\nFormat: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", 
                             $"Input cannot be empty. Try again.", 
                             $"Input failed to convert to a matching ID. Try again.");
                         
                         loanTakerAccount = loanTaker.Accounts.FirstOrDefault(x => x.AccountID == getBankAccountID);
-                        
                         if (loanTakerAccount == null)
                         {
                             Console.Clear();
@@ -467,12 +459,13 @@ namespace AFGRBank.Main
                         displayText[1] = loanTakerAccount.AccountID.ToString();
                         break;
 
-                    case 2: // Gets currency and that currency's exchange rate
+                    case 2:
+                        // Select which currency the loan should be in
+                        Console.Clear();
 
-                        // Method used to display available currencies to be selected
+                        // GetJSONCurrencyRatesToString display available currencies to be selected
                         string displayCurrencyRates = GetJSONCurrencyRatesToString();
 
-                        Console.Clear();
                         currencyName = Validate.StringToCurrencyName(
                             $"Select currency (default is SEK):" +
                             $"\n{displayCurrencyRates}",
@@ -480,6 +473,7 @@ namespace AFGRBank.Main
                             $"Input did not match any existing currency. Try again."
                             );
 
+                        // Gets the currency rate of the selected Currencyname
                         currencyRate = currencyAndRates[currencyName];
 
                         displayText[2] = $"{currencyName.ToString()} : Current exchange rate {currencyRate.ToString()} x {CurrencyNames.SEK.ToString()}";
@@ -499,8 +493,9 @@ namespace AFGRBank.Main
                         }
                         displayText[3] = loanAmount.ToString();
                         break;
-                    case 4:
 
+                    case 4:
+                        // Creates a loan for the specified user to that particular bank account
                         if (loanTaker == null && loanTakerAccount == null && currencyName == null && currencyRate >= 0)
                         {
                             Console.WriteLine($"One or more fields has no value. Please fill them.");
@@ -508,6 +503,7 @@ namespace AFGRBank.Main
                         }
                         admin.CreateLoan(loanTaker, loanTakerAccount, loanAmount, currencyName, currencyRate);
                         break;
+
                     case 5:
                         return;
                 }
@@ -525,7 +521,7 @@ namespace AFGRBank.Main
         #region "AccountMenu() and SavingsAccountMenu() methods"
 
 
-        private void ListAccountsMenu(List<Account> accountList)
+        private Account? ListAccountsMenu(List<Account> accountList)
         {
             // promptText will be displayed above menu buttons
             // menuOptions are the menu buttons the user can navigate through
@@ -567,7 +563,7 @@ namespace AFGRBank.Main
 
                 if (chosenOption == "Exit")
                 {
-                    return;
+                    return null;
                 }
 
                 if (selectedIndex < menuAccounts.Count)
@@ -575,36 +571,38 @@ namespace AFGRBank.Main
                     Console.Clear();
 
                     Account selectedAccount = menuAccounts[selectedIndex];
-                    if (selectedAccount is CheckingsAccount)
-                    {
-                        ViewSelectedAccountMenu(selectedAccount,
-                            $"Account ID:   {selectedAccount.AccountID}\n" +
-                            $"Account Type: Checkings account\n" +
-                            $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}\n"
-                        );
-                    }
-                    if (selectedAccount is SavingsAccount)
-                    {
-                        ViewSelectedAccountMenu(selectedAccount,
-                            $"Account ID:   {selectedAccount.AccountID}\n" +
-                            $"Account Type: Savings account\n" +
-                            $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}\n"
-                        );
-                    }
+                    return selectedAccount;
 
                     Console.ReadKey();
                 }
             }
         }
 
-
-
-        // Used by ViewAccountMenu() to print out info about the selected bank account 
-        private void ViewSelectedAccountMenu(Account selectedAccount, string promptText)
+        /// <summary>
+        /// Prints out property values of <paramref name="selectedAccount"/>
+        /// </summary>
+        /// <param name="selectedAccount"></param>
+        private void ViewSelectedAccountMenu(Account selectedAccount, List<Account> accountList)
         {
+            string promptText = $"Error. Could not load account info.";
+            if (selectedAccount is CheckingsAccount)
+            {
+                promptText = 
+                    $"Account ID:   {selectedAccount.AccountID}\n" +
+                    $"Account Type: Checkings account\n" +
+                    $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}";
+            }
+            else if (selectedAccount is SavingsAccount)
+            {
+                promptText =
+                    $"Account ID:   {selectedAccount.AccountID}\n" +
+                    $"Account Type: Savings account\n" +
+                    $"Balance:      {selectedAccount.Funds} {selectedAccount.Currency}";
+            }
+
             string[] ViewSelectedAccountMenuOptions = {
-                $"Edit currency",
                 $"View all transactions",
+                $"Edit currency",
                 $"Delete account",
                 $"Exit"
             };
@@ -616,11 +614,21 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case 0:
-                        // User inputs the new currency to overwrite the old 
+                        // Print out all transactions in selectedAccount
                         Console.Clear();
-                        
+
+                        selectedAccount.ViewTransactions(selectedAccount);
+
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
+                        break;
+
+                    case 1:
+                        // Change the currency of the selectedAccount 
+                        Console.Clear();
+
                         string displayCurrencyRates = GetJSONCurrencyRatesToString();
-                        
+
                         CurrencyNames newCurrency = Validate.StringToCurrencyName(
                             $"Input the new currency:" +
                             $"\n{displayCurrencyRates}",
@@ -630,37 +638,14 @@ namespace AFGRBank.Main
                         user.SetCurrency(selectedAccount, newCurrency);
                         break;
 
-                    case 1:
-                        // Prints out transaction history of selected bank account
-                        Console.Clear();
-
-                        if (selectedAccount is CheckingsAccount)
-                        {
-                            cAccount.ViewAccountInfo(selectedAccount);
-                        }
-                        if (selectedAccount is SavingsAccount)
-                        {
-                            sAccount.ViewAccountInfo(selectedAccount);
-                        }
-                        Console.WriteLine($"Press any key to continue...");
-                        Console.ReadKey();
-                        break;
-                    
                     case 2:
+                        // Delete selectedAccount
                         Console.Clear();
-                        if (selectedAccount is CheckingsAccount)
-                        {
-                            cAccount.DeleteAccount(login.LoggedInUser.Accounts, selectedAccount.AccountID);
-                        }
-                        if (selectedAccount is SavingsAccount)
-                        {
-                            sAccount.DeleteAccount(login.LoggedInUser.Accounts, selectedAccount.AccountID);
-                        }
+
+                        selectedAccount.DeleteAccount(accountList, selectedAccount.AccountID);
+
                         Console.WriteLine($"Press any key to continue...");
                         Console.ReadKey();
-                        return;
-
-                    case 3:
                         return;
                 }
             }

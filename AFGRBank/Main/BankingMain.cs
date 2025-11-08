@@ -178,17 +178,33 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case 0:
+                        // Transfer money from your account to another
                         TransferMenu();
                         break;
                     case 1:
+                        // List every account in User's account list
+                        // If user exits instead, skip the "if" code block
+
+                        Account? account = null;
+                        do
+                        {
+                            account = ListAccountsMenu(login.LoggedInUser.Accounts);
+                            if (account != null)
+                            {
+                                ViewSelectedAccountMenu(account, login.LoggedInUser.Accounts);
+                            }
+                        } while (account == null);
                         break;
+
                     case 2:
-                        ListAccountsMenu(login.LoggedInUser.Accounts);
+
                         break;
+
                     case 3:
                         
                         break;
                     case 4:
+                        login.LoggedInUser.ViewAllTransactions();
                         break;
                     case 5:
                         login.LogoutUser();
@@ -363,7 +379,7 @@ namespace AFGRBank.Main
             {
                 toString += $"\t{item}\n";
             }
-            return toString.Replace("[", "").Replace("]", " x SEK").Replace(",", ":");
+            return toString.Replace("[", "").Replace("]", " x SEK").Replace(",", " =");
         }
 
 
