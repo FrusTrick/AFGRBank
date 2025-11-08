@@ -167,7 +167,7 @@ namespace AFGRBank.Main
             string[] userMenuOptions = { 
                 "Transfer funds",
                 "View your bank accounts", 
-                //"View interest rates",
+                "Create new bank account",
                 "View transactions",
                 "Logout" 
             };
@@ -178,30 +178,30 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case 0:
-                        // Transfer money from your account to another
-                        TransferMenu();
+                        // Opens submenu that allows user to transfer money from their account to another
+                        TransferMenu(login.LoggedInUser);
                         break;
                     case 1:
-                        // List every account in User's account list
+                        // Opens submenu that list every account in User's account list
                         // If user exits instead, skip the "if" code block
 
-                        Account? account = null;
+                        Account? selectedAccount = null;
                         do
                         {
-                            account = ListAccountsMenu(login.LoggedInUser.Accounts);
-                            if (account != null)
+                            selectedAccount = ListUserAccountsMenu(login.LoggedInUser);
+                            if (selectedAccount != null)
                             {
-                                ViewSelectedAccountMenu(account, login.LoggedInUser.Accounts);
+                                ViewSelectedAccountMenu(selectedAccount, login.LoggedInUser.Accounts);
                             }
-                        } while (account == null);
+                        } while (selectedAccount == null);
                         break;
 
                     case 2:
-
+                        // Opens submenu to create a new account
+                        CreateNewAccountMenu(login.LoggedInUser);
                         break;
 
                     case 3:
-                        
                         break;
                     case 4:
                         login.LoggedInUser.ViewAllTransactions();
