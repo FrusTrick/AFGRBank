@@ -244,19 +244,23 @@ namespace AFGRBank.Main
                 {
                     case 0:
                         // Create a new user and add it to Login.UserList
+                        Console.Clear();
                         CreateUserMenu();
                         break;
                     case 1:
                         // Update exchange rate for a specified CurrencyNames currency.
+                        Console.Clear();
                         UpdateCurrencyRatesMenu();
                         break;
                     case 2:
                         // Creates loan for a specified User
+                        Console.Clear();
                         CreateLoanMenu();
                         break;
                     case 3:
                         // View all transactions that is waiting to be confirmed by a 15 minute timer
                         // Includes an option for admin to confirm transactions early
+                        Console.Clear();
                         admin.ViewPendingTransactions(pendingTransaction);
                         break;
                     case 4:
