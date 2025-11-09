@@ -78,10 +78,10 @@ namespace AFGRBank.Main
                         CurrencyExchange.CurrencyNames toRecipientCurrency = recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Currency;
 
                         // Alex: Converts enums to string
-                        string senderCurrency = toSenderCurrency.ToString();
-                        string recipientCurrency = toRecipientCurrency.ToString();
+                        string sCurrency = toSenderCurrency.ToString();
+                        string rCurrency = toRecipientCurrency.ToString();
 
-                        decimal convertedRate = exhange.CalculateExchangeRate(senderCurrency, recipientCurrency, funds);
+                        decimal convertedRate = exhange.CalculateExchangeRate(sCurrency, rCurrency, funds);
 
                         recipientTransaction.Funds = convertedRate;
 
