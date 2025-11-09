@@ -2,12 +2,6 @@
 using AFGRBank.Exchange;
 using AFGRBank.Loans;
 using AFGRBank.Main;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AFGRBank.UserType
 {

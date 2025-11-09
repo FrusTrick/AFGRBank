@@ -6,13 +6,10 @@ using AFGRBank.Exchange;
 using AFGRBank.Loans;
 using AFGRBank.Main;
 using AFGRBank.Utility;
-using System.Net.NetworkInformation;
-using System.Security.Principal;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 // To be able to access the enum list without writing CurrencyExchange.CurrencyNames
 using static AFGRBank.Exchange.CurrencyExchange;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AFGRBank.UserType
 {
