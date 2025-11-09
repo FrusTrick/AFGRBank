@@ -44,6 +44,8 @@ Due it being instanced immediately upon program execution, `BankingMain` also in
 - `AFGRBank.Utility`
 - `AFGRBank.Exchange.CurrencyExchange` - uses `CurrencyExchange` as a `static` 
 
+---
+
 ## AFGRBank - User Class
 
 ### Overview
