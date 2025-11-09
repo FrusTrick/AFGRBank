@@ -32,19 +32,19 @@ namespace AFGRBank.Exchange
         }
 
 
-        public decimal CalculateExchangeRate(string senderCurrencyName, string recipientCurrencyName, decimal transactionAmount)
+        public decimal CalculateExchangeRate(string senderCurrencyName, string recipientCurrencyName, decimal amount)
         {
             if (senderCurrencyName == recipientCurrencyName)
             {
-                return transactionAmount;
+                return amount;
             }
 
             else
             {
+                // Locates the CurrencyRates.JSON file
+                // Deserializes it and turns it into an accessible dictionary
                 string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exchange", "CurrencyRates.json");
                 string jsonString = File.ReadAllText(jsonPath);
-
-                // Deserializes the json file and turns it into a dictionary
                 var currencyRates = JsonSerializer.Deserialize<Dictionary<string, decimal>>(jsonString);
 
 
@@ -56,17 +56,20 @@ namespace AFGRBank.Exchange
                 decimal recipientXCR = currencyRates[recipientCurrencyName];
 
 
-                // Convert transactionAmount to SEK first (newTransactionAmount)
-                // Then converts newTransactionAmount to recipient, using recipient exchange rate.
+                // Converts amount to SEK first, then converts to recipient currency, using recipient exchange rate.
                 // Example:
-                // if ( transactionAmount == 100USD ) then ( 100 / 0.11 = 909 SEK)
+                // if ( amount == 100USD ) and (recipientCurrencyName == DKK)
+                //      ( 100 / 0.11 = 909.00 SEK) 
+                //      ( 909 * 0.68 = 618.12 DKK )
 
-                // if ( transactionAmount == 100USD ) then ( 100 * 0.11 = 11 SEK)
 
-                decimal newTransactionAmount = transactionAmount / senderXCR;
-                decimal newNewTransactionAmount = newTransactionAmount * recipientXCR;
-                
-                return newNewTransactionAmount;
+                decimal newAmount = amount / senderXCR;
+                decimal newNewAmount = newAmount * recipientXCR;
+
+                // Uncomment line below for testing
+                // Console.WriteLine($"{amount} : {newAmount} : {newNewAmount}");
+
+                return newNewAmount;
             }
         }
 
