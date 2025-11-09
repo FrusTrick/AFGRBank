@@ -349,31 +349,5 @@ namespace AFGRBank.UserType
             }
             
         }
-
-        // Log funktion for using decimals instead of 
-        private static decimal DecimalLn(decimal x, int precision = 50)
-        {
-            if (x <= 0) throw new ArgumentOutOfRangeException(nameof(x), "x must be positive.");
-
-            decimal result = 0;
-            decimal y = (x - 1) / (x + 1);
-            decimal yPower = y;
-            for (int n = 1; n <= precision; n += 2)
-            {
-                result += yPower / n;
-                yPower *= y * y;
-            }
-            return 2 * result;
-        }
-
-        private static decimal DecimalCeiling(decimal value)
-        {
-            // Get the integer part
-            decimal intPart = Math.Truncate(value);
-            // If value has any fractional part, round up
-            if (value > intPart)
-                return intPart + 1;
-            return intPart;
-        }
     }
 }
