@@ -221,5 +221,80 @@ Represents transaction creation and contains methods handling them while they ar
 ### Relationships
 -**Associations:** Uses `User`, `CurrencyExchange`, `Transaction`.
 
+## AFGRBank - Login Class
 
+### Overview
+The `Login` class is located in the `AFGRBank.Main` namespace.  
+It manages user authentication by allowing users to sign in and sign out.  
+It also holds a shared list of all registered users in the system.
+
+### Class Information
+- **Class Name:** `Login`  
+- **Namespace:** `AFGRBank.Main`  
+- **Base Class:** `object`  
+
+### Properties
+- `UserList` (`List<User>`, static): Stores all user and admin accounts in the system.  
+- `LoggedInUser` (`User?`): The currently logged-in user. `null` if no user is logged in.
+
+### Methods
+- `LoginUser(string username, string password)`  
+  Attempts to log in a user by matching the provided username and password against `UserList`.  
+  If a match is found, that user becomes the active session user.
+
+- `LogoutUser()`  
+  Logs out the currently logged-in user.  
+  Displays a message depending on whether a user was logged in or not.
+
+### Dependencies
+- `AFGRBank.UserType` – Uses `User` for account information.
+
+### Notes
+- Do not use this class to check current user information globally; only to handle login state changes.
+- User validation is handled by searching the shared user list.
+
+---
+
+## AFGRBank - Loan Class
+
+### Overview
+The `Loan` class is located in the `AFGRBank.Loans` namespace.  
+It represents a financial loan that belongs to a user and contains details such as currency, interest rate, duration, and amount.
+
+### Class Information
+- **Class Name:** `Loan`  
+- **Namespace:** `AFGRBank.Loans`  
+- **Base Class:** `object`  
+
+### Properties
+- `Currency` (`CurrencyExchange.CurrencyNames`): The currency in which the loan is taken.  
+- `InterestRate` (`decimal`): The loan's interest rate.  
+- `StartDate` (`DateTime`): When the loan begins.  
+- `EndDate` (`DateTime`): When the loan is scheduled to be fully repaid.  
+- `LoanAmount` (`decimal`): The borrowed amount.
+
+### Methods
+- `CreateLoan(currency, interestRate, amount, months)`  
+  Creates and initializes a new loan with specified values.
+
+- `GetLoan()`  
+  Displays the loan details in the console.
+
+- `EditLoan(currency, interestRate, amount, months)`  
+  Updates the existing loan with new values.
+
+- `CalcMaxLoan(income, multiplier)`  
+  Calculates the maximum possible loan a user can receive based on income.
+
+- `DisplayAllLoans(User user)`  
+  Displays a list of all loans associated with a specific user.
+
+### Dependencies
+- `AFGRBank.Exchange` – Uses `CurrencyExchange.CurrencyNames`.  
+- `AFGRBank.UserType` – Uses `User` and accesses `LoanList`.  
+- `System` – Used for date and console output.
+
+### Notes
+- Designed to allow loan creation, editing, and viewing in an organized structure.
+- Works closely with user loan lists for tracking multiple loans.
 
