@@ -571,8 +571,8 @@ namespace AFGRBank.Main
                 // Each "updateCurrencyRatesMenuOptions" element are used for the menu buttons
                 string promptText = $"Select which currency's exchange rate to update:" +
                     $"\n{displayJSON}";
-                string selectedCurrencyText = selectedCurrency?.ToString() ?? "(none)";
-                string newRateText = newRate?.ToString() ?? "(none)";
+                string selectedCurrencyText = selectedCurrency?.ToString() ?? "";
+                string newRateText = newRate?.ToString() ?? "";
 
                 string[] updateCurrencyRatesMenuOptions = {
                     $"Select currency: {selectedCurrencyText}    ",
