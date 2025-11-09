@@ -46,6 +46,7 @@ namespace AFGRBank.Main
                     SenderID = senderAccID,
                     ReceiverID = recipientAccID,
                     Funds = funds,
+                    Sender = true,
                     TransDate = DateTime.Now
                 };
                 Transaction recipientTransaction = new Transaction
@@ -53,6 +54,7 @@ namespace AFGRBank.Main
                     SenderID = senderAccID,
                     ReceiverID = recipientAccID,
                     Funds = funds,
+                    Sender = false,
                     TransDate = DateTime.Now
                 };
 

@@ -15,6 +15,7 @@ namespace AFGRBank.Main
         public Guid SenderID { get; set; }
         public Guid ReceiverID { get; set; }
         public decimal Funds { get; set; }
+        public bool Sender {  get; set; }
         public DateTime TransDate { get; set; }
 
         // Initializing to access the FinalizeTransaction() method.
@@ -105,11 +106,9 @@ namespace AFGRBank.Main
                 return;
             }
 
-            var accountIds = user.Accounts.Select(a => a.AccountID).ToHashSet();
-
             foreach (var transaction in allTransactions)
             {
-                bool isSent = accountIds.Contains(transaction.SenderID);
+                bool isSent = transaction.Sender;
                 var account = user.Accounts.FirstOrDefault(a =>
                     a.AccountID == (isSent ? transaction.SenderID : transaction.ReceiverID));
 
@@ -120,7 +119,7 @@ namespace AFGRBank.Main
                 if (isSent)
                 {
                     Console.WriteLine(
-                        $"You sent {transaction.Funds} {account.Currency}\n" +
+                        $"You sent {transaction.Funds.ToString("0.00")} {account.Currency}\n" +
                         $"From: {account.AccountID}\n" +
                         $"To: {transaction.ReceiverID}\n" +
                         $"Transaction Date: {transaction.TransDate:d}");
@@ -128,7 +127,7 @@ namespace AFGRBank.Main
                 else
                 {
                     Console.WriteLine(
-                        $"You received {transaction.Funds} {account.Currency}\n" +
+                        $"You received {transaction.Funds.ToString("0.00")} {account.Currency}\n" +
                         $"From: {transaction.SenderID}\n" +
                         $"To: {account.AccountID}\n" +
                         $"Transaction Date: {transaction.TransDate:d}");
@@ -137,4 +136,5 @@ namespace AFGRBank.Main
             }
         }
     }
+    
 }
