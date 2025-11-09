@@ -23,14 +23,19 @@ namespace AFGRBank
             //Starts a backgorund timer that checks pending transactions every minute and executes any transactions older than 15 minutes.
             _timer = new Timer(BankingMain.RunTask, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
 
+            
             while (true)
             {
+                // GetLoggedInUser() checks if user is already logged in
+                // As there's no way to stay logged in after closing program, this will return false
                 bool isLoggedIn = menus.GetLoggedInUser();
+
                 while (isLoggedIn == false)
                 {
                     menus.MainMenu(loginAttempts);
                     isLoggedIn = menus.GetLoggedInUser();
                 } 
+
                 while (isLoggedIn == true)
                 {
                     bool isAdmin = menus.GetIsAdmin();
