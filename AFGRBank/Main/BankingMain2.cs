@@ -614,6 +614,8 @@ namespace AFGRBank.Main
                         if (selectedCurrency == null || newRate == null)
                         {
                             Console.WriteLine("Please select a currency and enter a new rate before updating. ");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
                             break;
                         }
 
@@ -634,26 +636,135 @@ namespace AFGRBank.Main
             }
         }
 
-        private void CreateLoanMenu()
-        {
-            // These variables will used as user defined parameter in CreateLoan() 
-            User? loanTaker = null;
-            Account? loanTakerAccount = null;
-            CurrencyNames currencyName = CurrencyNames.SEK;
-            decimal loanAmount = 0;
-            decimal interestRate = 0;
 
-            // This will be used to display the loanTaker, loanTakerAccount, currencyName, loanAmount, and interestRate on the button text
-            string[] displayText = { string.Empty, string.Empty, string.Empty, string.Empty, string.Empty };
+        private void AdminViewUserAccountMenu(User selectedUser, Account selectedAccount)
+        {
 
             while (true)
             {
-                string questionText = $"Create new loan request:";
+                string questionText = 
+                    $"________________________________________________" +
+                    $"\nCurrently viewing:" +
+                    $"\n{selectedAccount.AccountID}" +
+                    $"\n{selectedAccount.Funds} {selectedAccount.Currency}" +
+                    $"\nOwner:" +
+                    $"\n{selectedUser.UserName}" +
+                    $"\n[ {selectedUser.Name} {selectedUser.Surname} | {selectedUser.PhoneNumber} | {selectedUser.Email} ]" +
+                    $"\n________________________________________________";
+
+                string[] adminViewUserAccountMenu = { 
+                    $"Deposit",
+                    $"Withdraw",
+                    $"Add loan",
+                    $"Exit",
+                };
+                var selectedOption = Menu.ReadOptionIndex(questionText, adminViewUserAccountMenu);
+                switch (selectedOption)
+                {
+                    case 0:
+                        // Deposit money
+                        Console.Clear();
+                        decimal depositAmount = Validate.StringToDecimal(
+                            $"Input the amount of money in {selectedAccount.Currency} to deposit", 
+                            $"Input cannot be empty. Try again.", 
+                            $"Input contained invalid characters. Try again."
+                            );
+
+                        var confirm = Menu.ReadOptionIndex($"{questionText}" +
+                            $"\nYou are about to deposit {depositAmount} {selectedAccount.Currency} to {selectedAccount.AccountID}.", 
+                            [ 
+                            "Yes", 
+                            "No"
+                            ]);
+
+                        switch (confirm)
+                        {
+                            case 0:
+                                Console.Clear();
+                                admin.AddFunds(selectedUser, selectedAccount, depositAmount);
+                                Console.WriteLine($"Press any key to continue...");
+                                Console.ReadKey();
+                                selectedAccount = selectedUser.Accounts.Find(x => x.AccountID == selectedAccount.AccountID);
+                                break;
+
+                            case 1:
+                                continue;
+                        }
+                        break;
+
+                    case 1:
+                        // Withdraw money from 
+                        Console.Clear();
+                        decimal withdrawAmount = Validate.StringToDecimal(
+                            $"Input the amount of money in {selectedAccount.Currency} to withdraw",
+                            $"Input cannot be empty. Try again.",
+                            $"Input contained invalid characters. Try again."
+                            );
+
+                        confirm = Menu.ReadOptionIndex($"{questionText}" +
+                            $"\nYou are about to withdraw {withdrawAmount} {selectedAccount.Currency} from {selectedAccount.AccountID}.",
+                            [
+                            "Yes",
+                            "No"
+                            ]);
+
+                        switch (confirm)
+                        {
+                            case 0:
+                                Console.Clear();
+                                admin.RemoveFunds(selectedUser, selectedAccount, withdrawAmount);
+                                Console.WriteLine($"Press any key to continue...");
+                                Console.ReadKey();
+                                selectedAccount = selectedUser.Accounts.Find(x => x.AccountID == selectedAccount.AccountID);
+                                break;
+
+                            case 1:
+                                continue;
+                        }
+                        break;
+
+                    case 2:
+                        // Creates a loan for user account
+                        Console.Clear();
+                        CreateLoanMenu(selectedUser, selectedAccount);
+                        Console.WriteLine($"Press any key to continue...");
+                        Console.ReadKey();
+                        break;
+
+                    case 3:
+                        return;
+                }
+            }
+        }
+
+        private void CreateLoanMenu(User loanTaker, Account loanTakerAccount)
+        {
+            // These variables will used as user defined parameter in CreateLoan() 
+            decimal loanAmount = 0;
+            decimal interestRate = 0;
+
+            // This will be used to display the the above variables next to the button text
+            string[] displayText = { 
+                string.Empty, 
+                loanTakerAccount.Currency.ToString(), 
+                string.Empty };
+
+            while (true)
+            {
+                string questionText =
+                $"________________________________________________" +
+                $"\nCurrently viewing:" +
+                $"\n{loanTakerAccount.AccountID}" +
+                $"\n{loanTakerAccount.Funds} {loanTakerAccount.Currency}" +
+                $"\nOwner:" +
+                $"\n{loanTaker.UserName}" +
+                $"\n[ {loanTaker.Name} {loanTaker.Surname} | {loanTaker.PhoneNumber} | {loanTaker.Email} ]" +
+                $"\n________________________________________________" +
+                $"\nCreate new loan:";
+
                 string[] createLoanMenuOptions = {
-                    $"Username:            {displayText[0]}",
-                    $"Bank Account ID:     {displayText[1]}",
-                    $"Loan Amount:         {displayText[3]}{displayText[2]}",
-                    $"Interest rate:       {displayText[4]}",
+                    $"Loan Amount:         {displayText[0]}{displayText[1]}",
+                    $"Interest rate:       {displayText[2]}",
                     $"Create new loan",
                     $"Exit"
                 };
@@ -661,98 +772,60 @@ namespace AFGRBank.Main
                 var selectedOption = Menu.ReadOptionIndex(questionText, createLoanMenuOptions);
                 switch (selectedOption)
                 {
-                    case 0: // Input username and find a matching User with LINQ. If there's no match to be found, break out of this case early
-                        Console.Clear();
-                        string getUsername = Validate.GetInput($"Input username", $"Input cannot be empty. Try again.");
-
-                        loanTaker = Login.UserList.FirstOrDefault(x => x.UserName == getUsername);
-                        if (loanTaker == null)
-                        {
-                            Console.WriteLine($"Failed to find any user with matching username.");
-                            Console.WriteLine($"Press any key to exit...");
-                            Console.ReadKey();
-                            break;
-                        }
-
-                        displayText[0] = $"{loanTaker.UserName} [ {loanTaker.Name} {loanTaker.Surname} | {loanTaker.Email} | {loanTaker.PhoneNumber} ]";
-                        break;
-                    
-                    case 1: 
-                        // Select an account to lend money to.
-                        // If loanTaker has not been set yet, display text and exit this case
-                        // Also automatically sets currency
-                        Console.Clear();
-
-                        if (loanTaker == null)
-                        {
-                            Console.WriteLine($"Failed to load bank accounts. A user must be selected beforehand.");
-                            Console.WriteLine($"Press any key to continue...");
-                            Console.ReadKey();
-                            continue;
-                        }
-
-                        loanTakerAccount = ListUserAccountsMenu(loanTaker);
-
-                        // If user doesn't select an account, exit this case
-                        if (loanTakerAccount == null)
-                        {
-                            continue;
-                        }
-
-                        currencyName = loanTakerAccount.Currency;
-                        displayText[1] = loanTakerAccount.AccountID.ToString();
-                        displayText[2] = loanTakerAccount.Currency.ToString();
-                        break;
-
-                    case 2:
+                    case 0:
                         // Sets the amount of money to be lended
                         Console.Clear();
-                        loanAmount = Validate.StringToDecimal(
+                        decimal temp = Validate.StringToDecimal(
                             $"Input the loan amount",
                             $"Input cannot be empty. Try again.",
                             $"Invalid input. Only numbers and decimal symbol allowed. Try again."
                             );
-                        if (loanAmount <= 0 || loanAmount == null)
+                        if (temp <= 0)
                         {
                             Console.WriteLine($"Loan amount can not be below 0. Press any key to continue...");
                             Console.ReadKey();
+                            continue;
                         }
-                        displayText[3] = $"{loanAmount.ToString()} ";
+                        loanAmount = temp;
+                        displayText[0] = $"{loanAmount.ToString()} ";
                         break;
 
-                    case 3: 
+                    case 1: 
                         // Sets the loan interest rate
                         Console.Clear();
-                        interestRate = Validate.StringToDecimal(
+                        temp = Validate.StringToDecimal(
                             $"Input the interest rate in percentage",
                             $"Input cannot be empty. Try again.",
                             $"Invalid input. Only numbers and decimal symbol allowed. Try again."
                             );
-                        if (interestRate <= 0 || interestRate == null)
+                        if (temp <= 0)
                         {
                             Console.WriteLine($"Interest rate can not be below 0. Press any key to continue...");
                             Console.ReadKey();
+                            continue;
                         }
-                        displayText[4] = interestRate.ToString();
+                        interestRate = temp;
+                        displayText[2] = interestRate.ToString();
                         break;
 
-                    case 4:
+                    case 2:
                         // Creates a loan for the specified user to that particular bank account
-
                         Console.Clear();
-                        if (loanTaker == null || loanTakerAccount == null || currencyName == null || loanAmount <= 0 || interestRate <= 0)
+                        if (loanAmount <= 0 || interestRate <= 0)
                         {
                             Console.WriteLine($"One or more fields has no value. Please fill them.");
                             Console.WriteLine($"Press any key to continue...");
                             Console.ReadKey();
-                            break;
+                            continue;
                         }
-                        admin.CreateLoan(loanTaker, loanTakerAccount, loanAmount, currencyName, interestRate);
+                        admin.CreateLoan(loanTaker, loanTakerAccount, loanAmount, loanTakerAccount.Currency, interestRate);
                         Console.WriteLine($"Press any key to continue...");
                         Console.ReadKey();
+                        loanTakerAccount = loanTaker.Accounts.Find(x => x.AccountID == loanTakerAccount.AccountID);
+
                         break;
 
-                    case 5:
+                    case 3:
                         return;
 
                 }

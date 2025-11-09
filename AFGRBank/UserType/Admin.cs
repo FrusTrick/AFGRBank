@@ -18,8 +18,6 @@ namespace AFGRBank.UserType
 {
     public class Admin : User
     {
-        public bool IsAdmin { get; set; } = true;
-
         // Initializing to access the RemoveExpiredTransactions() method.
         Transaction transaction = new Transaction();
 
@@ -320,7 +318,6 @@ namespace AFGRBank.UserType
                         continue;
                     }
 
-                    Console.ReadKey();
                 }
             }
             
