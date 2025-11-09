@@ -94,45 +94,46 @@ namespace AFGRBank.Main
         /// <param name="user"></param>
         public void DisplayAllTransactions(User user)
         {
-            List<Transaction> allTranactions = new List<Transaction>();
+            var allTransactions = user.Accounts
+                .SelectMany(a => a.AccTransList)
+                .Distinct()
+                .ToList();
 
-            foreach (Account account in user.Accounts) 
+            if (allTransactions.Count == 0)
             {
-                foreach (Transaction trasnaction in account.AccTransList)
-                { 
-                    allTranactions.Add(trasnaction);
-                }
+                Console.WriteLine("You have no transaction history.");
+                return;
             }
 
-            if (allTranactions.Count > 0) {
+            var accountIds = user.Accounts.Select(a => a.AccountID).ToHashSet();
 
-                foreach (Transaction transaction in allTranactions)
+            foreach (var transaction in allTransactions)
+            {
+                bool isSent = accountIds.Contains(transaction.SenderID);
+                var account = user.Accounts.FirstOrDefault(a =>
+                    a.AccountID == (isSent ? transaction.SenderID : transaction.ReceiverID));
+
+                if (account == null)
+                    continue; // Skip if no matching account is found
+
+                Console.WriteLine("____________________________________");
+                if (isSent)
                 {
-                    bool sent;
-                    sent = user.Accounts.Exists(x => x.AccountID == transaction.SenderID);
-                    if (sent)
-                    {
-                        var account = user.Accounts.Find(x => x.AccountID == transaction.SenderID);
-                        Console.WriteLine($"____________________________________");
-                        Console.WriteLine($"You sent {transaction.Funds} {account.Currency.ToString()} " +
-                            $"\nFrom: {account.AccountID} \nTo: {transaction.ReceiverID}" +
-                            $"\nTransaction Date: {transaction.TransDate.ToShortTimeString()}");
-                        Console.WriteLine($"____________________________________");
-                    }
-                    else if (!sent)
-                    {
-                        var account = user.Accounts.Find(x => x.AccountID == transaction.ReceiverID);
-                        Console.WriteLine($"____________________________________");
-                        Console.WriteLine($"You Recieved {transaction.Funds} {account.Currency.ToString()} " +
-                            $"\nFrom: {transaction.SenderID} \nTo: {account.AccountID}" +
-                            $"\nTransaction Date: {transaction.TransDate.ToShortTimeString()}");
-                        Console.WriteLine($"____________________________________");
-                    }
+                    Console.WriteLine(
+                        $"You sent {transaction.Funds} {account.Currency}\n" +
+                        $"From: {account.AccountID}\n" +
+                        $"To: {transaction.ReceiverID}\n" +
+                        $"Transaction Date: {transaction.TransDate:d}");
                 }
-            }
-            else
-            {
-                Console.WriteLine("You have no transaction history");
+                else
+                {
+                    Console.WriteLine(
+                        $"You received {transaction.Funds} {account.Currency}\n" +
+                        $"From: {transaction.SenderID}\n" +
+                        $"To: {account.AccountID}\n" +
+                        $"Transaction Date: {transaction.TransDate:d}");
+                }
+                Console.WriteLine("____________________________________");
             }
         }
     }
