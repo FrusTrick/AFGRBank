@@ -246,7 +246,7 @@ namespace AFGRBank.UserType
                 newLoan.CreateLoan(currency, interestRate, loanAmount, months);
                 user.AddLoan(newLoan);
                 AddFunds(user, account, loanAmount);
-                Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
+                Console.WriteLine($"{loanAmount} has now been sent to {user.UserName} with an interest rate of {interestRate}.");
             }
             catch (Exception ex)
             {
