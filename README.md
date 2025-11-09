@@ -2,6 +2,13 @@
 
 ---
 
+## AFGRBank - Program Class
+### Overview
+The program entry point. Contains as little clutter as we could.
+The only declared items are `Timer` `_timer`, which is used to finalize `Transaction` objects after 15 minutes; and `short` `loginAttempts`, used to determine how many failed sign in attempts an user has before they are kicked out of program.
+
+---
+
 ## AFGRBank - BankingMain Class
 ### Overview
 The `BankingMain` is located in the `AFGRBank.Main` namespace.
@@ -11,7 +18,7 @@ Due it being instanced immediately upon program execution, `BankingMain` also in
 
 ### Field
 - **Line 35 - line 43:** Instanced objects of the following classes: `User`, `Admin`, `Login`, `CurrencyExchange`, `CheckingsAccount`, `SavingsAccount`, `Transaction`, `PendingTransaction`, `Loan`. This is so that all menus may access every class' methods.
-- `pendingTransaction` (`List<Transaction>`): A "waiting list" where all transactions are stored inside before they can be confirmed, either by a 15 minute global timer, or by an admin (that you presumably bribed <_<)
+- `pendingTransaction` (`List<Transaction>`): A "waiting list" where all transactions are stored inside before they can be confirmed, either by the `_timer`, or by an admin (that you presumably bribed <_<)
 
 ### Methods
 - `ListUserAccountsMenu(User user)` - List out every bank account that belongs to the `user` parameter, and allows the user to select and return one bank account. Depending on implementation, `user` can be the currently logged in user or a different user entirely.
