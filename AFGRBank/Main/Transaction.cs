@@ -17,6 +17,7 @@ namespace AFGRBank.Main
         public decimal Funds { get; set; }
         public bool Sender {  get; set; }
         public DateTime TransDate { get; set; }
+        public CurrencyExchange.CurrencyNames Currency { get; set; }
 
         // Initializing to access the FinalizeTransaction() method.
         PendingTransaction pTransaction = new PendingTransaction();

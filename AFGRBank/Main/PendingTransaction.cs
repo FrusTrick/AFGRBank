@@ -39,6 +39,8 @@ namespace AFGRBank.Main
                 //Find both sender account and recipient account.
                 var sender = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderAccID));
                 var recipient = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == recipientAccID));
+                var senderCurrency = sender.Accounts.FirstOrDefault(y => y.AccountID == senderAccID).Currency;
+                var recipientCurrency = recipient.Accounts.FirstOrDefault(y => y.AccountID == recipientAccID).Currency;
 
                 //Create new transaction instance to save to accounts later.
                 Transaction senderTransaction = new Transaction
@@ -47,6 +49,7 @@ namespace AFGRBank.Main
                     ReceiverID = recipientAccID,
                     Funds = funds,
                     Sender = true,
+                    Currency = senderCurrency,
                     TransDate = DateTime.Now
                 };
                 Transaction recipientTransaction = new Transaction
@@ -55,6 +58,7 @@ namespace AFGRBank.Main
                     ReceiverID = recipientAccID,
                     Funds = funds,
                     Sender = false,
+                    Currency = recipientCurrency,
                     TransDate = DateTime.Now
                 };
 
