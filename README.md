@@ -59,9 +59,6 @@ Admins can manage user accounts, update exchange rates, create loans, and confir
 - **Namespace:** `AFGRBank.UserType`  
 - **Inherits From:** `User`  
 
-### Properties
-- `IsAdmin` (`bool`): Indicates admin status; always `true`.  
-
 ### Methods
 - `AddFunds(User user, Account account, decimal amount)` – Adds funds to a user's account.  
 - `RemoveFunds(User user, Account account, decimal amount)` – Removes funds from a user's account.  
