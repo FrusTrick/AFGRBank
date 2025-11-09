@@ -24,6 +24,74 @@ namespace AFGRBank.UserType
         Transaction transaction = new Transaction();
 
         /// <summary>
+        /// Adds funds to a user's account.
+        /// </summary>
+        /// <param name="user">The user receiving the funds.</param>
+        /// <param name="account">The account to credit.</param>
+        /// <param name="amount">The amount to add.</param>
+        public void AddFunds(User user, Account account, decimal amount)
+        {
+            try
+            {
+                if (user == null || account == null)
+                {
+                    Console.WriteLine("User or account not found");
+                    return;
+                }
+
+                if (amount <= 0)
+                {
+                    Console.WriteLine("Amount must be greater than zero.");
+                    return;
+                }
+
+                account.Funds += amount;
+                Console.WriteLine($"{amount} has been added to {user.UserName}'s account ({account.AccountID}).");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"AddFunds failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Removes funds from a user's account, if sufficient balance exists.
+        /// </summary>
+        /// <param name="user">The user whose funds will be removed.</param>
+        /// <param name="account">The account to debit.</param>
+        /// <param name="amount">The amount to remove.</param>
+        public void RemoveFunds(User user, Account account, decimal amount)
+        {
+            try
+            {
+                if (user == null || account == null)
+                {
+                    Console.WriteLine("User or account not found");
+                    return;
+                }
+
+                if (amount <= 0)
+                {
+                    Console.WriteLine("Amount must be greater than zero.");
+                    return;
+                }
+
+                if (account.Funds < amount)
+                {
+                    Console.WriteLine("Insufficient funds.");
+                    return;
+                }
+
+                account.Funds -= amount;
+                Console.WriteLine($"{amount} has been removed from {user.UserName}'s account ({account.AccountID}).");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Remove Funds failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Creates a new <see cref="User"/> object and adds it to the user list.
         /// </summary>
         /// <param name="username">The username of the user.</param>
