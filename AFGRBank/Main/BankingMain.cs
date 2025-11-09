@@ -358,7 +358,16 @@ namespace AFGRBank.Main
             Login.UserList.Add(admin);
             
             sAccount.CreateAccount(seedUser.Accounts, CurrencyNames.USD);
-
+            
+            // Gives everyone a starting funds of 500 for data seeding.
+            foreach (User user in Login.UserList)
+            {
+                if (user.Accounts != null && user.Accounts.Any())
+                {
+                    admin.AddFunds(user, user.Accounts.First(), 500m);
+                }
+                
+            }
 
            //PendingTransaction pending = new(transaction, Login.UserList[0], Login.UserList[1]);
             //PTransaction.Add(pending);
