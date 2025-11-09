@@ -221,18 +221,31 @@ namespace AFGRBank.UserType
                     return;
                 }
 
-                decimal monthlyPayment = loanAmount * 0.05m;
                 decimal monthlyInterest = interestRate / 12m;
 
-                // Equation for calculating the monthly payment, Log(1 + ( Log(m / (m - l * mi) ) )
-                int months = (int)Math.Ceiling(
-                    Math.Log((double)(monthlyPayment / (monthlyPayment - loanAmount * monthlyInterest))) /
-                    Math.Log((double)(1 + monthlyInterest))
-                );
+                // Simple monthly payment (you can adjust formula if you want higher/lower payments)
+                decimal monthlyPayment = loanAmount * monthlyInterest / (1 - (decimal)Math.Pow((double)(1 + monthlyInterest), -12)); // for 12 months
+
+                if (monthlyPayment <= 0 || monthlyInterest < 0)
+                    throw new ArgumentException("Monthly payment and interest must be positive");
+
+                decimal remainingBalance = loanAmount;
+                int months = 0;
+
+                // Repayment loop (safe, cannot produce negative months)
+                while (remainingBalance > 0)
+                {
+                    remainingBalance = remainingBalance * (1 + monthlyInterest) - monthlyPayment;
+                    months++;
+
+                    if (months > 120000) // Safety limit
+                        throw new ArgumentOutOfRangeException(nameof(months), "Loan cannot be repaid with current monthly payment.");
+                }
 
                 Loan newLoan = new Loan();
                 newLoan.CreateLoan(currency, interestRate, loanAmount, months);
                 user.AddLoan(newLoan);
+                AddFunds(user, account, loanAmount);
                 Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
             }
             catch (Exception ex)
@@ -333,7 +346,5 @@ namespace AFGRBank.UserType
             }
             
         }
-
-
     }
 }
