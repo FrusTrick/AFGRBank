@@ -18,8 +18,6 @@ namespace AFGRBank.UserType
 {
     public class Admin : User
     {
-        public bool IsAdmin { get; set; } = true;
-
         // Initializing to access the RemoveExpiredTransactions() method.
         Transaction transaction = new Transaction();
 
@@ -248,7 +246,7 @@ namespace AFGRBank.UserType
                 newLoan.CreateLoan(currency, interestRate, loanAmount, months);
                 user.AddLoan(newLoan);
                 AddFunds(user, account, loanAmount);
-                Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
+                Console.WriteLine($"{loanAmount} has now been sent to {user.UserName} with an interest rate of {interestRate}.");
             }
             catch (Exception ex)
             {
@@ -344,7 +342,6 @@ namespace AFGRBank.UserType
                         continue;
                     }
 
-                    Console.ReadKey();
                 }
             }
             

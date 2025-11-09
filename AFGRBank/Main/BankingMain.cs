@@ -229,9 +229,9 @@ namespace AFGRBank.Main
             string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}." +
                 $"\nYou're logged in as admin.";
             string[] adminMenuOptions = {
+                "Manage bank account",
                 "Create new user",
                 "Update currency rate",
-                "Create new loan",
                 "View pending transactions",
                 "Logout"
             };
@@ -243,19 +243,34 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case 0:
-                        // Create a new user and add it to Login.UserList
+                        // Opens submenu to pick an user account to deposit and withdraw physical money, as well as creating a loan
+                        Console.Clear();
+                        string username = Validate.GetInput($"Input username:");
+
+                        // Checks if User with that username exists
+                        if (!Login.UserList.Exists(x => x.UserName == username))
+                        {
+                            Console.WriteLine($"Input did not match any usernames. User could not be found.");
+                            Console.WriteLine($"Press any key to continue...");
+                            Console.ReadKey();
+                            continue;
+                        }
+
+                        User selectedUser = Login.UserList.Find(x => x.UserName == username);
+                        Account selectedAccount = ListUserAccountsMenu(selectedUser);
+                        AdminViewUserAccountMenu(selectedUser, selectedAccount);
+
+                        break;
+
+                    case 1:
+                        // Opens submenu for creating a new user and add it to Login.UserList
                         Console.Clear();
                         CreateUserMenu();
                         break;
-                    case 1:
+                    case 2:
                         // Update exchange rate for a specified CurrencyNames currency.
                         Console.Clear();
                         UpdateCurrencyRatesMenu();
-                        break;
-                    case 2:
-                        // Creates loan for a specified User
-                        Console.Clear();
-                        CreateLoanMenu();
                         break;
                     case 3:
                         // View all transactions that is waiting to be confirmed by a 15 minute timer
@@ -354,7 +369,6 @@ namespace AFGRBank.Main
             admin.Email = "ad@min.se";
             admin.PhoneNumber = 666;
             admin.Address = "Address";
-            admin.IsAdmin = true;
             Login.UserList.Add(admin);
             
             sAccount.CreateAccount(seedUser.Accounts, CurrencyNames.USD);
