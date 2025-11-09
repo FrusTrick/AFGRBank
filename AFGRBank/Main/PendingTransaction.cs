@@ -107,8 +107,6 @@ namespace AFGRBank.Main
             return new List<Transaction>();
         }
 
-
-
         public void FinalizeTransaction(Transaction senderTransaction, Transaction recipientTransaction)
         {
 

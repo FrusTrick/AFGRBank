@@ -309,7 +309,8 @@ namespace AFGRBank.UserType
                     if (input == "y")
                     {
                         PendingTransaction pendingTransaction = new();
-                        pendingTransaction.FinalizeTransaction(pending[0], pending[1]); // 0 refers to the sender, 1 refers to the recipient
+                        transaction.ConfirmTransaction(pending[0], pending[1]); // 0 refers to the sender, 1 refers to the recipient
+                        //pendingTransaction.FinalizeTransaction(pending[0], pending[1]); 
                         Console.WriteLine("Transaction has been confirmed.");
                         break;
                     }
