@@ -80,5 +80,4 @@ Admins can manage user accounts, update exchange rates, create loans, and confir
 
 ### Notes
 - Admins manage users, funds, loans, and transactions.  
-- `IsAdmin` is always `true`.  
 - Methods include checks and calculations for safe operation.
