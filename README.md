@@ -51,6 +51,9 @@ Due it being instanced immediately upon program execution, `BankingMain` also in
 - `AFGRBank.Utility`
 - `AFGRBank.Exchange.CurrencyExchange` - uses `CurrencyExchange` as a `static` 
 
+### Relationships
+- **Associations:** `User`, `Admin`, `Login`, `CurrencyExchange`, `CheckingsAccount`, `SavingsAccount`, `Transaction`, `PendingTransaction`, `Loan`.
+
 ---
 
 ## AFGRBank - User Class
@@ -136,3 +139,18 @@ Admins can manage user accounts, update exchange rates, create loans, and confir
 - Admins manage users, funds, loans, and transactions.  
 - `IsAdmin` is always `true`.  
 - Methods include checks and calculations for safe operation.
+
+---
+
+## AFGRBank - CurrencyExchange Class
+### Overview
+The `BankingMain` is located in the `AFGRBank.Exchange` namespace.
+Represents whoever or whatever actually calculates the exchange rates of the world's currencies.
+
+### Enum
+- `CurrencyNames`: The shorthand names of currencies (contains five as of now: `SEK`, `DKK`, `EUR`, `USD`, `YEN`). Inside CurrencyRates.JSON,  each currency has a corresponding exchange rate value. The exchange rate are based on their real life exchange rate to SEK (might be out of date).
+
+### Methods
+- `CalculateExchangeRate(string senderCurrencyName, string recipientCurrencyName, decimal amount)` - Called during money transfer between bank accounts so that the transfer amount stays equivalent between different currencies (e.g. if sender uses USD and recipient uses SEK, this method ensures that 100 USD doesn't become 100 SEK).
+
+---
