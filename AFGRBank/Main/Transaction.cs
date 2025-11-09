@@ -15,7 +15,9 @@ namespace AFGRBank.Main
         public Guid SenderID { get; set; }
         public Guid ReceiverID { get; set; }
         public decimal Funds { get; set; }
+        public bool Sender {  get; set; }
         public DateTime TransDate { get; set; }
+        public CurrencyExchange.CurrencyNames Currency { get; set; }
 
         // Initializing to access the FinalizeTransaction() method.
         PendingTransaction pTransaction = new PendingTransaction();
@@ -94,46 +96,46 @@ namespace AFGRBank.Main
         /// <param name="user"></param>
         public void DisplayAllTransactions(User user)
         {
-            List<Transaction> allTranactions = new List<Transaction>();
+            var allTransactions = user.Accounts
+                .SelectMany(a => a.AccTransList)
+                .Distinct()
+                .ToList();
 
-            foreach (Account account in user.Accounts) 
+            if (allTransactions.Count == 0)
             {
-                foreach (Transaction trasnaction in account.AccTransList)
-                { 
-                    allTranactions.Add(trasnaction);
-                }
+                Console.WriteLine("You have no transaction history.");
+                return;
             }
 
-            if (allTranactions.Count > 0) {
+            foreach (var transaction in allTransactions)
+            {
+                bool isSent = transaction.Sender;
+                var account = user.Accounts.FirstOrDefault(a =>
+                    a.AccountID == (isSent ? transaction.SenderID : transaction.ReceiverID));
 
-                foreach (Transaction transaction in allTranactions)
+                if (account == null)
+                    continue; // Skip if no matching account is found
+
+                Console.WriteLine("____________________________________");
+                if (isSent)
                 {
-                    bool sent;
-                    sent = user.Accounts.Exists(x => x.AccountID == transaction.SenderID);
-                    if (sent)
-                    {
-                        var account = user.Accounts.Find(x => x.AccountID == transaction.SenderID);
-                        Console.WriteLine($"____________________________________");
-                        Console.WriteLine($"You sent {transaction.Funds} {account.Currency.ToString()} " +
-                            $"\nFrom: {account.AccountID} \nTo: {transaction.ReceiverID}" +
-                            $"\nTransaction Date: {transaction.TransDate.ToShortTimeString()}");
-                        Console.WriteLine($"____________________________________");
-                    }
-                    else if (!sent)
-                    {
-                        var account = user.Accounts.Find(x => x.AccountID == transaction.ReceiverID);
-                        Console.WriteLine($"____________________________________");
-                        Console.WriteLine($"You Recieved {transaction.Funds} {account.Currency.ToString()} " +
-                            $"\nFrom: {transaction.SenderID} \nTo: {account.AccountID}" +
-                            $"\nTransaction Date: {transaction.TransDate.ToShortTimeString()}");
-                        Console.WriteLine($"____________________________________");
-                    }
+                    Console.WriteLine(
+                        $"You sent {transaction.Funds.ToString("0.00")} {account.Currency}\n" +
+                        $"From: {account.AccountID}\n" +
+                        $"To: {transaction.ReceiverID}\n" +
+                        $"Transaction Date: {transaction.TransDate:d}");
                 }
-            }
-            else
-            {
-                Console.WriteLine("You have no transaction history");
+                else
+                {
+                    Console.WriteLine(
+                        $"You received {transaction.Funds.ToString("0.00")} {account.Currency}\n" +
+                        $"From: {transaction.SenderID}\n" +
+                        $"To: {account.AccountID}\n" +
+                        $"Transaction Date: {transaction.TransDate:d}");
+                }
+                Console.WriteLine("____________________________________");
             }
         }
     }
+    
 }

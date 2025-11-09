@@ -39,6 +39,8 @@ namespace AFGRBank.Main
                 //Find both sender account and recipient account.
                 var sender = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderAccID));
                 var recipient = userList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == recipientAccID));
+                var senderCurrency = sender.Accounts.FirstOrDefault(y => y.AccountID == senderAccID).Currency;
+                var recipientCurrency = recipient.Accounts.FirstOrDefault(y => y.AccountID == recipientAccID).Currency;
 
                 //Create new transaction instance to save to accounts later.
                 Transaction senderTransaction = new Transaction
@@ -46,6 +48,8 @@ namespace AFGRBank.Main
                     SenderID = senderAccID,
                     ReceiverID = recipientAccID,
                     Funds = funds,
+                    Sender = true,
+                    Currency = senderCurrency,
                     TransDate = DateTime.Now
                 };
                 Transaction recipientTransaction = new Transaction
@@ -53,6 +57,8 @@ namespace AFGRBank.Main
                     SenderID = senderAccID,
                     ReceiverID = recipientAccID,
                     Funds = funds,
+                    Sender = false,
+                    Currency = recipientCurrency,
                     TransDate = DateTime.Now
                 };
 
@@ -72,10 +78,10 @@ namespace AFGRBank.Main
                         CurrencyExchange.CurrencyNames toRecipientCurrency = recipient.Accounts.FirstOrDefault(x => x.AccountID == recipientAccID).Currency;
 
                         // Alex: Converts enums to string
-                        string senderCurrency = toSenderCurrency.ToString();
-                        string recipientCurrency = toRecipientCurrency.ToString();
+                        string sCurrency = toSenderCurrency.ToString();
+                        string rCurrency = toRecipientCurrency.ToString();
 
-                        decimal convertedRate = exhange.CalculateExchangeRate(senderCurrency, recipientCurrency, funds);
+                        decimal convertedRate = exhange.CalculateExchangeRate(sCurrency, rCurrency, funds);
 
                         recipientTransaction.Funds = convertedRate;
 
