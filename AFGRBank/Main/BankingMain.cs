@@ -11,6 +11,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Diagnostics;
 
 namespace AFGRBank.Main
 {
@@ -32,6 +33,7 @@ namespace AFGRBank.Main
         Admin admin = new Admin();
         Login login = new Login();
         CurrencyExchange cx = new CurrencyExchange();
+        Account account = new Account();
         CheckingsAccount cAccount = new CheckingsAccount();
         SavingsAccount sAccount = new SavingsAccount();
         Transaction transaction = new Transaction();
@@ -39,10 +41,8 @@ namespace AFGRBank.Main
         
         public static List<PendingTransaction> PTransaction { get; set; } = new();
 
-
-
-        // The first screen, contains the options to login or exit program.
-        // "loginAttempts"
+        // The first screen user will encounter, contains the options to login or exit program.
+        // "loginAttempts" will be used in LoginMenu()
         public void MainMenu(short loginAttempts)
         {
             string asciiArt =
@@ -51,22 +51,25 @@ namespace AFGRBank.Main
                 "ASCII Placeholder\n";
 
             string[] mainMenuOptions = { "Login", "Exit" };
+
             while (true)
             {
-                MainMenuOptions selectedOption = Menu.ReadOption<string, MainMenuOptions>(asciiArt, mainMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(asciiArt, mainMenuOptions);
+
                 switch (selectedOption)
                 {
-                    case MainMenuOptions.Login:
+                    case 0:
                         LoginMenu(loginAttempts);
                         return;
-                    case MainMenuOptions.Exit:
-                        Environment.FailFast("You have quit the program.");
+                    case 1:
+                        Process.GetCurrentProcess().Kill();
                         return;
                 }
             }
         }
 
         // Login screen, here user can input their username and password, as well as try to sign in or exit back to MainMenu()
+        // User has a certain amount of tries to login as defined by the "loginAttempts" parameter
         public void LoginMenu(short loginAttempts)
         {
             string username = string.Empty;
@@ -74,39 +77,43 @@ namespace AFGRBank.Main
 
             while (true)
             {
-                string promptText = "Sign in to bank";
+                string questionText = "Sign in to bank";
+
                 string[] menuOptions = { 
                     $"Username: {username}", 
                     $"Password: {password}", 
                     "Login", 
                     "Exit" 
                 };
-                var selectedOptions = Menu.ReadOptionIndex(promptText, menuOptions);
+
+                var selectedOptions = Menu.ReadOptionIndex(questionText, menuOptions);
+
                 switch (selectedOptions)
                 {
                     case 0:
                         Console.Clear();
-                        username = Validate.GetInput($"Username:",
-                                        $"Username cannot be empty. Try again.");
+                        username = Validate.GetInput($"Username:", $"Username cannot be empty. Try again.");
                         break;
+
                     case 1:
                         Console.Clear();
-                        password = Validate.GetInput($"Password:",
-                                        $"Password cannot be empty. Try again.");
+                        password = Validate.GetInput($"Password:", $"Password cannot be empty. Try again.");
                         break;
+
                     case 2:
                         Console.Clear();
+
                         // Log in button, if user attempts to login without filling in username or password,
-                        // they lose 1 attempt, and an error message is displayed.
-                        // If attempts reaches 0, they're automatically exited out of program.
+                        // they'll lose 1 attempt, an error message is displayed, and they're forced to retry.
+                        // If loginAttempts reaches 0, they're automatically exited out of program.
                         if (username == string.Empty || password == string.Empty)
                         {
                             loginAttempts--;
                             if (loginAttempts <= 0)
                             {
-                                Console.WriteLine($"Failed to login.");
+                                Console.WriteLine($"Failed all login attempts. You will now be exited out of the program.");
                                 Console.ReadKey();
-                                Environment.FailFast("Shit!");
+                                Process.GetCurrentProcess().Kill();
                             }
                             if (username == string.Empty)
                             {
@@ -122,18 +129,22 @@ namespace AFGRBank.Main
                             break;
                         }
 
-                        // If filled, calls this method which will try to locate user with matching username and password in Login.UserList
+                        // When both are filled, this method will try to locate an User object with matching username and password in Login.UserList
+                        // and try to set that User as Login.LoggedInUser
                         login.LoginUser(username, password);
+
+                        // Login.LoggedInUser is still "null", that means User with the matching username/password could not be found
+                        // which counts as a failed login attempt. They'll lose 1 attempt, an error message is displayed, and they're forced to retry.
+                        // If loginAttempts reaches 0, they're automatically exited out of program.
                         if (login.LoggedInUser == null)
                         {
                             loginAttempts--;
                             if (loginAttempts <= 0)
                             {
-                                Console.WriteLine($"Failed to login.");
+                                Console.WriteLine($"Failed all login attempts. You will now be exited out of the program.");
                                 Console.ReadKey();
-                                Environment.FailFast("Shit!");
+                                Process.GetCurrentProcess().Kill();
                             }
-                            // If no matching user could be found, this error message will be displayed, and then resets this loop
                             Console.WriteLine("Failed to login. Username or password was wrong.");
                             Console.WriteLine($"{loginAttempts} tries left. Press any key to retry...");
                             Console.ReadKey();
@@ -151,7 +162,7 @@ namespace AFGRBank.Main
             string text = $"Welcome {login.LoggedInUser.Name} {login.LoggedInUser.Surname}.";
             string[] userMenuOptions = { 
                 "Borrow money", 
-                "Change currency", 
+                "Create new bank account",
                 "View your bank accounts", 
                 "View interest rates",
                 "View transactions",
@@ -161,22 +172,24 @@ namespace AFGRBank.Main
             bool isContinue = true;
             while (isContinue)
             {
-                UserMenuOptions selectedOption = Menu.ReadOption<string, UserMenuOptions>(text, userMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(text, userMenuOptions);
                 switch (selectedOption)
                 {
-                    case UserMenuOptions.Borrow:
+                    case 0:
                         BorrowMenu();
                         break;
-                    case UserMenuOptions.SetCurrency:
+                    case 1:
+                        CreateNewAccountMenu();
                         break;
-                    case UserMenuOptions.ViewAccounts:
-                        AccountMenu();
+                    case 2:
+                        ViewAccountMenu(login.LoggedInUser.Accounts);
                         break;
-                    case UserMenuOptions.ViewInterests:
+                    case 3:
+                        user.ViewAllTransactions();
                         break;
-                    case UserMenuOptions.ViewTransactions:
+                    case 4:
                         break;
-                    case UserMenuOptions.Logout:
+                    case 5:
                         login.LogoutUser();
                         return;
                 }
@@ -202,18 +215,19 @@ namespace AFGRBank.Main
                 switch (selectedOption)
                 {
                     case 0:
-                        // Create a new user and add it to Login.UserList
+                        // Create a new User and insert that User to Login.UserList
                         CreateUserMenu();
                         break;
                     case 1:
-                        // Update exchange rate for a specified currency.
+                        // Update exchange rate for a specified "CurrencyExchange.CurrencyNames Currency"
                         UpdateCurrencyRatesMenu();
                         break;
                     case 2:
-                        // Creates loan 
+                        // Create a new loan for a specific User and put it inside their loan history (User.LoanList)
                         CreateLoanMenu();
                         break;
                     case 3:
+                        // View a list of all pending transaction between Users in the system. 
                         admin.ViewPendingTransactions();
                         break;
                     case 4:
@@ -228,7 +242,7 @@ namespace AFGRBank.Main
 
         public void AccountMenu()
         {
-            string text = $"Your bank account menu.";
+            string questionText = $"Your bank account menu.";
             string[] accountMenuOptions = { 
                 "View your account info",
                 "View your account transactions",
@@ -241,24 +255,26 @@ namespace AFGRBank.Main
             bool isContinue = true;
             while (isContinue)
             {
-                AccountMenuOptions selectedOption = Menu.ReadOption<string, AccountMenuOptions>(text, accountMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(questionText, accountMenuOptions);
                 switch (selectedOption)
                 {
-                    case AccountMenuOptions.ViewAccountInfo:
+                    case 0:
                         break;
-                    case AccountMenuOptions.ViewAccountTransactions:
+                    case 1:
                         break;
-                    case AccountMenuOptions.TransferFunds:
+                    case 2:
+                        TransferMenu();
                         break;
-                    case AccountMenuOptions.CreateAccount:
+                    case 3:
                         break;
-                    case AccountMenuOptions.DeleteAccount:
+                    case 4:
                         break;
-                    case AccountMenuOptions.Exit:
+                    case 5:
                         return;
                 }
             }
         }
+
         public void SavingsAccountMenu()
         {
             string text = $"Your bank account menu.";
@@ -275,66 +291,32 @@ namespace AFGRBank.Main
             bool isContinue = true;
             while (isContinue)
             {
-                SavingsAccountMenuOptions selectedOption = Menu.ReadOption<string, SavingsAccountMenuOptions>(text, savingAccountMenuOptions);
+                var selectedOption = Menu.ReadOptionIndex(text, savingAccountMenuOptions);
                 switch (selectedOption)
                 {
-                    case SavingsAccountMenuOptions.ViewAccountInfo:
+                    case 0:
+                        sAccount.ViewAccountInfo();
                         break;
-                    case SavingsAccountMenuOptions.ViewAccountTransactions:
+                    case 1:
                         break;
-                    case SavingsAccountMenuOptions.ViewSavingsForecast:
+                    case 2:
+                        sAccount.SavingsForecast();
                         break;
-                    case SavingsAccountMenuOptions.TransferFunds:
+                    case 3:
+                        TransferMenu();
                         break;
-                    case SavingsAccountMenuOptions.CreateAccount:
+                    case 4:
                         break;
-                    case SavingsAccountMenuOptions.DeleteAccount:
+                    case 5:
                         break;
-                    case SavingsAccountMenuOptions.Exit:
+                    case 6:
                         return;
                 }
             }
         }
 
 
-        public void TransferMenu()
-        {
-            string senderID = "None";
-            string receiverID = "None";
-            decimal amount = 0;
-
-            bool isContinue = true;
-            while (isContinue)
-            {
-                string text = $"Transfer funds:" +
-                    $"\nFrom:   {senderID}" +
-                    $"\nTo:     {receiverID}" +
-                    $"\nAmount: {amount}";
-            
-                string[] transferMenuOptions = {
-                    "Choose bank account to send from",
-                    "Choose bank account to send to",
-                    "Choose amount",
-                    "Exit"
-                };
-
-                TransferMenuOptions selectedOption = Menu.ReadOption<string, TransferMenuOptions>(text, transferMenuOptions);
-                switch (selectedOption)
-                {
-                    case TransferMenuOptions.SetSenderID:
-                        senderID = "TestAccount";
-                        break;
-                    case TransferMenuOptions.SetReceiverID:
-                        receiverID = "TestAccount";
-                        break;
-                    case TransferMenuOptions.SetAmount:
-                        amount = 1999.99M;
-                        break;
-                    case TransferMenuOptions.Exit:
-                        return;
-                }
-            }
-        }
+        
 
         public void LoanMenu()
         {

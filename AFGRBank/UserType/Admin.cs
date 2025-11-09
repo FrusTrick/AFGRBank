@@ -121,7 +121,7 @@ namespace AFGRBank.UserType
                 );
 
                 Loan newLoan = new Loan();
-                newLoan.CreateLoan(currency, interestRate, startDate, loanAmount, months);
+                newLoan.CreateLoan(currency, interestRate, loanAmount, months);
                 user.AddLoan(newLoan);
                 Console.WriteLine($"{loanAmount} has now been sent to your account with an interest rate of {interestRate}.");
             }
@@ -143,7 +143,7 @@ namespace AFGRBank.UserType
             {
                 menuOptions.Add(
                     $"From: {pt.CurrentSender.UserName} -> To: {pt.CurrentReceiver.UserName}," +
-                    $" Amount: {pt.CurrentTransaction.Funds}, Created: {pt.InitializedDate}"
+                    $"\nAmount: {pt.CurrentTransaction.Funds}, \nCreated: {pt.InitializedDate}\n"
                 );
                 menuTransactions.Add(pt);
             }
