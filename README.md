@@ -1,82 +1,87 @@
-# AFGRBank - Admin Class
+# AFGRBank Classes Documentation
 
-## Overview
+---
+
+## AFGRBank - User Class
+
+### Overview
+The `User` class is located in the `AFGRBank.UserType` namespace.  
+Represents a standard bank customer who can hold accounts, make transactions, and take out loans.
+
+### Class Information
+- **Class Name:** `User`  
+- **Namespace:** `AFGRBank.UserType`  
+- **Base Class:** `object`  
+
+### Properties
+- `UserName` (`string`): Username for login.  
+- `Password` (`string`): Password for login.  
+- `Name` (`string`): User's first name.  
+- `Surname` (`string`): User's last name.  
+- `Email` (`string`): User's email address.  
+- `Address` (`string`): Physical address.  
+- `PhoneNumber` (`int`): Contact number.  
+- `Accounts` (`List<Account>`): List of the user's bank accounts.  
+- `TransactionList` (`List<Transaction>`): All transactions associated with the user.  
+- `LoanList` (`List<Loan>`): Active loans of the user.  
+- `TotalFunds` (`decimal`, private): Cached total funds across all accounts.  
+
+### Methods
+- `SetCurrency(Account account, CurrencyExchange.CurrencyNames currency)` – Sets the currency type of an account.  
+- `ViewAccounts() : List<Account>` – Returns all accounts owned by the user.  
+- `CalculateAccountInterest(SavingsAccount account, decimal interestRate) : decimal` – Calculates interest for a savings account.  
+- `AddLoan(Loan loan)` – Adds a loan to the user's loan list.  
+- `ViewAllTransactions() : List<Transaction>` – Returns all transactions associated with the user's accounts.  
+- `GetTotalFunds() : decimal` – Calculates total funds across all user accounts.  
+
+### Dependencies
+- `AFGRBank.BankAccounts` – Uses `Account` and `SavingsAccount`.  
+- `AFGRBank.Exchange` – Uses `CurrencyExchange.CurrencyNames`.  
+- `AFGRBank.Loans` – Uses `Loan`.  
+- `AFGRBank.Main` – May interact with main application logic.
+
+### Notes
+- Users are standard bank clients with no admin privileges.  
+- Total funds and interest calculations are specific to `SavingsAccount`.  
+- Designed to allow future extensions, such as currency conversion.
+
+---
+
+## AFGRBank - Admin Class
+
+### Overview
 The `Admin` class is located in the `AFGRBank.UserType` namespace.  
-It inherits from the `User` class and represents a bank administrator with special privileges.  
+Represents a bank administrator with special privileges.  
 Admins can manage user accounts, update exchange rates, create loans, and confirm pending transactions.
 
----
-
-## Class Information
+### Class Information
 - **Class Name:** `Admin`  
-- **Inherits from:** `User`  
-- **Namespace:** `AFGRBank.UserType`
+- **Namespace:** `AFGRBank.UserType`  
+- **Inherits From:** `User`  
 
----
+### Properties
+- `IsAdmin` (`bool`): Indicates admin status; always `true`.  
 
-## Properties
+### Methods
+- `AddFunds(User user, Account account, decimal amount)` – Adds funds to a user's account.  
+- `RemoveFunds(User user, Account account, decimal amount)` – Removes funds from a user's account.  
+- `CreateUser(...)` – Creates a new user and adds to the user list.  
+- `UpdateCurrencyRates(CurrencyNames currencyName, decimal updatedAmount)` – Updates exchange rates.  
+- `CreateLoan(User user, Account account, decimal loanAmount, CurrencyNames currency, decimal interestRate)` – Creates a loan for a user.  
+- `ViewPendingTransactions(List<Transaction> pending)` – Displays pending transactions for review and approval.
 
-- `IsAdmin` (`bool`): Indicates that this user is an admin. Defaults to `true`.
+### Dependencies
+- `AFGRBank.BankAccounts` – Uses `Account` for balance management.  
+- `AFGRBank.Exchange` – Uses `CurrencyExchange` for exchange rates.  
+- `AFGRBank.Loans` – Uses `Loan` for loan management.  
+- `AFGRBank.Main` – Accesses login and user list.  
+- `AFGRBank.Utility` – Uses `Menu` and `Transaction` for UI and transactions.
 
----
-
-## Methods
-
-### `AddFunds(User user, Account account, decimal amount)`
-Adds funds to a user's account after validating inputs.  
-- Checks that `user` and `account` exist.  
-- Ensures `amount` is greater than zero.  
-- Updates the account balance.
-
-### `RemoveFunds(User user, Account account, decimal amount)`
-Removes funds from a user's account if sufficient balance exists.  
-- Validates `user` and `account`.  
-- Ensures `amount` is greater than zero.  
-- Deducts the amount if funds are sufficient.
-
-### `CreateUser(string username, string password, string name, string surName, string email, int phoneNumber, string address, List<User> userList)`
-Creates a new user and adds it to the list.  
-- Checks for unique username.  
-- Returns the updated user list including the new user.
-
-### `UpdateCurrencyRates(CurrencyNames currencyName, decimal updatedAmount)`
-Updates the `CurrencyRates.json` file with a new exchange rate.  
-- Ensures the JSON file exists.  
-- Updates or adds the currency rate.  
-- Uses JSON serialization with enums.
-
-### `CreateLoan(User user, Account account, decimal loanAmount, CurrencyNames currency, decimal interestRate)`
-Creates a loan for a user and credits it to the account.  
-- Checks eligibility based on total funds and existing loans.  
-- Calculates monthly payment and repayment period.  
-- Adds the loan to `User.LoanList` and updates the account balance.
-
-### `ViewPendingTransactions(List<Transaction> pending)`
-Displays pending transactions for review.  
-- Removes expired transactions.  
-- Shows a menu of pending transactions.  
-- Admin can confirm or decline each transaction.
-
----
-
-## Dependencies
-The `Admin` class interacts with:
-
-- `AFGRBank.BankAccounts` – Uses `Account` to manage balances.  
-- `AFGRBank.Exchange` – Uses `CurrencyExchange` and `CurrencyNames` for exchange rates.  
-- `AFGRBank.Loans` – Uses `Loan` to create and manage loans.  
-- `AFGRBank.Main` – Accesses `Login` for the user list.  
-- `AFGRBank.Utility` – Uses `Menu` and `Transaction` for UI and transaction management.
-
----
-
-## Relationships
+### Relationships
 - **Inheritance:** `Admin` → `User`  
-- **Associations:** Uses `Account`, `Loan`, `Transaction`, `Menu`, `CurrencyExchange`
+- **Associations:** Uses `Account`, `Loan`, `Transaction`, `Menu`, `CurrencyExchange`.
 
----
-
-## Notes
-- Admin actions include creating users, managing funds, updating exchange rates, creating loans, and confirming transactions.  
-- The `IsAdmin` property is always `true`.  
-- Loan and transaction methods include automated calculations and safety checks.
+### Notes
+- Admins manage users, funds, loans, and transactions.  
+- `IsAdmin` is always `true`.  
+- Methods include checks and calculations for safe operation.
