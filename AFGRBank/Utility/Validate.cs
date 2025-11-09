@@ -215,7 +215,7 @@ namespace AFGRBank.Utility
                     Console.WriteLine(msgErrorEmpty);
                     continue;
                 }
-                if (!decimal.TryParse(stringToParse, System.Globalization.CultureInfo.InvariantCulture, out decimal parsedValue))
+                if (!decimal.TryParse(stringToParse, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal parsedValue))
                 {
                     Console.WriteLine(msgErrorParse);
                     continue;

@@ -558,63 +558,76 @@ namespace AFGRBank.Main
         private void UpdateCurrencyRatesMenu()
         {
             // The default selected currency and values (TryParse doesn't allow CurrencyNames selectedCurrency = null)
-            CurrencyNames selectedCurrency = CurrencyNames.SEK;
-            decimal newRates = 1m;
-
-            // This string array will be used to display the admin selected currency and the new exchange rates in the menu buttons
-            string[] displayNewCurrencyAndRates = { string.Empty, string.Empty };
+            CurrencyNames? selectedCurrency = null;
+            decimal? newRate = null;
 
             // Convert .JSON content to string. This will automatically display the updated values
             string displayJSON = GetJSONCurrencyRatesToString();
 
-            // "promptText" is used to for the text above menu buttons
-            // Each "updateCurrencyRatesMenuOptions" element are used for the menu buttons
-            string promptText = $"Select which currency's exchange rate to update:" +
-                $"\n{displayJSON}";
-            string[] updateCurrencyRatesMenuOptions = {
-                $"Select currency:        {displayNewCurrencyAndRates[0]}",
-                $"Set new exchange rate:  {displayNewCurrencyAndRates[1]}",
-                $"Update",
-                $"Exit",
-            };
-
             while (true)
             {
+                // Fadi: Moved to while loop to dynamically update it during each iteration
+                // "promptText" is used to for the text above menu buttons
+                // Each "updateCurrencyRatesMenuOptions" element are used for the menu buttons
+                string promptText = $"Select which currency's exchange rate to update:" +
+                    $"\n{displayJSON}";
+                string selectedCurrencyText = selectedCurrency?.ToString() ?? "(none)";
+                string newRateText = newRate?.ToString() ?? "(none)";
+
+                string[] updateCurrencyRatesMenuOptions = {
+                    $"Select currency: {selectedCurrencyText}    ",
+                    $"Set new exchange rate: {newRateText}    ",
+                    $"Update",
+                    $"Exit",
+                };
 
                 var selectedOption = Menu.ReadOptionIndex(promptText, updateCurrencyRatesMenuOptions);
 
                 switch (selectedOption)
                 {
                     case 0: 
+
                         Console.Clear();
                         // Admin picks which currency to update. There's validation to ensure input matches the correct enum.
                         selectedCurrency = Validate.StringToCurrencyName(
-                            $"Select currency:" + 
+                            $"Select currency: " + 
                                 $"\n{displayJSON}",
                             $"Input cannot be empty. Try again.",
                             $"Input did not match any existing currency. Try again." 
                             );
-
-                        displayNewCurrencyAndRates[0] = selectedCurrency.ToString();
                         break;
+
                     case 1:
+
                         Console.Clear();
                         // Admin inputs the updated exchange rate. There's validation to ensure input is decimal.
-                        newRates = Validate.StringToDecimal(
-                            $"Input updated exchange rate:" + 
+                        newRate = Validate.StringToDecimal(
+                            $"Input updated exchange rate: " + 
                                 $"\n{displayJSON}",
                             $"Input cannot be empty. Try again.",
                             $"Input failed to parse. Make sure the input doesn't contain invalid characters and try again."
                             );
-
-                        displayNewCurrencyAndRates[1] = newRates.ToString();
                         break;
+
                     case 2:
+
+                        if (selectedCurrency == null || newRate == null)
+                        {
+                            Console.WriteLine("Please select a currency and enter a new rate before updating. ");
+                            break;
+                        }
+
                         // Updates the selected currency with the new rates.
                         // Then calls 2nd method to update the text with the new rates.
-                        admin.UpdateCurrencyRates(selectedCurrency, newRates);
+                        admin.UpdateCurrencyRates(selectedCurrency.Value, newRate.Value);
+
+                        // Refresh JSON display to show new rates
                         displayJSON = GetJSONCurrencyRatesToString();
+
+                        Console.WriteLine("\nCurrency rates updated successfully! Press any key to continue. ");
+                        Console.ReadKey();
                         break;
+
                     case 3:
                         return;
                 }

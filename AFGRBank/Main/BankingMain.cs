@@ -324,9 +324,10 @@ namespace AFGRBank.Main
 
             foreach (KeyValuePair<CurrencyNames, decimal> item in currencyAndRates)
             {
-                toString += $"\t{item}\n";
+                toString += $"\t{item.Key} = {item.Value} * SEK\n";
             }
-            return toString.Replace("[", "").Replace("]", " x SEK").Replace(",", " =");
+            //return toString.Replace("[", "").Replace("]", " x SEK").Replace(",", " =");
+            return toString;
         }
 
 
