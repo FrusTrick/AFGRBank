@@ -65,7 +65,7 @@ Admins can manage user accounts, update exchange rates, create loans, and confir
 ### Methods
 - `AddFunds(User user, Account account, decimal amount)` – Adds funds to a user's account.  
 - `RemoveFunds(User user, Account account, decimal amount)` – Removes funds from a user's account.  
-- `CreateUser(...)` – Creates a new user and adds to the user list.  
+- `CreateUser(string username, string password, string name, string surName, string email, int phoneNumber, string address, List<User> userList) : List<User>` – Creates a new user and adds to the user list.  
 - `UpdateCurrencyRates(CurrencyNames currencyName, decimal updatedAmount)` – Updates exchange rates.  
 - `CreateLoan(User user, Account account, decimal loanAmount, CurrencyNames currency, decimal interestRate)` – Creates a loan for a user.  
 - `ViewPendingTransactions(List<Transaction> pending)` – Displays pending transactions for review and approval.
