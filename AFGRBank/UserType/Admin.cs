@@ -258,18 +258,27 @@ namespace AFGRBank.UserType
             // Initializing the menu
             string promptText = "Choose a transaction to confirm or exit";
             List<string> menuOptions = new List<string>(); // For saving the menu options
-            List<Transaction> menuTransactions = new List<Transaction>(); // For saving the transactions as a menu option
+            List<(Transaction senderTx, Transaction receiverTx)> menuTransactions = new List<(Transaction, Transaction)>(); ; // For saving the transactions as a menu option
 
-            // Build the list of transactions
-            foreach (var pt in pending)
+            for (int i = 0; i < pending.Count; i += 2)
             {
-                var sender = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == pt.SenderID));
-                var recipient = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == pt.ReceiverID));
+
+                if (i + 1 >= pending.Count) break;
+
+                var senderTx = pending[i];
+                var receiverTx = pending[i + 1];
+
+                var sender = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderTx.SenderID));
+                var recipient = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == receiverTx.ReceiverID));
+
                 menuOptions.Add(
-                    $"From: {sender.UserName} -> To: {recipient.UserName}\n" +
-                    $"Amount: {pt.Funds}\nCreated: {pt.TransDate}\n"
+                    $"From: {sender?.UserName} -> To: {recipient?.UserName}\n" +
+                    $"Amount: {senderTx.Funds.ToString("0.00")} {senderTx.Currency} -> {receiverTx.Funds.ToString("0.00")} {receiverTx.Currency}\n" +
+                    $"Created: {senderTx.TransDate}\n"
+
                 );
-                menuTransactions.Add(pt);
+
+                menuTransactions.Add((senderTx, receiverTx));
             }
 
             // Adds the Exit option
@@ -291,25 +300,27 @@ namespace AFGRBank.UserType
                 // Depending on the chosen index, check the matching transaction in the list
                 if (selectedIndex < menuTransactions.Count)
                 {
-                    Transaction selectedTransaction = menuTransactions[selectedIndex];
-                    var sender = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == selectedTransaction.SenderID));
-                    var recipient = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == selectedTransaction.ReceiverID));
+                    var (senderTx, receiverTx) = menuTransactions[selectedIndex];
+
+                    var sender = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == senderTx.SenderID));
+                    var recipient = Login.UserList.FirstOrDefault(x => x.Accounts.Any(y => y.AccountID == receiverTx.ReceiverID));
+
                     Console.Clear();
                     Console.WriteLine(
                         $"You selected transaction: \n" +
-                        $"From: {sender.UserName}\n" +
-                        $"To: {recipient.UserName}\n" +
-                        $"Amount: {selectedTransaction.Funds}\n" +
-                        $"Created: {selectedTransaction.TransDate}\n"
+                        $"From: {sender?.UserName}\n" +
+                        $"To: {recipient?.UserName}\n" +
+                        $"Amount: {senderTx.Funds.ToString("0.00")} {senderTx.Currency} -> {receiverTx.Funds.ToString("0.00")} {receiverTx.Currency}\n" +
+                        $"Created: {senderTx.TransDate}\n"
                     );
 
                     Console.WriteLine("\nDo you want to confirm this transaction early? y/n");
-                    string input = Console.ReadLine()?.Trim().ToLower();
+                    string? input = Console.ReadLine()?.Trim().ToLower();
 
                     if (input == "y")
                     {
                         PendingTransaction pendingTransaction = new();
-                        transaction.ConfirmTransaction(pending[0], pending[1]); // 0 refers to the sender, 1 refers to the recipient
+                        transaction.ConfirmTransaction(senderTx, receiverTx);
                         //pendingTransaction.FinalizeTransaction(pending[0], pending[1]); 
                         Console.WriteLine("Transaction has been confirmed.");
                         break;
