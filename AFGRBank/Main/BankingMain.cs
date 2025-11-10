@@ -15,6 +15,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Xml.Linq;
 using static AFGRBank.Exchange.CurrencyExchange;
+using System.ComponentModel.DataAnnotations;
 
 namespace AFGRBank.Main
 {
@@ -84,13 +85,14 @@ namespace AFGRBank.Main
         {
             string username = string.Empty;
             string password = string.Empty;
+            string passwordMasked = string.Empty;
 
             while (true)
             {
                 string promptText = "Sign in to bank";
                 string[] menuOptions = { 
                     $"Username: {username}", 
-                    $"Password: {password}", 
+                    $"Password: {passwordMasked}", 
                     "Login", 
                     "Exit" 
                 };
@@ -104,8 +106,10 @@ namespace AFGRBank.Main
                         break;
                     case 1:
                         Console.Clear();
-                        password = Validate.GetInput($"Password:",
+                        var passwordData = Validate.GetInputMasked($"Password: ",
                                         $"Password cannot be empty. Try again.");
+                        password = passwordData[0];
+                        passwordMasked = passwordData[1];
                         break;
                     case 2:
                         Console.Clear();
