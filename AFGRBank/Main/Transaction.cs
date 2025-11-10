@@ -65,22 +65,35 @@ namespace AFGRBank.Main
         /// </remarks>
         public void RemoveExpiredTransactions()
         {
-            // The time in minutes before a transaction expires
             double transactionTimeout = 15;
 
-            // Find all expired transactions
-            var expiredTransactions = BankingMain.pendingTransaction
-                .Where(pt => (DateTime.Now - pt.TransDate) >= TimeSpan.FromMinutes(transactionTimeout))
-                .ToList();
+            // Make a copy of the pending transactions to avoid modifying the collection while iterating
+            var pending = BankingMain.pendingTransaction;
 
-            // Loops through the static list in banking main
-            foreach (var pt in expiredTransactions)
+            // Loop through pairs (sender at i, receiver at i+1)
+            for (int i = 0; i < pending.Count; i += 2)
             {
-                BankingMain.pendingTransaction.Remove(pt);
-                Console.WriteLine($"Removed expired transaction from: {pt.SenderID} to: receiver ID: {pt.ReceiverID}");
+                if (i + 1 >= pending.Count) break; // Safety check for an unmatched transaction
+
+                var senderTx = pending[i];
+                var receiverTx = pending[i + 1];
+
+                bool senderExpired = (DateTime.Now - senderTx.TransDate) >= TimeSpan.FromMinutes(transactionTimeout);
+                bool receiverExpired = (DateTime.Now - receiverTx.TransDate) >= TimeSpan.FromMinutes(transactionTimeout);
+
+                // If either in the pair is expired, remove both
+                if (senderExpired || receiverExpired)
+                {
+                    Console.WriteLine($"Removed expired transaction from: {senderTx.SenderID} to receiver ID: {receiverTx.ReceiverID}");
+
+                    // Remove both from the original list
+                    ConfirmTransaction(pending[i], pending[i + 1]);
+
+                    i -= 2; // step back so loop continues correctly (because we removed 2 items)
+                }
             }
 
-            if (expiredTransactions.Count == 0)
+            if (!pending.Any(pt => (DateTime.Now - pt.TransDate) >= TimeSpan.FromMinutes(transactionTimeout)))
             {
                 Console.WriteLine("No expired transactions found.");
             }
