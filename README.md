@@ -355,6 +355,12 @@ It represents a financial loan that belongs to a user and contains details such 
 ---
 
 ## AFGRBank - CurrencyExchange Class
+
+### Class Information
+- **Class Name:** `CurrencyExchange`  
+- **Namespace:** `AFGRBank.Exchange`
+- **Base Class:** `object`
+
 ### Overview
 The `BankingMain` is located in the `AFGRBank.Exchange` namespace.
 Represents whoever or whatever actually calculates the exchange rates of the world's currencies.
@@ -367,29 +373,39 @@ Represents whoever or whatever actually calculates the exchange rates of the wor
 
 ---
 
-## AFGRBank.Utility Namespace
+## Menu class
+
+### Class Information
+- **Class Name:** `Menu`  
+- **Namespace:** `AFGRBank.Utility`
+- **Base Class:** `object`
+
 ### Overview
-Contains the classes which allows menus and user input fields to function.
-
-### Menu class
-#### Overview
 Contains methods that displays menu buttons and enables user to navigate in console.
-Credits to:
-- Johannes for letting us borrow his methods.
-- calmBranch for making `ReadOptionIndexList()`.
+- Credits to:
+  - Johannes for letting us borrow his methods.
+  - calmBranch for making `ReadOptionIndexList()`.
 
-#### Methods
+### Methods
 - `ReadOptionIndex<T>(string questionText, T[] menuOptions)` - The label or prompt text is stored in `questionText`, the buttons are stored in `menuOptions`. This method allows user to navigate through `menuOptions` buttons with the arrow keys and select a button with Enter, which then returns the selected button's index `int` value. This `int` will be to compare inside a `switch` to enter its corresponding `case` code block.
 - `ReadOptionIndexList<T>(string questionText, T[] menuOptions)` Similar to `ReadOptionIndex()`, except it uses a `List<T>` rather than an array, which enables a dynamically resizable list of menu buttons. Uses an `if`-statement rather than `switch`.
 - `ReadOption<T, TEnum>(string questionText, T[] menuOptions) where TEnum : Enum` - **Depricated**. Similar to `ReadOptionIndex()`, except it returns an enum value. 
 
-### Validate class
-#### Overview
+## Validate class
+
+### Class Information
+- **Class Name:** `Validate`  
+- **Namespace:** `AFGRBank.Utility`  
+- **Base Class:** `object`
+
+### Overview
 Contains methods for validating user inputs, type conversions, and handling errors without crashing while also informing this to user so they know what they did wrong.
+
 These "error informations" are `string` variables which developers can define themselves, allowing for some code flexiblility. 
+
 However, one glaring flaw is that users are unable to leave once these methods are called. Only way is to input the correct characters, which can be difficult if the prompt text misleading.
 
-#### Methods
+### Methods
 - `GetInput(string msgPrompt)` - Prompts user input and simply returns a trimmed string.
 - `GetInput(string msgPrompt, string msgErrorEmpty)` - Prompts user input and returns a trimmed string. If input is `null`, empty, or contains only whitespace characters, display `msgErrorEmpty` on console before restarting the loop.
 - `GetInputMasked(string msgPrompt, string msgErrorEmpty)` - Prompts user input and hides their inputs behind an asterisk, and then returns `List<T>` with both the trimmed string and an the hidden string. Used for password inputs.
