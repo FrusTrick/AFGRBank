@@ -66,6 +66,61 @@ namespace AFGRBank.Utility
             }
         }
 
+        /// <summary>
+        /// Validates the input and masks it as stars to hide what's being written.
+        /// </summary>
+        /// <param name="msgPrompt"> A custom defined text that ideally instructs the user to write the desired input.</param>
+        /// <param name="msgErrorEmpty">A custom defined text that will be printed out whenever the user writes an empty input.</param>
+        /// <returns>A list of strings, where index[0] is the unmasked input and index[1] is the masked input</returns>
+        /// <remarks>
+        /// R
+        /// </remarks>
+        public static List<string> GetInputMasked(string msgPrompt, string msgErrorEmpty)
+        {
+            while (true)
+            {
+                Console.Write(msgPrompt);
+
+                string input = "";
+
+                // Variable to save the key that was pressed
+                ConsoleKeyInfo key;
+
+                do
+                {
+                    // Set to true so the key that is pressed isn't shown in the console
+                    key = Console.ReadKey(true);
+
+                    // If the input is larger than 0 and the input is a backspace, replace
+                    if (key.Key == ConsoleKey.Backspace && input.Length > 0)
+                    {
+                        // Removes the last character from input.
+                        input = input.Substring(0, input.Length - 1);
+                        Console.Write("\b \b");
+                    }
+                    // If the input isn't a control key (enter, backspace, tab etc)
+                    else if (!char.IsControl(key.KeyChar))
+                    {
+                        // Returns the character that was read from ReadKey and replaces it with a star
+                        input += key.KeyChar;
+                        Console.Write("*");
+                    }
+
+                } while (key.Key != ConsoleKey.Enter);
+
+                Console.WriteLine(); // move to next line
+
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    Console.WriteLine(msgErrorEmpty);
+                    continue;
+                }
+
+                // Return both real and masked password
+                var results = new List<string> { input.Trim(), new string('*', input.Length) };
+                return results;
+            }
+        }
 
         /// <summary>
         /// Prompts user, and continuously loops until user inputs a valid email address syntax.
