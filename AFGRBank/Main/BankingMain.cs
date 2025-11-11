@@ -261,7 +261,11 @@ namespace AFGRBank.Main
                         }
 
                         User selectedUser = Login.UserList.Find(x => x.UserName == username);
-                        Account selectedAccount = ListUserAccountsMenu(selectedUser);
+                        Account? selectedAccount = ListUserAccountsMenu(selectedUser);
+                        if (selectedAccount == null)
+                        {
+                            continue;
+                        }
                         AdminViewUserAccountMenu(selectedUser, selectedAccount);
 
                         break;
