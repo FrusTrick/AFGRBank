@@ -17,8 +17,8 @@ Due it being instanced immediately upon program execution, `BankingMain` also in
 > There is nothing more permanent than a temporary solution
 
 ### Field
-- **Line 35 - line 43:** Instanced objects of the following classes: `User`, `Admin`, `Login`, `CurrencyExchange`, `CheckingsAccount`, `SavingsAccount`, `Transaction`, `PendingTransaction`, `Loan`. This is so that all menus may access every class' methods.
-- `pendingTransaction` (`List<Transaction>`): A "waiting list" where all transactions are stored inside before they can be confirmed, either by the `_timer`, or by an admin (that you presumably bribed <_<)
+- **Line 35 - line 43:** Instanced objects of the following classes: `User`, `Admin`, `Login`, `CurrencyExchange`, `CheckingsAccount`, `SavingsAccount`, `Transaction`, `PendingTransaction`, `Loan`. This is so that the menus may access every class' methods.
+- `pendingTransaction` (`List<Transaction>`): A "waiting list" where all transactions await to be confirmed, either by the `_timer`, or by an admin.
 
 ### Methods
 - `ListUserAccountsMenu(User user)` - List out every bank account that belongs to the `user` parameter, and allows the user to select and return one bank account. Depending on implementation, `user` can be the currently logged in user or a different user entirely.
@@ -355,6 +355,12 @@ It represents a financial loan that belongs to a user and contains details such 
 ---
 
 ## AFGRBank - CurrencyExchange Class
+
+### Class Information
+- **Class Name:** `CurrencyExchange`  
+- **Namespace:** `AFGRBank.Exchange`
+- **Base Class:** `object`
+
 ### Overview
 The `BankingMain` is located in the `AFGRBank.Exchange` namespace.
 Represents whoever or whatever actually calculates the exchange rates of the world's currencies.
@@ -364,5 +370,51 @@ Represents whoever or whatever actually calculates the exchange rates of the wor
 
 ### Methods
 - `CalculateExchangeRate(string senderCurrencyName, string recipientCurrencyName, decimal amount)` - Called during money transfer between bank accounts so that the transfer amount stays equivalent between different currencies (e.g. if sender uses USD and recipient uses SEK, this method ensures that 100 USD doesn't become 100 SEK).
+
+---
+
+## Menu class
+
+### Class Information
+- **Class Name:** `Menu`  
+- **Namespace:** `AFGRBank.Utility`
+- **Base Class:** `object`
+
+### Overview
+Contains methods that displays menu buttons and enables user to navigate in console.
+- Credits to:
+  - Johannes for letting us borrow his methods.
+  - calmBranch for making `ReadOptionIndexList()`.
+
+### Methods
+- `ReadOptionIndex<T>(string questionText, T[] menuOptions)` - The label or prompt text is stored in `questionText`, the buttons are stored in `menuOptions`. This method allows user to navigate through `menuOptions` buttons with the arrow keys and select a button with Enter, which then returns the selected button's index `int` value. This `int` will be to compare inside a `switch` to enter its corresponding `case` code block.
+- `ReadOptionIndexList<T>(string questionText, T[] menuOptions)` Similar to `ReadOptionIndex()`, except it uses a `List<T>` rather than an array, which enables a dynamically resizable list of menu buttons. Uses an `if`-statement rather than `switch`.
+- `ReadOption<T, TEnum>(string questionText, T[] menuOptions) where TEnum : Enum` - **Depricated**. Similar to `ReadOptionIndex()`, except it returns an enum value. 
+
+## Validate class
+
+### Class Information
+- **Class Name:** `Validate`  
+- **Namespace:** `AFGRBank.Utility`  
+- **Base Class:** `object`
+
+### Overview
+Contains methods for validating user inputs, type conversions, and handling errors without crashing while also informing this to user so they know what they did wrong.
+
+These "error informations" are `string` variables which developers can define themselves, allowing for some code flexiblility. 
+
+However, one glaring flaw is that users are unable to leave once these methods are called. Only way is to input the correct characters, which can be difficult if the prompt text misleading.
+
+### Methods
+- `GetInput(string msgPrompt)` - Prompts user input and simply returns a trimmed string.
+- `GetInput(string msgPrompt, string msgErrorEmpty)` - Prompts user input and returns a trimmed string. If input is `null`, empty, or contains only whitespace characters, display `msgErrorEmpty` on console before restarting the loop.
+- `GetInputMasked(string msgPrompt, string msgErrorEmpty)` - Prompts user input and hides their inputs behind an asterisk, and then returns `List<T>` with both the trimmed string and an the hidden string. Used for password inputs.
+- `StringToInt(string msgPrompt, string msgErrorEmpty, string msgErrorParse)` - Prompts user input, converts that input to an `int` value. If input was empty or contained invalid `int` characters, display `msgErrorEmpty` or `msgErrorParse` respectively on console before restarting the loop.
+- `StringToInt(string msgPrompt, string msgErrorEmpty, string msgErrorParse)` - Same as the above method, except it converts to `decimal` value.
+- `StringToCurrencyName(string msgPrompt, string msgErrorEmpty, string msgErrorParse)` - Same as the above method, except it converts to an `CurrencyName` enum.
+- `StringToGuid(string msgPrompt, string msgErrorEmpty, string msgErrorParse)` - **Depricated**. Same as the above method, except it converts to a `Guid` value.
+
+### Dependencies
+- `AFGRBank.Exchange` – Uses this namespace for `StringToCurrencyName()`. 
 
 ---
